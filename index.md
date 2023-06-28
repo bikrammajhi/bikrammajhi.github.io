@@ -3,7 +3,7 @@ layout: default
 ---
 **I'm on the job market! Please reach out if you know of an opportunity that would fit my background.**
 
-Hey there, I'm Bikram, a passionate first year MTech. Computer Science student specializing in Artificial Intelligence at IIT-Jodhpur. I'm all about the thrilling blend of Probabilistic Machine Learning (ML) and Reinforcement Learning (RL), where I dive deep into creating cutting-edge innovations that push the limits of Artificial Intelligence.
+Hey there, I'm Bikram, a first year MTech. Computer Science student specializing in Artificial Intelligence at IIT-Jodhpur. I'm all about the thrilling blend of Probabilistic Machine Learning (ML) and Reinforcement Learning (RL), where I dive deep into creating cutting-edge innovations that push the limits of Artificial Intelligence.
 
 
 During my undergraduate years at IISER Kolkata, I had the privilege of working on a fascinating project at the renowned [MorphogenesisLab](https://sites.google.com/view/morphogenesis-lab-iiserkolkata/about-us?authuser=0) under Prof. Mohit Prasad. It was there that I discovered the pivotal role of early cancer detection, and the tremendous potential of Deep Learning in diagnosing cancer from images.
