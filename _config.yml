@@ -9,6 +9,8 @@ tracking_id: #
 
 footer: no
 
+<img class="profile-picture" src="headshot.jpg">
+
 sass:
     style: compressed
     sass_dir: _sass
