@@ -4,6 +4,8 @@ baseurl: "/"
 
 markdown: kramdown
 #ins_logo: "./bits-logo.png"
+profile-picture: "./headshot.jpeg"
+
 
 tracking_id: #
 
