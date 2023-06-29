@@ -3,6 +3,8 @@ layout: default
 ---
 **I'm on the job market! Please reach out if you know of an opportunity that would fit my background.**
 
+<img class="profile-picture" src="headshot.jpeg">
+
 Hey there, I'm Bikram, a first year MTech. Computer Science student specializing in Artificial Intelligence at [IIT-Jodhpur](https://www.iitj.ac.in/). I'm all about the thrilling blend of Probabilistic Machine Learning (ML) and Reinforcement Learning (RL), where I dive deep into creating cutting-edge innovations that push the limits of Artificial Intelligence.
 
 
