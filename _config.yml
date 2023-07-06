@@ -5,7 +5,7 @@ baseurl: "/"
 markdown: kramdown
 #ins_logo: "./bits-logo.png"
 
-
+theme: minima
 
 tracking_id: #
 
