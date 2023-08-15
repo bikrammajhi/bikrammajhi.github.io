@@ -18,8 +18,8 @@ sass:
 nav:
  - name: "about"
    link: "/"
- - name: "publications"
-   link: "research"
+ # - name: "publications"
+ #   link: "research"
  - name: "teaching etc."
    link: "projects"
  - name: "cv"
