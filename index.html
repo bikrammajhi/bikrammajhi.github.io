@@ -3,320 +3,284 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bikram Majhi — GPU Systems</title>
+<title>Bikram Majhi — I torture GPUs for science</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Lora:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --paper:    #f5f0e8;
-  --paper2:   #ede8dc;
-  --paper3:   #e4ddd0;
-  --ink:      #1c1a16;
-  --ink2:     #4a4640;
-  --ink3:     #8a8478;
-  --ink4:     #b8b0a0;
-  --rule:     #d4cdc0;
-  --rule2:    #c8c0b0;
-  --accent:   #b85c2c;       /* burnt sienna — warm, readable on paper */
-  --accent2:  #d4742e;
-  --green:    #3a6b40;       /* forest green for "done" states */
-  --green2:   #4e8c56;
-  --amber:    #c48c20;
-  --blue:     #2c5282;
-  --mono:     'JetBrains Mono', monospace;
-  --serif:    'Playfair Display', serif;
-  --sans:     'DM Sans', sans-serif;
+  --bg:      #080807;
+  --bg2:     #0f0f0e;
+  --bg3:     #181816;
+  --border:  #222220;
+  --border2: #2a2a27;
+  --text:    #ece8db;
+  --text2:   #8a8778;
+  --text3:   #4a4940;
+  --lime:    #c8f060;
+  --lime2:   #a0d030;
+  --amber:   #f0b840;
+  --red:     #e84030;
+  --blue:    #60a8f0;
+  --mono:    'DM Mono', monospace;
+  --serif:   'Lora', serif;
+  --display: 'Bebas Neue', sans-serif;
 }
 
 html { scroll-behavior: smooth; }
-body {
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--sans);
-  font-size: 15px;
-  line-height: 1.65;
-}
+body { background: var(--bg); color: var(--text); font-family: var(--mono); font-size: 14px; line-height: 1.6; overflow-x: hidden; }
 
-/* ── Subtle paper texture ── */
-body::before {
-  content: '';
-  position: fixed; inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
-  pointer-events: none; z-index: 0; opacity: .6;
-}
+/* ─── Cursor ─── */
+#cur { position:fixed; width:6px; height:6px; background:var(--lime); border-radius:50%; pointer-events:none; z-index:9999; transition:transform .08s; mix-blend-mode:difference; }
+#cur-r { position:fixed; width:28px; height:28px; border:1px solid rgba(200,240,96,.35); border-radius:50%; pointer-events:none; z-index:9998; }
+body:hover #cur { display:block; }
 
-/* ── Nav ── */
-nav {
-  position: sticky; top: 0; z-index: 50;
-  background: rgba(245,240,232,.92);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--rule);
-}
-.nav-wrap { max-width: 1100px; margin: 0 auto; padding: 0 40px; height: 52px; display: flex; align-items: center; justify-content: space-between; }
-.logo { font-family: var(--serif); font-size: 18px; font-style: italic; color: var(--ink); text-decoration: none; letter-spacing: .01em; }
-.logo span { color: var(--accent); }
-.nav-links { display: flex; gap: 28px; align-items: center; }
-.nav-links a { font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink3); text-decoration: none; transition: color .15s; }
-.nav-links a:hover { color: var(--accent); }
-.nav-status { font-family: var(--mono); font-size: 10px; color: var(--green); display: flex; align-items: center; gap: 5px; }
-.nav-status::before { content:''; width:5px; height:5px; border-radius:50%; background:var(--green); animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.25} }
+/* ─── Scanlines ─── */
+body::before { content:''; position:fixed; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.04) 3px,rgba(0,0,0,.04) 4px); pointer-events:none; z-index:200; }
 
-/* ── Wrap ── */
-.wrap { max-width: 1100px; margin: 0 auto; padding: 0 40px; position: relative; z-index: 1; }
+/* ─── Nav ─── */
+nav { position:fixed; top:0; left:0; right:0; z-index:100; border-bottom:1px solid var(--border); background:rgba(8,8,7,.9); backdrop-filter:blur(16px); }
+.nav-wrap { max-width:1120px; margin:0 auto; padding:0 32px; height:48px; display:flex; align-items:center; justify-content:space-between; }
+.logo { font-family:var(--display); font-size:22px; letter-spacing:.06em; color:var(--lime); text-decoration:none; }
+.nav-r { display:flex; align-items:center; gap:24px; }
+.nav-r a { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--text2); text-decoration:none; transition:color .12s; }
+.nav-r a:hover { color:var(--lime); }
+.blinker { display:flex; align-items:center; gap:6px; font-size:10px; color:var(--lime); }
+.blinker::before { content:''; width:5px; height:5px; border-radius:50%; background:var(--lime); animation:blink 1.8s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
 
-/* ── Hero ── */
-.hero { padding: 80px 0 64px; border-bottom: 1px solid var(--rule); }
-.hero-inner { display: grid; grid-template-columns: 1fr 380px; gap: 80px; align-items: end; }
-.hero-left { }
+/* ─── Hero ─── */
+.hero { min-height:100vh; display:grid; grid-template-rows:1fr auto; padding:100px 32px 60px; max-width:1120px; margin:0 auto; position:relative; }
+.hero-bg { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+.grid-lines { position:absolute; inset:0; background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px); background-size:80px 80px; opacity:.5; mask-image:radial-gradient(ellipse 70% 70% at 50% 40%, black 10%, transparent 100%); }
 
-.hero-kicker {
-  font-family: var(--mono);
-  font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--ink3); margin-bottom: 24px;
-  display: flex; align-items: center; gap: 10px;
-}
-.hero-kicker::before { content:''; display:inline-block; width:24px; height:1px; background:var(--ink3); }
+.hero-top { position:relative; z-index:1; display:flex; flex-direction:column; justify-content:flex-end; padding-bottom:48px; }
+.eyebrow { font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--text3); margin-bottom:20px; }
 
-.hero-name {
-  font-family: var(--serif);
-  font-size: clamp(52px, 8vw, 96px);
-  font-weight: 700;
-  line-height: .95;
-  letter-spacing: -.02em;
-  color: var(--ink);
-  margin-bottom: 6px;
-}
-.hero-name .given { display: block; font-weight: 400; font-style: italic; font-size: .65em; color: var(--ink2); }
-.hero-name .family { display: block; }
+.hero-name { font-family:var(--display); font-size:clamp(72px,14vw,160px); line-height:.9; letter-spacing:.02em; color:var(--text); margin-bottom:0; }
+.hero-name .outline { color:transparent; -webkit-text-stroke:1.5px var(--border2); }
+.hero-name .lime { color:var(--lime); }
 
-.hero-tagline {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: clamp(16px, 2vw, 20px);
-  color: var(--ink3);
-  margin-top: 20px;
-  line-height: 1.5;
-}
-.hero-tagline em { color: var(--accent); font-style: normal; font-weight: 500; }
+.hero-sub { font-family:var(--serif); font-style:italic; font-size:clamp(16px,2.2vw,22px); color:var(--text2); margin-top:20px; max-width:520px; line-height:1.5; }
+.hero-sub em { color:var(--text); font-style:normal; }
 
-.hero-right { padding-bottom: 4px; }
-.stat-table { width: 100%; border-collapse: collapse; }
-.stat-table tr { border-bottom: 1px solid var(--rule); }
-.stat-table tr:first-child { border-top: 1px solid var(--rule); }
-.stat-val { font-family: var(--serif); font-size: 28px; font-weight: 700; color: var(--accent); padding: 14px 0; width: 100px; }
-.stat-label { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink3); vertical-align: middle; }
-.stat-sub { font-size: 11px; color: var(--ink4); font-family: var(--sans); font-weight: 300; display: block; margin-top: 1px; }
+.hero-bottom { position:relative; z-index:1; display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:end; }
+.hero-stats { display:flex; gap:0; border:1px solid var(--border); }
+.hs { padding:14px 22px; border-right:1px solid var(--border); }
+.hs:last-child { border-right:none; }
+.hs-v { font-family:var(--display); font-size:28px; color:var(--lime); letter-spacing:.04em; display:block; line-height:1; }
+.hs-l { font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--text3); margin-top:3px; }
 
-/* ── Section commons ── */
-section { padding: 72px 0; border-bottom: 1px solid var(--rule); }
-.sec-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 48px; }
-.sec-n { font-family: var(--mono); font-size: 10px; color: var(--ink4); letter-spacing: .1em; }
-.sec-t { font-family: var(--serif); font-size: 30px; font-weight: 700; color: var(--ink); letter-spacing: -.01em; }
-.sec-rule { flex: 1; height: 1px; background: var(--rule); }
+.hero-quote { font-family:var(--serif); font-style:italic; font-size:15px; color:var(--text3); text-align:right; line-height:1.7; border-right:2px solid var(--border2); padding-right:20px; }
 
-/* ── About ── */
-.about-grid { display: grid; grid-template-columns: 1fr 320px; gap: 72px; }
-.about-text p { font-size: 15px; line-height: 1.85; color: var(--ink2); margin-bottom: 18px; font-weight: 300; }
-.about-text p strong { color: var(--ink); font-weight: 500; }
-.about-text a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(184,92,44,.3); transition: border-color .15s; }
-.about-text a:hover { border-color: var(--accent); }
-.about-text code { font-family: var(--mono); font-size: 12.5px; background: var(--paper2); padding: 1px 5px; border-radius: 3px; color: var(--ink); }
+/* ─── Shared ─── */
+.wrap { max-width:1120px; margin:0 auto; padding:0 32px; }
+section { border-top:1px solid var(--border); padding:80px 0; }
+.sec-head { display:flex; align-items:center; gap:14px; margin-bottom:56px; }
+.sec-n { font-size:10px; letter-spacing:.1em; color:var(--text3); }
+.sec-t { font-family:var(--display); font-size:36px; letter-spacing:.04em; color:var(--text); }
+.sec-rule { flex:1; height:1px; background:var(--border); }
 
-.aside-block { }
-.aside-label { font-family: var(--mono); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink4); margin-bottom: 14px; }
-.stack-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--rule); }
-.stack-row:first-of-type { border-top: 1px solid var(--rule); }
-.sr-n { font-family: var(--mono); font-size: 11.5px; color: var(--ink2); }
-.sr-dots { display: flex; gap: 3px; }
-.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--paper3); border: 1px solid var(--rule2); }
-.dot.on { background: var(--accent); border-color: var(--accent); }
+/* ─── About ─── */
+.about-grid { display:grid; grid-template-columns:1.2fr 1fr; gap:72px; }
+.about-body p { font-size:14px; line-height:1.85; color:var(--text2); margin-bottom:18px; }
+.about-body p strong { color:var(--text); font-weight:500; }
+.about-body a { color:var(--lime); text-decoration:none; }
+.about-body a:hover { text-decoration:underline; }
 
-.reading-list { margin-top: 32px; }
-.r-row { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--rule); font-size: 12px; color: var(--ink3); line-height: 1.5; }
-.r-row:first-of-type { border-top: 1px solid var(--rule); }
-.r-mark { color: var(--accent); flex-shrink: 0; font-family: var(--serif); font-style: italic; margin-top: 1px; }
+.stack-block { }
+.sl { font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--text3); margin-bottom:14px; }
+.stack-row { display:flex; justify-content:space-between; align-items:center; padding:11px 0; border-bottom:1px solid var(--border); font-size:12px; }
+.stack-row:first-of-type { border-top:1px solid var(--border); }
+.sr-name { color:var(--text); }
+.sr-dots { display:flex; gap:4px; }
+.dot { width:7px; height:7px; border-radius:50%; background:var(--border2); }
+.dot.on { background:var(--lime); }
 
-/* ── 100 Days ── */
-.days-lede { font-size: 15px; line-height: 1.8; color: var(--ink2); font-weight: 300; max-width: 680px; margin-bottom: 32px; }
-.days-lede strong { color: var(--ink); font-weight: 500; }
-.days-grid { display: grid; grid-template-columns: repeat(10,1fr); gap: 4px; margin-bottom: 16px; }
-.dd { aspect-ratio: 1; border-radius: 3px; background: var(--paper2); border: 1px solid var(--rule); transition: background .1s; }
-.dd.done { background: var(--green2); border-color: var(--green); }
-.dd.now { background: var(--accent); border-color: var(--accent2); box-shadow: 0 0 6px rgba(184,92,44,.35); }
-.days-leg { display: flex; gap: 20px; font-family: var(--mono); font-size: 10px; color: var(--ink3); align-items: center; margin-bottom: 40px; }
-.dl { display: flex; align-items: center; gap: 6px; }
-.dlb { width: 10px; height: 10px; border-radius: 2px; }
+.reading { margin-top:36px; }
+.r-item { display:flex; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); align-items:flex-start; font-size:12px; color:var(--text2); line-height:1.5; }
+.r-item:first-of-type { border-top:1px solid var(--border); }
+.r-bullet { color:var(--lime); flex-shrink:0; margin-top:1px; }
 
-.phases { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
-.ph { background: var(--paper); padding: 22px 20px; }
-.ph-range { font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; color: var(--ink4); margin-bottom: 8px; }
-.ph-t { font-family: var(--serif); font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
-.ph-d { font-size: 12px; color: var(--ink3); line-height: 1.6; }
-.ph-badge { display: inline-block; margin-top: 12px; font-family: var(--mono); font-size: 9px; padding: 2px 8px; border-radius: 2px; }
-.ph-done { background: rgba(58,107,64,.1); color: var(--green); border: 1px solid rgba(58,107,64,.3); }
-.ph-active { background: rgba(184,92,44,.1); color: var(--accent); border: 1px solid rgba(184,92,44,.4); }
-.ph-next { background: var(--paper2); color: var(--ink3); border: 1px solid var(--rule); }
+/* ─── 100-Days Progress ─── */
+.days-intro { font-size:13px; color:var(--text2); margin-bottom:32px; line-height:1.75; max-width:640px; }
+.days-intro strong { color:var(--text); }
+.days-grid { display:grid; grid-template-columns:repeat(10,1fr); gap:3px; margin-bottom:20px; }
+.day-dot { aspect-ratio:1; border-radius:2px; background:var(--border); position:relative; cursor:default; transition:background .1s; }
+.day-dot.done { background:var(--lime2); }
+.day-dot.done:hover { background:var(--lime); }
+.day-dot.current { background:var(--lime); box-shadow:0 0 6px var(--lime); }
+.days-legend { display:flex; gap:20px; font-size:10px; color:var(--text3); align-items:center; }
+.dl { display:flex; align-items:center; gap:6px; }
+.dl-box { width:10px; height:10px; border-radius:2px; }
 
-/* ── Wins ── */
-.wins { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
-.win { background: var(--paper); padding: 36px 32px; }
-.win-label { font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink4); margin-bottom: 16px; }
-.win-fig { font-family: var(--serif); font-size: 56px; font-weight: 700; line-height: 1; margin-bottom: 10px; }
-.win-green { color: var(--green); }
-.win-amber { color: var(--amber); }
-.win-accent { color: var(--accent); }
-.win-blue { color: var(--blue); }
-.win-t { font-size: 14px; font-weight: 500; color: var(--ink); margin-bottom: 7px; }
-.win-d { font-size: 13px; color: var(--ink3); line-height: 1.65; font-weight: 300; }
-.win-a { display: inline-block; margin-top: 14px; font-family: var(--mono); font-size: 10px; color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(184,92,44,.3); padding-bottom: 1px; }
-.win-a:hover { border-bottom-color: var(--accent); }
+/* Phase labels */
+.phases { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); border:1px solid var(--border); margin-top:32px; }
+.phase { background:var(--bg); padding:20px 18px; }
+.ph-range { font-size:10px; letter-spacing:.1em; color:var(--text3); margin-bottom:8px; }
+.ph-title { font-size:13px; color:var(--text); margin-bottom:6px; font-weight:500; }
+.ph-items { font-size:11px; color:var(--text3); line-height:1.7; }
+.ph-badge { display:inline-block; margin-top:10px; font-size:9px; padding:2px 8px; border:1px solid; }
+.ph-done { border-color:rgba(160,208,48,.4); color:var(--lime2); }
+.ph-active { border-color:rgba(200,240,96,.6); color:var(--lime); }
+.ph-next { border-color:var(--border2); color:var(--text3); }
 
-/* ── Ladder ── */
-.ladder { border: 1px solid var(--rule); }
-.rung { display: grid; grid-template-columns: 60px 1fr auto; gap: 24px; align-items: center; padding: 20px 28px; border-bottom: 1px solid var(--rule); background: var(--paper); transition: background .15s; position: relative; }
-.rung:last-child { border-bottom: none; }
-.rung::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:transparent; transition:background .15s; }
-.rung:hover { background: var(--paper2); }
-.rung:hover::before { background: var(--accent); }
-.rung-n { font-family: var(--serif); font-size: 36px; font-weight: 700; color: var(--rule2); font-style: italic; }
-.rung.done .rung-n { color: var(--green2); }
-.rung.now .rung-n { color: var(--accent); }
-.rung-t { font-size: 14px; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
-.rung-d { font-size: 12px; color: var(--ink3); line-height: 1.55; max-width: 520px; font-weight: 300; }
-.rung-tag { font-family: var(--mono); font-size: 10px; padding: 3px 10px; border: 1px solid; white-space: nowrap; }
-.done .rung-tag { border-color: rgba(58,107,64,.4); color: var(--green); }
-.now .rung-tag { border-color: rgba(184,92,44,.5); color: var(--accent); }
-.rung:not(.done):not(.now) .rung-tag { border-color: var(--rule2); color: var(--ink4); }
+/* ─── Wins ─── */
+.wins-grid { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--border); border:1px solid var(--border); }
+.win-card { background:var(--bg); padding:32px 28px; position:relative; overflow:hidden; }
+.win-card::after { content:attr(data-num); position:absolute; right:-10px; top:-10px; font-family:var(--display); font-size:100px; color:rgba(200,240,96,.04); line-height:1; pointer-events:none; }
+.win-icon { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text3); margin-bottom:16px; }
+.win-num { font-family:var(--display); font-size:52px; line-height:1; margin-bottom:8px; }
+.win-green { color:var(--lime); }
+.win-amber { color:var(--amber); }
+.win-title { font-size:13px; color:var(--text); margin-bottom:8px; }
+.win-desc { font-size:12px; color:var(--text3); line-height:1.65; }
+.win-link { display:inline-block; margin-top:14px; font-size:10px; color:var(--lime); text-decoration:none; border-bottom:1px solid rgba(200,240,96,.3); padding-bottom:1px; }
+.win-link:hover { border-bottom-color:var(--lime); }
 
-/* ── Writing ── */
-.posts { border: 1px solid var(--rule); }
-.post { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: start; padding: 28px 32px; border-bottom: 1px solid var(--rule); text-decoration: none; background: var(--paper); transition: background .12s; position: relative; }
-.post:last-child { border-bottom: none; }
-.post::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:transparent; transition:background .12s; }
-.post:hover { background: var(--paper2); }
-.post:hover::before { background: var(--accent); }
-.post-meta { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
-.ptag { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; padding: 2px 7px; border: 1px solid; border-radius: 2px; }
-.ptag-cuda { color: var(--blue); border-color: rgba(44,82,130,.3); background: rgba(44,82,130,.06); }
-.ptag-cute { color: var(--green); border-color: rgba(58,107,64,.3); background: rgba(58,107,64,.06); }
-.ptag-perf { color: var(--amber); border-color: rgba(196,140,32,.3); background: rgba(196,140,32,.06); }
-.ptag-infra { color: var(--accent); border-color: rgba(184,92,44,.3); background: rgba(184,92,44,.06); }
-.ptag-arch { color: #6b46c1; border-color: rgba(107,70,193,.3); background: rgba(107,70,193,.06); }
-.post-date { font-family: var(--mono); font-size: 10px; color: var(--ink4); }
-.post-t { font-family: var(--serif); font-size: 19px; font-weight: 700; color: var(--ink); margin-bottom: 7px; line-height: 1.3; }
-.post-x { font-size: 13px; color: var(--ink3); line-height: 1.65; font-weight: 300; max-width: 580px; }
-.post-arr { font-family: var(--serif); font-size: 22px; color: var(--ink4); align-self: center; transition: all .12s; font-style: italic; }
-.post:hover .post-arr { color: var(--accent); transform: translateX(3px); }
+/* ─── Ladder ─── */
+.ladder { display:flex; flex-direction:column; gap:1px; background:var(--border); border:1px solid var(--border); }
+.rung { display:grid; grid-template-columns:52px 1fr auto; gap:24px; align-items:center; background:var(--bg); padding:20px 24px; transition:background .12s; position:relative; }
+.rung::before { content:''; position:absolute; left:0; top:0; bottom:0; width:2px; background:transparent; transition:background .12s; }
+.rung:hover { background:var(--bg3); }
+.rung:hover::before { background:var(--lime); }
+.rung-n { font-family:var(--display); font-size:32px; color:var(--border2); letter-spacing:.04em; }
+.rung.done .rung-n { color:var(--lime2); }
+.rung.active .rung-n { color:var(--lime); }
+.rung-title { font-size:13px; color:var(--text); margin-bottom:4px; }
+.rung-desc { font-size:11px; color:var(--text3); line-height:1.55; max-width:500px; }
+.rung-tag { font-size:10px; padding:3px 10px; border:1px solid; white-space:nowrap; }
+.done .rung-tag { border-color:rgba(160,208,48,.4); color:var(--lime2); }
+.active .rung-tag { border-color:var(--lime); color:var(--lime); }
+.rung:not(.done):not(.active) .rung-tag { border-color:var(--border2); color:var(--text3); }
 
-/* ── Projects ── */
-.proj-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
-.proj { background: var(--paper); padding: 32px 28px; text-decoration: none; display: block; transition: background .12s; position: relative; }
-.proj:hover { background: var(--paper2); }
-.proj-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-.proj-name { font-family: var(--mono); font-size: 13px; color: var(--accent); font-weight: 500; }
-.proj-gh { font-family: var(--mono); font-size: 10px; color: var(--ink3); border: 1px solid var(--rule2); padding: 2px 8px; text-decoration: none; transition: all .12s; }
-.proj:hover .proj-gh { border-color: var(--accent); color: var(--accent); }
-.proj-d { font-size: 13px; color: var(--ink3); line-height: 1.65; margin-bottom: 16px; font-weight: 300; }
-.proj-chips { display: flex; gap: 5px; flex-wrap: wrap; }
-.chip { font-family: var(--mono); font-size: 9.5px; padding: 2px 7px; background: var(--paper2); border: 1px solid var(--rule); color: var(--ink3); }
-.proj-star { font-family: var(--mono); font-size: 10px; color: var(--amber); margin-top: 12px; }
+/* ─── Writing ─── */
+.posts { border:1px solid var(--border); }
+.post { display:grid; grid-template-columns:1fr auto; gap:20px; align-items:start; padding:28px 32px; border-bottom:1px solid var(--border); text-decoration:none; background:var(--bg); transition:background .12s; position:relative; }
+.post:last-child { border-bottom:none; }
+.post::before { content:''; position:absolute; left:0; top:0; bottom:0; width:2px; background:transparent; transition:background .12s; }
+.post:hover { background:var(--bg2); }
+.post:hover::before { background:var(--lime); }
+.post-tags { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+.ptag { font-size:9px; letter-spacing:.1em; text-transform:uppercase; padding:2px 7px; border:1px solid; }
+.ptag-cuda { color:var(--blue); border-color:rgba(96,168,240,.3); }
+.ptag-cute { color:var(--lime); border-color:rgba(200,240,96,.3); }
+.ptag-perf { color:var(--amber); border-color:rgba(240,184,64,.3); }
+.ptag-infra { color:#e870a0; border-color:rgba(232,112,160,.3); }
+.ptag-arch { color:#a070f0; border-color:rgba(160,112,240,.3); }
+.post-title { font-size:17px; font-family:var(--serif); color:var(--text); margin-bottom:7px; line-height:1.3; }
+.post-excerpt { font-size:12px; color:var(--text3); line-height:1.65; max-width:580px; }
+.post-date { font-size:10px; color:var(--text3); }
+.post-arr { font-size:18px; color:var(--text3); align-self:center; transition:all .12s; }
+.post:hover .post-arr { color:var(--lime); transform:translateX(3px); }
 
-/* ── Papers ── */
-.papers { border: 1px solid var(--rule); }
-.paper { padding: 16px 24px; border-bottom: 1px solid var(--rule); display: flex; gap: 16px; align-items: flex-start; }
-.paper:last-child { border-bottom: none; }
-.paper-arch { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; padding: 2px 7px; border: 1px solid var(--rule2); color: var(--ink3); flex-shrink: 0; margin-top: 2px; white-space: nowrap; }
-.paper-t { font-family: var(--serif); font-size: 13px; color: var(--ink); margin-bottom: 3px; line-height: 1.45; font-weight: 500; }
-.paper-m { font-size: 11px; color: var(--ink3); }
-.paper-m a { color: var(--blue); text-decoration: none; }
-.paper-m a:hover { text-decoration: underline; }
+/* ─── Projects ─── */
+.proj-grid { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--border); border:1px solid var(--border); }
+.proj { background:var(--bg); padding:30px 28px; text-decoration:none; display:block; transition:background .12s; position:relative; overflow:hidden; }
+.proj::after { content:attr(data-bg); position:absolute; right:-16px; bottom:-16px; font-family:var(--display); font-size:72px; letter-spacing:.04em; color:rgba(200,240,96,.03); line-height:1; pointer-events:none; }
+.proj:hover { background:var(--bg3); }
+.proj-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
+.proj-name { font-size:13px; color:var(--lime); font-weight:500; }
+.proj-gh { font-size:10px; color:var(--text3); border:1px solid var(--border2); padding:2px 8px; text-decoration:none; transition:all .12s; }
+.proj:hover .proj-gh { border-color:var(--lime); color:var(--lime); }
+.proj-desc { font-size:12px; color:var(--text3); line-height:1.65; margin-bottom:18px; }
+.proj-chips { display:flex; gap:6px; flex-wrap:wrap; }
+.chip { font-size:9px; letter-spacing:.08em; padding:2px 7px; background:var(--bg3); border:1px solid var(--border2); color:var(--text2); }
+.proj-star { font-size:10px; color:var(--amber); margin-top:12px; display:flex; align-items:center; gap:4px; }
 
-/* ── Contact ── */
-.contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
-.contact-big { font-family: var(--serif); font-size: clamp(36px,5vw,60px); font-weight: 700; line-height: 1.05; color: var(--ink); margin-bottom: 14px; }
-.contact-big em { color: var(--accent); font-style: italic; }
-.contact-sub { font-size: 14px; color: var(--ink3); line-height: 1.75; font-weight: 300; }
-.clink { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--rule); text-decoration: none; transition: all .12s; }
-.clink:first-child { border-top: 1px solid var(--rule); }
-.clink-l { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink2); transition: color .12s; }
-.clink-r { font-family: var(--mono); font-size: 11px; color: var(--ink3); transition: color .12s; }
-.clink:hover .clink-l, .clink:hover .clink-r { color: var(--accent); }
+/* ─── Papers ─── */
+.papers { border:1px solid var(--border); }
+.paper { padding:16px 24px; border-bottom:1px solid var(--border); display:flex; gap:16px; align-items:flex-start; }
+.paper:last-child { border-bottom:none; }
+.paper-arch { font-size:9px; letter-spacing:.1em; text-transform:uppercase; padding:2px 7px; border:1px solid var(--border2); color:var(--text3); flex-shrink:0; margin-top:2px; }
+.paper-title { font-size:12px; color:var(--text); margin-bottom:3px; line-height:1.45; }
+.paper-meta { font-size:10px; color:var(--text3); }
+.paper-meta a { color:var(--blue); text-decoration:none; }
+.paper-meta a:hover { text-decoration:underline; }
 
-/* ── Footer ── */
-footer { padding: 28px 0; }
-.foot-inner { max-width: 1100px; margin: 0 auto; padding: 0 40px; display: flex; justify-content: space-between; align-items: center; }
-.foot-l { font-family: var(--mono); font-size: 10px; color: var(--ink4); letter-spacing: .06em; }
-.foot-r { font-family: var(--mono); font-size: 10px; color: var(--ink4); }
-.foot-r span { color: var(--accent); }
+/* ─── Contact ─── */
+.contact-grid { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
+.contact-big { font-family:var(--display); font-size:clamp(40px,6vw,72px); line-height:.95; letter-spacing:.04em; color:var(--text); margin-bottom:16px; }
+.contact-big span { color:var(--lime); }
+.contact-sub { font-size:13px; color:var(--text3); line-height:1.7; }
+.clinks { }
+.clink { display:flex; justify-content:space-between; align-items:center; padding:16px 0; border-bottom:1px solid var(--border); text-decoration:none; transition:all .12s; }
+.clink:first-child { border-top:1px solid var(--border); }
+.clink-l { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text2); transition:color .12s; }
+.clink-r { font-size:12px; color:var(--text3); transition:color .12s; }
+.clink:hover .clink-l, .clink:hover .clink-r { color:var(--lime); }
 
-/* ── Reveal ── */
-.reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
-.reveal.in { opacity: 1; transform: none; }
-.d1 { transition-delay: .08s; } .d2 { transition-delay: .16s; } .d3 { transition-delay: .24s; } .d4 { transition-delay: .32s; }
+/* ─── Footer ─── */
+footer { border-top:1px solid var(--border); }
+.foot-inner { max-width:1120px; margin:0 auto; padding:24px 32px; display:flex; justify-content:space-between; align-items:center; }
+.foot-l { font-size:10px; color:var(--text3); letter-spacing:.08em; }
+.foot-r { font-size:10px; color:var(--text3); }
+.foot-r span { color:var(--lime); }
+
+/* ─── Animations ─── */
+.reveal { opacity:0; transform:translateY(20px); transition:opacity .55s ease, transform .55s ease; }
+.reveal.in { opacity:1; transform:none; }
+.reveal-d1 { transition-delay:.07s; }
+.reveal-d2 { transition-delay:.14s; }
+.reveal-d3 { transition-delay:.21s; }
+.reveal-d4 { transition-delay:.28s; }
 
 @media(max-width:768px) {
-  .wrap { padding: 0 20px; }
-  .hero-inner, .about-grid, .wins, .proj-grid, .contact-grid { grid-template-columns: 1fr; }
-  .phases { grid-template-columns: 1fr 1fr; }
-  .rung { grid-template-columns: 48px 1fr; }
-  .rung-tag { display: none; }
-  .nav-links { display: none; }
+  .hero-bottom, .about-grid, .wins-grid, .proj-grid, .contact-grid { grid-template-columns:1fr; }
+  .hero-name { font-size:clamp(56px,18vw,100px); }
+  .phases { grid-template-columns:1fr 1fr; }
+  .rung { grid-template-columns:40px 1fr; }
+  .rung-tag { display:none; }
+  .wrap { padding:0 20px; }
 }
 </style>
 </head>
 <body>
 
+<div id="cur"></div>
+<div id="cur-r"></div>
+
+<div class="hero-bg"><div class="grid-lines"></div></div>
+
+<!-- Nav -->
 <nav>
   <div class="nav-wrap">
-    <a href="#" class="logo">Bikram <span>Majhi</span></a>
-    <div class="nav-links">
+    <a href="#" class="logo">BM</a>
+    <div class="nav-r">
       <a href="#about">about</a>
       <a href="#journey">100 days</a>
       <a href="#writing">writing</a>
       <a href="#projects">projects</a>
       <a href="#contact">contact</a>
+      <div class="blinker">B200 live</div>
     </div>
-    <div class="nav-status">B200 live</div>
   </div>
 </nav>
 
 <!-- Hero -->
 <div class="wrap">
 <div class="hero">
-  <div class="hero-inner">
-    <div class="hero-left">
-      <div class="hero-kicker reveal">IIT Jodhpur · GPU Systems · Bhubaneswar, India</div>
-      <h1 class="hero-name reveal d1">
-        <span class="given">Bikram</span>
-        <span class="family">Majhi.</span>
-      </h1>
-      <p class="hero-tagline reveal d2">
-        <em>"I torture GPUs for science."</em><br>
-        Turning memory-bound into compute-bound,<br>one kernel at a time.
-      </p>
+  <div class="hero-top">
+    <div class="eyebrow reveal">IIT Jodhpur · GPU Systems · Bhubaneswar, India</div>
+    <div class="hero-name reveal reveal-d1">
+      BIKRAM<br>
+      <span class="outline">MA</span><span class="lime">JHI</span>
     </div>
-    <div class="hero-right reveal d2">
-      <table class="stat-table">
-        <tr>
-          <td class="stat-val">121%</td>
-          <td class="stat-label">vs cuBLAS<span class="stat-sub">Custom GEMM · Tesla T4</span></td>
-        </tr>
-        <tr>
-          <td class="stat-val">96%</td>
-          <td class="stat-label">vs cuBLAS<span class="stat-sub">Custom GEMM · P100</span></td>
-        </tr>
-        <tr>
-          <td class="stat-val">57+</td>
-          <td class="stat-label">days logged<span class="stat-sub">272 commits · 36 stars</span></td>
-        </tr>
-        <tr>
-          <td class="stat-val">B200</td>
-          <td class="stat-label">current target<span class="stat-sub">sm_100 · 183 GB HBM3e</span></td>
-        </tr>
-      </table>
+    <div class="hero-sub reveal reveal-d2">
+      <em>"I torture GPUs for science."</em><br>
+      Turning memory-bound into compute-bound, one kernel at a time.
+    </div>
+  </div>
+  <div class="hero-bottom reveal reveal-d3">
+    <div class="hero-stats">
+      <div class="hs"><span class="hs-v">57+</span><span class="hs-l">Days logged</span></div>
+      <div class="hs"><span class="hs-v">121%</span><span class="hs-l">vs cuBLAS T4</span></div>
+      <div class="hs"><span class="hs-v">36★</span><span class="hs-l">GitHub stars</span></div>
+      <div class="hs"><span class="hs-v">sm_100</span><span class="hs-l">Blackwell native</span></div>
+    </div>
+    <div class="hero-quote">
+      "The goal: develop a strong theoretical<br>and practical understanding of<br>GPU-based high-performance computing."
     </div>
   </div>
 </div>
@@ -327,68 +291,75 @@ footer { padding: 28px 0; }
 <div class="wrap">
   <div class="sec-head reveal"><span class="sec-n">01</span><h2 class="sec-t">About</h2><div class="sec-rule"></div></div>
   <div class="about-grid">
-    <div class="about-text reveal">
-      <p>I'm a student at <strong>IIT Jodhpur</strong> who spends most of his time figuring out what GPUs are actually doing. Not at the framework level — at the hardware level. I want to know why a warp stalls, where the bandwidth goes, and what the Roofline model says before I trust any number.</p>
-      <p>My flagship project is <strong>100 Days of GPU</strong> — a public daily log committed to GitHub. Starting from GPU vs CPU architecture, moving through the CUDA programming model, OS internals, virtual memory, warp mechanics, all the way to <strong>CuTe DSL and Tensor Core programming on Blackwell</strong>. Every day is a commit. 272 in.</p>
-      <p>I've already <strong>outperformed cuBLAS by 121% on Tesla T4</strong> (non-Tensor Core path) and reached <strong>96% of cuBLAS on P100</strong>. Current work: Blackwell B200, <code>sm_100</code>, CUDA 13.1 via Modal. Working through the full optimization ladder — coalescing → smem → register tiling → warp MMA → Tensor Cores.</p>
-      <p>I follow the <a href="https://newsletter.semianalysis.com" target="_blank">SemiAnalysis</a> newsletter, read the GPU microbenchmarking paper series from Volta through Blackwell, and practice on <a href="https://leetgpu.com" target="_blank">LeetGPU</a> and <a href="https://tensara.org" target="_blank">Tensara</a>.</p>
+    <div class="about-body reveal">
+      <p>I'm a student at <strong>IIT Jodhpur</strong> who spends most of his time squeezing TFLOPS out of NVIDIA GPUs. My approach is always bottom-up — I want to understand what happens at the hardware level before I trust any abstraction above it.</p>
+      <p>My flagship project is <strong>100 Days of GPU</strong> — a public daily log starting from GPU vs CPU architecture, through CUDA programming model, OS internals, memory hierarchies, all the way to <strong>CuTe DSL and Tensor Core programming</strong>. Every day is a commit. 272 commits in.</p>
+      <p>I've already <strong>outperformed cuBLAS by 121% on Tesla T4</strong> (non-Tensor Core path) and hit <strong>96% of cuBLAS on P100</strong>. Current obsession: Blackwell B200, <code>sm_100</code>, FP4 data paths, and the new Transformer Engine. Running kernels on Modal with CUDA 13.1.</p>
+      <p>I read SemiAnalysis newsletters, microbenchmarking papers from Volta through Blackwell, and the PMPP book. I care about the Roofline model, arithmetic intensity, L2 cache partitioning, and why warp divergence kills you.</p>
     </div>
-    <div class="reveal d1">
-      <div class="aside-block">
-        <div class="aside-label">Kernel stack</div>
-        <div class="stack-row"><span class="sr-n">CUDA C++ / PTX</span><div class="sr-dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></div>
-        <div class="stack-row"><span class="sr-n">CuTe DSL / CUTLASS</span><div class="sr-dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div></div></div>
-        <div class="stack-row"><span class="sr-n">cuBLAS / cuDNN</span><div class="sr-dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div></div></div>
-        <div class="stack-row"><span class="sr-n">Triton</span><div class="sr-dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div></div></div>
-        <div class="stack-row"><span class="sr-n">Nsight Compute</span><div class="sr-dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div></div></div>
-        <div class="stack-row"><span class="sr-n">ThunderKittens / Mojo</span><div class="sr-dots"><div class="dot on"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+    <div class="about-stack reveal reveal-d1">
+      <div class="stack-block">
+        <div class="sl">Kernel stack</div>
+        <div class="stack-row"><span class="sr-name">CUDA C++ / PTX</span><div class="sr-dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></div>
+        <div class="stack-row"><span class="sr-name">CuTe DSL / CUTLASS</span><div class="sr-dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div></div></div>
+        <div class="stack-row"><span class="sr-name">cuBLAS / cuDNN</span><div class="sr-dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div></div></div>
+        <div class="stack-row"><span class="sr-name">Triton</span><div class="sr-dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div></div></div>
+        <div class="stack-row"><span class="sr-name">Nsight Compute</span><div class="sr-dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div></div></div>
+        <div class="stack-row"><span class="sr-name">Mojo / ThunderKittens</span><div class="sr-dots"><div class="dot on"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
       </div>
-      <div class="reading-list">
-        <div class="aside-label">Currently reading</div>
-        <div class="r-row"><span class="r-mark">§</span>Dissecting Blackwell — arXiv:2507.10789</div>
-        <div class="r-row"><span class="r-mark">§</span>The Ultra-Scale Playbook (HuggingFace)</div>
-        <div class="r-row"><span class="r-mark">§</span>NVIDIA Tensor Core Evolution: Volta → Blackwell</div>
-        <div class="r-row"><span class="r-mark">§</span>PMPP 4th Ed. — Hwu, Kirk, El Hajj</div>
+      <div class="reading" style="margin-top:32px;">
+        <div class="sl">Currently reading</div>
+        <div class="r-item"><span class="r-bullet">▸</span>Dissecting the NVIDIA Blackwell Architecture with Microbenchmarks</div>
+        <div class="r-item"><span class="r-bullet">▸</span>The Ultra-Scale Playbook: Training LLMs on GPU Clusters</div>
+        <div class="r-item"><span class="r-bullet">▸</span>NVIDIA Tensor Core Evolution: Volta to Blackwell (SemiAnalysis)</div>
+        <div class="r-item"><span class="r-bullet">▸</span>Dissecting Hopper: TMA, Tensor Core, Memory Subsystem</div>
       </div>
     </div>
   </div>
 </div>
 </section>
 
-<!-- 100 Days -->
+<!-- 100 Days Journey -->
 <section id="journey">
 <div class="wrap">
   <div class="sec-head reveal"><span class="sec-n">02</span><h2 class="sec-t">100 Days of GPU</h2><div class="sec-rule"></div></div>
-  <p class="days-lede reveal">A <strong>public daily log</strong> on GitHub. Starting from first principles — GPU vs CPU, threads vs warps — and going all the way to Tensor Core MMA on Blackwell. <strong>272 commits. 36 stars. 5 forks.</strong> One day at a time.</p>
+  <p class="days-intro reveal">
+    A <strong>public daily log</strong> of my GPU learning journey — committed to GitHub every day.
+    Starting from GPU vs CPU architecture, working through CUDA, OS internals, memory hierarchies, warp mechanics,
+    all the way to CuTe DSL, Tensor Cores, and Blackwell. <strong>272 commits, 36 stars, 5 forks.</strong>
+  </p>
+
+  <!-- 100-dot grid (57 done, 1 active, rest upcoming) -->
   <div class="days-grid reveal" id="days-grid"></div>
-  <div class="days-leg reveal">
-    <div class="dl"><div class="dlb" style="background:var(--green2)"></div>Completed</div>
-    <div class="dl"><div class="dlb" style="background:var(--accent)"></div>Current</div>
-    <div class="dl"><div class="dlb" style="background:var(--paper2);border:1px solid var(--rule)"></div>Upcoming</div>
+  <div class="days-legend reveal">
+    <div class="dl"><div class="dl-box" style="background:var(--lime2)"></div>Completed</div>
+    <div class="dl"><div class="dl-box" style="background:var(--lime);box-shadow:0 0 5px var(--lime)"></div>Current</div>
+    <div class="dl"><div class="dl-box" style="background:var(--border)"></div>Upcoming</div>
   </div>
-  <div class="phases reveal">
-    <div class="ph">
+
+  <div class="phases reveal" style="margin-top:32px;">
+    <div class="phase">
       <div class="ph-range">Days 001–018</div>
-      <div class="ph-t">CUDA Foundations</div>
-      <div class="ph-d">GPU arch, kernels, memory hierarchy, coalescing, shared memory, async execution</div>
-      <span class="ph-badge ph-done">complete</span>
+      <div class="ph-title">CUDA Foundations</div>
+      <div class="ph-items">GPU arch, kernels, memory hierarchy, coalescing, shared mem, async execution</div>
+      <span class="ph-badge ph-done">done</span>
     </div>
-    <div class="ph">
+    <div class="phase">
       <div class="ph-range">Days 019–044</div>
-      <div class="ph-t">OS + Performance</div>
-      <div class="ph-d">Virtual memory, scheduling, warp shuffle, cooperative groups, profiling with Nsight</div>
-      <span class="ph-badge ph-done">complete</span>
+      <div class="ph-title">OS + Performance</div>
+      <div class="ph-items">OS internals, virtual memory, scheduling, warp shuffle, cooperative groups, profiling</div>
+      <span class="ph-badge ph-done">done</span>
     </div>
-    <div class="ph">
+    <div class="phase">
       <div class="ph-range">Days 045–057</div>
-      <div class="ph-t">CuTe + Tensor Cores</div>
-      <div class="ph-d">CuTe layout algebra, mma.sync, Tensor Core programming, CUTLASS abstractions</div>
+      <div class="ph-title">CuTe + Tensor Cores</div>
+      <div class="ph-items">CuTe layouts, mma.sync, Tensor Core programming, CUTLASS abstractions</div>
       <span class="ph-badge ph-active">active →</span>
     </div>
-    <div class="ph">
+    <div class="phase">
       <div class="ph-range">Days 058–100</div>
-      <div class="ph-t">Blackwell + Beyond</div>
-      <div class="ph-d">sm_100 native kernels, FP4 Tensor Cores, FlashAttention, Triton, ThunderKittens</div>
+      <div class="ph-title">Blackwell + Beyond</div>
+      <div class="ph-items">sm_100 native kernels, FP4 Tensor Cores, FlashAttention, Triton, ThunderKittens</div>
       <span class="ph-badge ph-next">upcoming</span>
     </div>
   </div>
@@ -399,71 +370,71 @@ footer { padding: 28px 0; }
 <section>
 <div class="wrap">
   <div class="sec-head reveal"><span class="sec-n">03</span><h2 class="sec-t">Results</h2><div class="sec-rule"></div></div>
-  <div class="wins">
-    <div class="win reveal">
-      <div class="win-label">Custom GEMM kernel · Tesla T4</div>
-      <div class="win-fig win-green">121%</div>
-      <div class="win-t">of cuBLAS performance</div>
-      <div class="win-d">Handwritten CUDA GEMM outperforming cuBLAS on Tesla T4 non-Tensor Core path. Coalesced access + smem tiling + register blocking.</div>
-      <a href="https://gist.github.com/bikrammajhi/1892de169821509c819761abd6bd758e" class="win-a" target="_blank">View gist →</a>
+  <div class="wins-grid">
+    <div class="win-card reveal" data-num="1">
+      <div class="win-icon">Custom GEMM kernel · Tesla T4</div>
+      <div class="win-num win-green">121%</div>
+      <div class="win-title">of cuBLAS performance</div>
+      <div class="win-desc">Handwritten CUDA GEMM outperforming cuBLAS on Tesla T4 (non-Tensor Core path). Coalesced access + smem tiling + register blocking.</div>
+      <a href="https://gist.github.com/bikrammajhi/1892de169821509c819761abd6bd758e" class="win-link" target="_blank">View gist →</a>
     </div>
-    <div class="win reveal d1">
-      <div class="win-label">Custom GEMM kernel · NVIDIA P100</div>
-      <div class="win-fig win-amber">96%</div>
-      <div class="win-t">of cuBLAS performance</div>
-      <div class="win-d">Reaching 96% of cuBLAS on P100. Memory-bound bottleneck eliminated through hierarchical tiling and arithmetic intensity optimization.</div>
-      <a href="https://gist.github.com/bikrammajhi/372864a2a8abbed01fc977b4b0c125ed" class="win-a" target="_blank">View gist →</a>
+    <div class="win-card reveal reveal-d1" data-num="2">
+      <div class="win-icon">Custom GEMM kernel · NVIDIA P100</div>
+      <div class="win-num win-amber">96%</div>
+      <div class="win-title">of cuBLAS performance</div>
+      <div class="win-desc">Reaching 96% of cuBLAS on P100. Arithmetic intensity optimized, memory-bound bottleneck eliminated through hierarchical tiling.</div>
+      <a href="https://gist.github.com/bikrammajhi/372864a2a8abbed01fc977b4b0c125ed" class="win-link" target="_blank">View gist →</a>
     </div>
-    <div class="win reveal d2">
-      <div class="win-label">100 Days of GPU · GitHub</div>
-      <div class="win-fig win-accent">36★</div>
-      <div class="win-t">stars · 272 commits</div>
-      <div class="win-d">Public daily GPU learning log. CUDA, CUTLASS, Triton, PTX, Nsight. 57+ days completed. Actively maintained.</div>
-      <a href="https://github.com/bikrammajhi/100-days-of-GPU" class="win-a" target="_blank">View repo →</a>
+    <div class="win-card reveal reveal-d2" data-num="3">
+      <div class="win-icon">100 Days of GPU · GitHub</div>
+      <div class="win-num win-green">36★</div>
+      <div class="win-title">stars, 272 commits</div>
+      <div class="win-desc">Public daily log of GPU learning — CUDA, CUTLASS, Triton, PTX, Nsight. 57+ days completed, 5 forks, actively maintained.</div>
+      <a href="https://github.com/bikrammajhi/100-days-of-GPU" class="win-link" target="_blank">View repo →</a>
     </div>
-    <div class="win reveal d3">
-      <div class="win-label">Current target · Blackwell B200</div>
-      <div class="win-fig win-blue">B200</div>
-      <div class="win-t">sm_100 native kernels</div>
-      <div class="win-d">Running CUDA 13.1 on B200 via Modal. Benchmarking handwritten kernels vs cuBLAS. 183 GB HBM3e, 1000W TDP.</div>
+    <div class="win-card reveal reveal-d3" data-num="4">
+      <div class="win-icon">Current target · Blackwell B200</div>
+      <div class="win-num" style="color:var(--blue);">B200</div>
+      <div class="win-title">sm_100 native kernels</div>
+      <div class="win-desc">Running CUDA 13.1 + nvcc sm_100 on B200 via Modal. Benchmarking handwritten kernels against cuBLAS. Closing the gap on 183GB HBM3e hardware.</div>
     </div>
   </div>
 </div>
 </section>
 
-<!-- Ladder -->
+<!-- Optimization Ladder -->
 <section>
 <div class="wrap">
-  <div class="sec-head reveal"><span class="sec-n">04</span><h2 class="sec-t">The GEMM optimization ladder</h2><div class="sec-rule"></div></div>
+  <div class="sec-head reveal"><span class="sec-n">04</span><h2 class="sec-t">The GEMM ladder</h2><div class="sec-rule"></div></div>
   <div class="ladder reveal">
     <div class="rung done">
       <div class="rung-n">01</div>
-      <div><div class="rung-t">Naive kernel</div><div class="rung-d">1 thread → 1 output element. Pure algorithm. Teaches make_layout, stride, and how a GPU addresses memory.</div></div>
+      <div><div class="rung-title">Naive kernel</div><div class="rung-desc">1 thread → 1 output. Pure algorithm. Teaches make_layout, stride, and what a GPU actually does with your code.</div></div>
       <div class="rung-tag">0.075 TFLOPS</div>
     </div>
     <div class="rung done">
       <div class="rung-n">02</div>
-      <div><div class="rung-t">Coalesced global memory</div><div class="rung-d">Reorganize thread–data mapping so a warp reads a contiguous 128-byte cache line. local_tile + make_coord.</div></div>
+      <div><div class="rung-title">Coalesced global memory</div><div class="rung-desc">Reorganize thread-data mapping so a warp reads a contiguous 128-byte cache line. local_tile + make_coord.</div></div>
       <div class="rung-tag">~3× gain</div>
     </div>
     <div class="rung done">
       <div class="rung-n">03</div>
-      <div><div class="rung-t">Shared memory tiling</div><div class="rung-d">Load a tile into SRAM once cooperatively. Reuse across all threads. DRAM traffic cut by 128×. sync_threads is the contract.</div></div>
+      <div><div class="rung-title">Shared memory tiling</div><div class="rung-desc">Load a tile once into SRAM cooperatively. Reuse it across BM threads. DRAM traffic cut by 128×. sync_threads is the contract.</div></div>
       <div class="rung-tag">~20× gain</div>
     </div>
     <div class="rung done">
       <div class="rung-n">04</div>
-      <div><div class="rung-t">Register file tiling</div><div class="rung-d">local_partition assigns each thread its smem slice into registers. Inner loop runs with zero memory stalls.</div></div>
+      <div><div class="rung-title">Register file tiling</div><div class="rung-desc">local_partition assigns each thread its smem slice into registers. Inner loop runs zero memory stalls. Pure RF math.</div></div>
       <div class="rung-tag">~80× gain</div>
     </div>
     <div class="rung done">
       <div class="rung-n">05</div>
-      <div><div class="rung-t">Hierarchical warp tiling (CuTe DSL)</div><div class="rung-d">Three-level composition: threadblock → warp → 16×16 MMA fragment. composition() chains layouts, no manual pointer arithmetic.</div></div>
+      <div><div class="rung-title">Hierarchical warp tiling (CuTe)</div><div class="rung-desc">Three-level composition: threadblock → warp → 16×16 MMA. composition() chains layouts without pointer arithmetic.</div></div>
       <div class="rung-tag">~500× gain</div>
     </div>
-    <div class="rung now">
+    <div class="rung active">
       <div class="rung-n">06</div>
-      <div><div class="rung-t">Tensor Core MMA · sm_100 Blackwell</div><div class="rung-d">Native mma.sync, FP4/FP8 Tensor Core data paths, Transformer Engine. Closing in on 75 TFLOPS on 183 GB HBM3e.</div></div>
+      <div><div class="rung-title">Tensor Core MMA · sm_100</div><div class="rung-desc">Native Blackwell mma.sync. FP4 / FP8 Tensor Core data paths. Transformer Engine. Approaching cuBLAS on 183GB HBM3e.</div></div>
       <div class="rung-tag">target: 75 TFLOPS</div>
     </div>
   </div>
@@ -477,33 +448,33 @@ footer { padding: 28px 0; }
   <div class="posts reveal">
     <a href="./blogs/blackwell-modal-setup.html" class="post">
       <div>
-        <div class="post-meta"><span class="ptag ptag-infra">infra</span><span class="ptag ptag-cuda">CUDA</span><span class="post-date">Mar 2026</span></div>
-        <div class="post-t">Running CUDA kernels on a Blackwell B200 with Modal</div>
-        <div class="post-x">How to set up a cloud GPU workflow that compiles and runs .cu files on a real B200 from your laptop. CUDA 13.1, nvcc sm_100, billed by the second.</div>
+        <div class="post-tags"><span class="ptag ptag-infra">infra</span><span class="ptag ptag-cuda">CUDA</span><span class="post-date" style="margin-left:4px">Mar 2026</span></div>
+        <div class="post-title">Running CUDA kernels on a Blackwell B200 with Modal</div>
+        <div class="post-excerpt">How to set up a cloud GPU workflow that compiles and runs .cu files on a real B200 from your laptop — CUDA 13.1, nvcc sm_100, no server management.</div>
       </div>
       <div class="post-arr">→</div>
     </a>
     <a href="#" class="post">
       <div>
-        <div class="post-meta"><span class="ptag ptag-cute">CuTe DSL</span><span class="post-date">Coming soon</span></div>
-        <div class="post-t">CuTe DSL from scratch: layouts, tiles, and composition</div>
-        <div class="post-x">make_layout is a function from coordinates to linear offsets. Five stages from naive to hierarchical MMA — each abstraction earns its place.</div>
+        <div class="post-tags"><span class="ptag ptag-cute">CuTe DSL</span><span class="post-date" style="margin-left:4px">Coming soon</span></div>
+        <div class="post-title">CuTe DSL from scratch: layouts, tiles, and composition</div>
+        <div class="post-excerpt">make_layout is just a function from coordinates to linear offsets. Five stages from naive to hierarchical MMA — every abstraction earns its place.</div>
       </div>
       <div class="post-arr">→</div>
     </a>
     <a href="#" class="post">
       <div>
-        <div class="post-meta"><span class="ptag ptag-perf">performance</span><span class="post-date">Coming soon</span></div>
-        <div class="post-t">Why your GEMM is 1000× slower than cuBLAS — and how to fix it</div>
-        <div class="post-x">Benchmark-driven walkthrough of every optimization level. Real numbers on B200. Each stage cuts the gap. The final boss is arithmetic intensity.</div>
+        <div class="post-tags"><span class="ptag ptag-perf">perf</span><span class="ptag ptag-cuda">CUDA</span><span class="post-date" style="margin-left:4px">Coming soon</span></div>
+        <div class="post-title">Why your GEMM is 1000× slower than cuBLAS — and how to fix it</div>
+        <div class="post-excerpt">Benchmark-driven walkthrough of every optimization level. Real numbers on B200. Each stage cuts the gap. The final boss is arithmetic intensity.</div>
       </div>
       <div class="post-arr">→</div>
     </a>
     <a href="#" class="post">
       <div>
-        <div class="post-meta"><span class="ptag ptag-arch">architecture</span><span class="post-date">Coming soon</span></div>
-        <div class="post-t">Microbenchmarking Blackwell: what changed in sm_100</div>
-        <div class="post-x">Following the Dissecting-the-GPU paper series through Blackwell. New memory hierarchy, Transformer Engine, TMA. What it means for kernel writers.</div>
+        <div class="post-tags"><span class="ptag ptag-arch">architecture</span><span class="post-date" style="margin-left:4px">Coming soon</span></div>
+        <div class="post-title">Microbenchmarking Blackwell: what's new in sm_100</div>
+        <div class="post-excerpt">Following the Dissecting-the-GPU paper series from Volta through Hopper to Blackwell. What changed in the memory hierarchy, Tensor Engine, and TMA.</div>
       </div>
       <div class="post-arr">→</div>
     </a>
@@ -515,26 +486,26 @@ footer { padding: 28px 0; }
 <section id="projects">
 <div class="wrap">
   <div class="sec-head reveal"><span class="sec-n">06</span><h2 class="sec-t">Projects</h2><div class="sec-rule"></div></div>
-  <div class="proj-grid reveal">
-    <a href="https://github.com/bikrammajhi/100-days-of-GPU" class="proj" target="_blank">
+  <div class="proj-grid">
+    <a href="https://github.com/bikrammajhi/100-days-of-GPU" class="proj" data-bg="GPU" target="_blank">
       <div class="proj-head"><span class="proj-name">100-days-of-GPU</span><span class="proj-gh">GitHub ↗</span></div>
-      <p class="proj-d">Public daily log. 57+ days, 272 commits. GPU arch → CUDA → OS internals → CuTe → Tensor Cores → Blackwell. The whole stack from scratch.</p>
-      <div class="proj-chips"><span class="chip">CUDA C++</span><span class="chip">CuTe DSL</span><span class="chip">Triton</span><span class="chip">PTX</span><span class="chip">Mojo</span></div>
+      <p class="proj-desc">Public daily log of GPU learning. 57+ days, 272 commits. GPU arch → CUDA → OS internals → CuTe DSL → Tensor Cores → Blackwell.</p>
+      <div class="proj-chips"><span class="chip">CUDA C++</span><span class="chip">CuTe</span><span class="chip">Triton</span><span class="chip">PTX</span><span class="chip">Mojo</span></div>
       <div class="proj-star">★ 36 stars · 5 forks</div>
     </a>
-    <a href="#" class="proj" target="_blank">
+    <a href="#" class="proj" data-bg="GEMM" target="_blank">
       <div class="proj-head"><span class="proj-name">blackwell-gemm</span><span class="proj-gh">GitHub ↗</span></div>
-      <p class="proj-d">Handwritten GEMM on B200. 6 optimization stages benchmarked vs cuBLAS. 121% on T4. 96% on P100. Current: Tensor Cores on sm_100.</p>
+      <p class="proj-desc">Handwritten GEMM kernels on B200. 6 optimization stages benchmarked vs cuBLAS. 121% of cuBLAS on T4. 96% on P100. Current: sm_100.</p>
       <div class="proj-chips"><span class="chip">CUDA C++</span><span class="chip">sm_100</span><span class="chip">cuBLAS</span><span class="chip">Modal</span></div>
     </a>
-    <a href="#" class="proj" target="_blank">
+    <a href="#" class="proj" data-bg="CUTE" target="_blank">
       <div class="proj-head"><span class="proj-name">cute-modal-runner</span><span class="proj-gh">GitHub ↗</span></div>
-      <p class="proj-d">Modal runner for CuTe DSL Python kernels and raw .cu CUDA files. One interface for both. CUDA 13.1, nvcc sm_100, B200.</p>
+      <p class="proj-desc">Modal-based runner for both CuTe DSL Python kernels and raw .cu CUDA files. One command dispatches both. CUDA 13.1, nvcc sm_100, B200.</p>
       <div class="proj-chips"><span class="chip">Python</span><span class="chip">Modal</span><span class="chip">CuTe DSL</span><span class="chip">CUDA 13.1</span></div>
     </a>
-    <a href="https://www.kaggle.com/code/bikrammajhi22/nvidia-cutlas" class="proj" target="_blank">
-      <div class="proj-head"><span class="proj-name">CUTLASS deep dive</span><span class="proj-gh">Kaggle ↗</span></div>
-      <p class="proj-d">Notebook diving into NVIDIA CUTLASS — template hierarchy, tile iterators, MMA operations. Companion to the 100-days journey.</p>
+    <a href="https://www.kaggle.com/code/bikrammajhi22/nvidia-cutlas" class="proj" data-bg="CUTLASS" target="_blank">
+      <div class="proj-head"><span class="proj-name">CUTLASS deep dive (Kaggle)</span><span class="proj-gh">Kaggle ↗</span></div>
+      <p class="proj-desc">Notebook diving into NVIDIA CUTLASS — template hierarchy, tile iterators, MMA operations. Companion to the 100-days journey.</p>
       <div class="proj-chips"><span class="chip">CUTLASS</span><span class="chip">Python</span><span class="chip">Kaggle</span></div>
     </a>
   </div>
@@ -546,11 +517,26 @@ footer { padding: 28px 0; }
 <div class="wrap">
   <div class="sec-head reveal"><span class="sec-n">07</span><h2 class="sec-t">Papers I study</h2><div class="sec-rule"></div></div>
   <div class="papers reveal">
-    <div class="paper"><span class="paper-arch">Blackwell</span><div><div class="paper-t">Dissecting the NVIDIA Blackwell Architecture with Microbenchmarks</div><div class="paper-m"><a href="https://arxiv.org/pdf/2507.10789" target="_blank">arXiv:2507.10789 ↗</a> · sm_100, Transformer Engine, evolved memory hierarchy</div></div></div>
-    <div class="paper"><span class="paper-arch">Hopper</span><div><div class="paper-t">Dissecting Hopper through Microbenchmarking and Multi-level Analysis</div><div class="paper-m"><a href="https://arxiv.org/pdf/2501.12084" target="_blank">arXiv:2501.12084 ↗</a> · H100, TMA, Tensor Core design, memory subsystem</div></div></div>
-    <div class="paper"><span class="paper-arch">Ampere</span><div><div class="paper-t">Demystifying the NVIDIA Ampere Architecture through Microbenchmarking</div><div class="paper-m"><a href="https://arxiv.org/pdf/2208.11174" target="_blank">arXiv:2208.11174 ↗</a> · A100, 3rd-gen Tensor Cores, L2 partitioning</div></div></div>
-    <div class="paper"><span class="paper-arch">General</span><div><div class="paper-t">Dissecting Tensor Cores via Microbenchmarks: Latency, Throughput, Numeric Behaviors</div><div class="paper-m"><a href="https://arxiv.org/pdf/2206.02874" target="_blank">arXiv:2206.02874 ↗</a> · Low-level Tensor Core analysis across architectures</div></div></div>
-    <div class="paper"><span class="paper-arch">Volta</span><div><div class="paper-t">Dissecting the NVIDIA Volta GPU Architecture via Microbenchmarking</div><div class="paper-m"><a href="https://arxiv.org/pdf/1804.06826" target="_blank">arXiv:1804.06826 ↗</a> · First Tensor Core GPU — SM and memory hierarchy analysis</div></div></div>
+    <div class="paper">
+      <span class="paper-arch">Blackwell</span>
+      <div><div class="paper-title">Dissecting the NVIDIA Blackwell Architecture with Microbenchmarks</div><div class="paper-meta"><a href="https://arxiv.org/pdf/2507.10789" target="_blank">arXiv:2507.10789 ↗</a> · Next-gen Transformer Engine, evolved memory hierarchy, sm_100</div></div>
+    </div>
+    <div class="paper">
+      <span class="paper-arch">Hopper</span>
+      <div><div class="paper-title">Dissecting the NVIDIA Hopper Architecture through Microbenchmarking and Multi-level Analysis</div><div class="paper-meta"><a href="https://arxiv.org/pdf/2501.12084" target="_blank">arXiv:2501.12084 ↗</a> · H100, TMA, Tensor Core design, memory subsystem</div></div>
+    </div>
+    <div class="paper">
+      <span class="paper-arch">Ampere</span>
+      <div><div class="paper-title">Demystifying the NVIDIA Ampere Architecture through Microbenchmarking</div><div class="paper-meta"><a href="https://arxiv.org/pdf/2208.11174" target="_blank">arXiv:2208.11174 ↗</a> · A100, 3rd-gen Tensor Cores, L2 partitioning</div></div>
+    </div>
+    <div class="paper">
+      <span class="paper-arch">General</span>
+      <div><div class="paper-title">Dissecting Tensor Cores via Microbenchmarks: Latency, Throughput and Numeric Behaviors</div><div class="paper-meta"><a href="https://arxiv.org/pdf/2206.02874" target="_blank">arXiv:2206.02874 ↗</a> · Low-level Tensor Core analysis across architectures</div></div>
+    </div>
+    <div class="paper">
+      <span class="paper-arch">Volta</span>
+      <div><div class="paper-title">Dissecting the NVIDIA Volta GPU Architecture via Microbenchmarking</div><div class="paper-meta"><a href="https://arxiv.org/pdf/1804.06826" target="_blank">arXiv:1804.06826 ↗</a> · First Tensor Core architecture — SM and memory hierarchy analysis</div></div>
+    </div>
   </div>
 </div>
 </section>
@@ -561,14 +547,22 @@ footer { padding: 28px 0; }
   <div class="sec-head reveal"><span class="sec-n">08</span><h2 class="sec-t">Contact</h2><div class="sec-rule"></div></div>
   <div class="contact-grid">
     <div class="reveal">
-      <div class="contact-big">Let's talk<br><em>kernels.</em></div>
-      <p class="contact-sub">Working on GPU optimization, CUDA, CuTe DSL, or Blackwell? I'm always happy to connect with people who care about what happens at the hardware level.</p>
+      <div class="contact-big">LET'S TALK<br><span>KERNELS.</span></div>
+      <p class="contact-sub">Working on GPU optimization, CUDA kernels, CuTe DSL, or Blackwell? Always happy to connect with people who care about what happens at the hardware level.</p>
     </div>
-    <div class="reveal d1">
-      <a href="https://github.com/bikrammajhi" class="clink" target="_blank"><span class="clink-l">GitHub</span><span class="clink-r">@bikrammajhi →</span></a>
-      <a href="https://x.com/nearlypi" class="clink" target="_blank"><span class="clink-l">Twitter / X</span><span class="clink-r">@nearlypi →</span></a>
-      <a href="https://www.linkedin.com/in/bikrammajhi" class="clink" target="_blank"><span class="clink-l">LinkedIn</span><span class="clink-r">bikrammajhi →</span></a>
-      <a href="https://www.kaggle.com/bikrammajhi22" class="clink" target="_blank"><span class="clink-l">Kaggle</span><span class="clink-r">bikrammajhi22 →</span></a>
+    <div class="clinks reveal reveal-d1">
+      <a href="https://github.com/bikrammajhi" class="clink" target="_blank">
+        <span class="clink-l">GitHub</span><span class="clink-r">@bikrammajhi →</span>
+      </a>
+      <a href="https://x.com/nearlypi" class="clink" target="_blank">
+        <span class="clink-l">Twitter / X</span><span class="clink-r">@nearlypi →</span>
+      </a>
+      <a href="https://www.linkedin.com/in/bikrammajhi" class="clink" target="_blank">
+        <span class="clink-l">LinkedIn</span><span class="clink-r">bikrammajhi →</span>
+      </a>
+      <a href="https://www.kaggle.com/bikrammajhi22" class="clink" target="_blank">
+        <span class="clink-l">Kaggle</span><span class="clink-r">bikrammajhi22 →</span>
+      </a>
     </div>
   </div>
 </div>
@@ -576,29 +570,46 @@ footer { padding: 28px 0; }
 
 <footer>
   <div class="foot-inner">
-    <div class="foot-l">© 2026 Bikram Majhi · IIT Jodhpur · Bhubaneswar, India</div>
-    <div class="foot-r">compiled with <span>nvcc -O3 -arch=sm_100</span></div>
+    <div class="foot-l">© 2026 BIKRAM MAJHI · IIT JODHPUR · BHUBANESWAR, INDIA</div>
+    <div class="foot-r">built with <span>nvcc -O3 -arch=sm_100</span></div>
   </div>
 </footer>
 
 <script>
+// Cursor
+const cur = document.getElementById('cur'), ring = document.getElementById('cur-r');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX; my=e.clientY;
+  cur.style.left=(mx-3)+'px'; cur.style.top=(my-3)+'px';
+});
+(function animRing(){
+  rx+=(mx-rx-14)*.1; ry+=(my-ry-14)*.1;
+  ring.style.left=rx+'px'; ring.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+})();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>cur.style.transform='scale(2.5)');
+  el.addEventListener('mouseleave',()=>cur.style.transform='scale(1)');
+});
+
 // 100-day dots
-const g = document.getElementById('days-grid');
+const grid = document.getElementById('days-grid');
 for(let i=0;i<100;i++){
   const d=document.createElement('div');
-  d.className='dd'+(i<57?' done':i===57?' now':'');
-  d.title=i<57?`Day ${i+1} — done`:i===57?`Day ${i+1} — current`:`Day ${i+1}`;
-  g.appendChild(d);
+  d.className='day-dot'+(i<57?' done':i===57?' current':'');
+  d.title=i<57?`Day ${i+1} — completed`:i===57?`Day ${i+1} — current`:`Day ${i+1} — upcoming`;
+  grid.appendChild(d);
 }
 
 // Scroll reveal
 const obs=new IntersectionObserver(entries=>{
   entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target); } });
-},{threshold:.08});
+},{threshold:0.08});
 document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 
-// Hero in immediately
-document.querySelectorAll('.hero .reveal, nav .reveal').forEach(el=>el.classList.add('in'));
+// Hero reveals immediately
+document.querySelectorAll('.hero .reveal').forEach(el=>el.classList.add('in'));
 </script>
 </body>
 </html>
