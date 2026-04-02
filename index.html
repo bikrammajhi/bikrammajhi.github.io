@@ -3,613 +3,1452 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bikram Majhi — I torture GPUs for science</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Lora:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+<title>Bikram Majhi</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Azeret+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:      #080807;
-  --bg2:     #0f0f0e;
-  --bg3:     #181816;
-  --border:  #222220;
-  --border2: #2a2a27;
-  --text:    #ece8db;
-  --text2:   #8a8778;
-  --text3:   #4a4940;
-  --lime:    #c8f060;
-  --lime2:   #a0d030;
-  --amber:   #f0b840;
-  --red:     #e84030;
-  --blue:    #60a8f0;
-  --mono:    'DM Mono', monospace;
-  --serif:   'Lora', serif;
-  --display: 'Bebas Neue', sans-serif;
+  --paper: #f4f1eb;
+  --paper2: #ede9e0;
+  --ink: #1c1a17;
+  --ink2: #3d3a35;
+  --ink3: #7a7570;
+  --rule: #d9d4c8;
+  --rule2: #c4bfb2;
+  --green: #2a5c45;
+  --green-light: #e8f0ec;
+  --orange: #b85c2a;
+  --orange-light: #f5ece6;
+  --blue: #2a4a6b;
 }
 
 html { scroll-behavior: smooth; }
-body { background: var(--bg); color: var(--text); font-family: var(--mono); font-size: 14px; line-height: 1.6; overflow-x: hidden; }
 
-/* ─── Cursor ─── */
-#cur { position:fixed; width:6px; height:6px; background:var(--lime); border-radius:50%; pointer-events:none; z-index:9999; transition:transform .08s; mix-blend-mode:difference; }
-#cur-r { position:fixed; width:28px; height:28px; border:1px solid rgba(200,240,96,.35); border-radius:50%; pointer-events:none; z-index:9998; }
-body:hover #cur { display:block; }
+body {
+  font-family: 'Azeret Mono', monospace;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12.5px;
+  line-height: 1.7;
+}
 
-/* ─── Scanlines ─── */
-body::before { content:''; position:fixed; inset:0; background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.04) 3px,rgba(0,0,0,.04) 4px); pointer-events:none; z-index:200; }
+/* ── NAV ── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 52px;
+}
 
-/* ─── Nav ─── */
-nav { position:fixed; top:0; left:0; right:0; z-index:100; border-bottom:1px solid var(--border); background:rgba(8,8,7,.9); backdrop-filter:blur(16px); }
-.nav-wrap { max-width:1120px; margin:0 auto; padding:0 32px; height:48px; display:flex; align-items:center; justify-content:space-between; }
-.logo { font-family:var(--display); font-size:22px; letter-spacing:.06em; color:var(--lime); text-decoration:none; }
-.nav-r { display:flex; align-items:center; gap:24px; }
-.nav-r a { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--text2); text-decoration:none; transition:color .12s; }
-.nav-r a:hover { color:var(--lime); }
-.blinker { display:flex; align-items:center; gap:6px; font-size:10px; color:var(--lime); }
-.blinker::before { content:''; width:5px; height:5px; border-radius:50%; background:var(--lime); animation:blink 1.8s infinite; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
 
-/* ─── Hero ─── */
-.hero { min-height:100vh; display:grid; grid-template-rows:1fr auto; padding:100px 32px 60px; max-width:1120px; margin:0 auto; position:relative; }
-.hero-bg { position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
-.grid-lines { position:absolute; inset:0; background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px); background-size:80px 80px; opacity:.5; mask-image:radial-gradient(ellipse 70% 70% at 50% 40%, black 10%, transparent 100%); }
+.nav-links {
+  display: flex;
+  gap: 28px;
+  list-style: none;
+}
 
-.hero-top { position:relative; z-index:1; display:flex; flex-direction:column; justify-content:flex-end; padding-bottom:48px; }
-.eyebrow { font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--text3); margin-bottom:20px; }
+.nav-links a {
+  font-size: 11px;
+  color: var(--ink3);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: color 0.15s;
+}
 
-.hero-name { font-family:var(--display); font-size:clamp(72px,14vw,160px); line-height:.9; letter-spacing:.02em; color:var(--text); margin-bottom:0; }
-.hero-name .outline { color:transparent; -webkit-text-stroke:1.5px var(--border2); }
-.hero-name .lime { color:var(--lime); }
+.nav-links a:hover { color: var(--ink); }
 
-.hero-sub { font-family:var(--serif); font-style:italic; font-size:clamp(16px,2.2vw,22px); color:var(--text2); margin-top:20px; max-width:520px; line-height:1.5; }
-.hero-sub em { color:var(--text); font-style:normal; }
+.nav-right {
+  font-size: 11px;
+  color: var(--ink3);
+  letter-spacing: 0.05em;
+}
 
-.hero-bottom { position:relative; z-index:1; display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:end; }
-.hero-stats { display:flex; gap:0; border:1px solid var(--border); }
-.hs { padding:14px 22px; border-right:1px solid var(--border); }
-.hs:last-child { border-right:none; }
-.hs-v { font-family:var(--display); font-size:28px; color:var(--lime); letter-spacing:.04em; display:block; line-height:1; }
-.hs-l { font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--text3); margin-top:3px; }
+/* ── HERO ── */
+.hero {
+  padding: 90px 40px 80px;
+  max-width: 1080px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 60px;
+  align-items: end;
+  border-bottom: 1px solid var(--rule);
+}
 
-.hero-quote { font-family:var(--serif); font-style:italic; font-size:15px; color:var(--text3); text-align:right; line-height:1.7; border-right:2px solid var(--border2); padding-right:20px; }
+.hero-label {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-/* ─── Shared ─── */
-.wrap { max-width:1120px; margin:0 auto; padding:0 32px; }
-section { border-top:1px solid var(--border); padding:80px 0; }
-.sec-head { display:flex; align-items:center; gap:14px; margin-bottom:56px; }
-.sec-n { font-size:10px; letter-spacing:.1em; color:var(--text3); }
-.sec-t { font-family:var(--display); font-size:36px; letter-spacing:.04em; color:var(--text); }
-.sec-rule { flex:1; height:1px; background:var(--border); }
+.hero-label::before {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  height: 1px;
+  background: var(--ink3);
+}
 
-/* ─── About ─── */
-.about-grid { display:grid; grid-template-columns:1.2fr 1fr; gap:72px; }
-.about-body p { font-size:14px; line-height:1.85; color:var(--text2); margin-bottom:18px; }
-.about-body p strong { color:var(--text); font-weight:500; }
-.about-body a { color:var(--lime); text-decoration:none; }
-.about-body a:hover { text-decoration:underline; }
+.hero-name {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(52px, 7vw, 88px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  margin-bottom: 28px;
+}
 
-.stack-block { }
-.sl { font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:var(--text3); margin-bottom:14px; }
-.stack-row { display:flex; justify-content:space-between; align-items:center; padding:11px 0; border-bottom:1px solid var(--border); font-size:12px; }
-.stack-row:first-of-type { border-top:1px solid var(--border); }
-.sr-name { color:var(--text); }
-.sr-dots { display:flex; gap:4px; }
-.dot { width:7px; height:7px; border-radius:50%; background:var(--border2); }
-.dot.on { background:var(--lime); }
+.hero-name em {
+  font-style: italic;
+  color: var(--green);
+}
 
-.reading { margin-top:36px; }
-.r-item { display:flex; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); align-items:flex-start; font-size:12px; color:var(--text2); line-height:1.5; }
-.r-item:first-of-type { border-top:1px solid var(--border); }
-.r-bullet { color:var(--lime); flex-shrink:0; margin-top:1px; }
+.hero-sub {
+  font-size: 13px;
+  color: var(--ink2);
+  line-height: 1.8;
+  max-width: 520px;
+  margin-bottom: 40px;
+}
 
-/* ─── 100-Days Progress ─── */
-.days-intro { font-size:13px; color:var(--text2); margin-bottom:32px; line-height:1.75; max-width:640px; }
-.days-intro strong { color:var(--text); }
-.days-grid { display:grid; grid-template-columns:repeat(10,1fr); gap:3px; margin-bottom:20px; }
-.day-dot { aspect-ratio:1; border-radius:2px; background:var(--border); position:relative; cursor:default; transition:background .1s; }
-.day-dot.done { background:var(--lime2); }
-.day-dot.done:hover { background:var(--lime); }
-.day-dot.current { background:var(--lime); box-shadow:0 0 6px var(--lime); }
-.days-legend { display:flex; gap:20px; font-size:10px; color:var(--text3); align-items:center; }
-.dl { display:flex; align-items:center; gap:6px; }
-.dl-box { width:10px; height:10px; border-radius:2px; }
+.hero-sub strong { color: var(--ink); font-weight: 500; }
 
-/* Phase labels */
-.phases { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); border:1px solid var(--border); margin-top:32px; }
-.phase { background:var(--bg); padding:20px 18px; }
-.ph-range { font-size:10px; letter-spacing:.1em; color:var(--text3); margin-bottom:8px; }
-.ph-title { font-size:13px; color:var(--text); margin-bottom:6px; font-weight:500; }
-.ph-items { font-size:11px; color:var(--text3); line-height:1.7; }
-.ph-badge { display:inline-block; margin-top:10px; font-size:9px; padding:2px 8px; border:1px solid; }
-.ph-done { border-color:rgba(160,208,48,.4); color:var(--lime2); }
-.ph-active { border-color:rgba(200,240,96,.6); color:var(--lime); }
-.ph-next { border-color:var(--border2); color:var(--text3); }
+.hero-cta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
 
-/* ─── Wins ─── */
-.wins-grid { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--border); border:1px solid var(--border); }
-.win-card { background:var(--bg); padding:32px 28px; position:relative; overflow:hidden; }
-.win-card::after { content:attr(data-num); position:absolute; right:-10px; top:-10px; font-family:var(--display); font-size:100px; color:rgba(200,240,96,.04); line-height:1; pointer-events:none; }
-.win-icon { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text3); margin-bottom:16px; }
-.win-num { font-family:var(--display); font-size:52px; line-height:1; margin-bottom:8px; }
-.win-green { color:var(--lime); }
-.win-amber { color:var(--amber); }
-.win-title { font-size:13px; color:var(--text); margin-bottom:8px; }
-.win-desc { font-size:12px; color:var(--text3); line-height:1.65; }
-.win-link { display:inline-block; margin-top:14px; font-size:10px; color:var(--lime); text-decoration:none; border-bottom:1px solid rgba(200,240,96,.3); padding-bottom:1px; }
-.win-link:hover { border-bottom-color:var(--lime); }
+.btn {
+  font-family: 'Azeret Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 2px;
+  transition: all 0.15s;
+  cursor: pointer;
+  border: none;
+}
 
-/* ─── Ladder ─── */
-.ladder { display:flex; flex-direction:column; gap:1px; background:var(--border); border:1px solid var(--border); }
-.rung { display:grid; grid-template-columns:52px 1fr auto; gap:24px; align-items:center; background:var(--bg); padding:20px 24px; transition:background .12s; position:relative; }
-.rung::before { content:''; position:absolute; left:0; top:0; bottom:0; width:2px; background:transparent; transition:background .12s; }
-.rung:hover { background:var(--bg3); }
-.rung:hover::before { background:var(--lime); }
-.rung-n { font-family:var(--display); font-size:32px; color:var(--border2); letter-spacing:.04em; }
-.rung.done .rung-n { color:var(--lime2); }
-.rung.active .rung-n { color:var(--lime); }
-.rung-title { font-size:13px; color:var(--text); margin-bottom:4px; }
-.rung-desc { font-size:11px; color:var(--text3); line-height:1.55; max-width:500px; }
-.rung-tag { font-size:10px; padding:3px 10px; border:1px solid; white-space:nowrap; }
-.done .rung-tag { border-color:rgba(160,208,48,.4); color:var(--lime2); }
-.active .rung-tag { border-color:var(--lime); color:var(--lime); }
-.rung:not(.done):not(.active) .rung-tag { border-color:var(--border2); color:var(--text3); }
+.btn-solid {
+  background: var(--ink);
+  color: var(--paper);
+}
 
-/* ─── Writing ─── */
-.posts { border:1px solid var(--border); }
-.post { display:grid; grid-template-columns:1fr auto; gap:20px; align-items:start; padding:28px 32px; border-bottom:1px solid var(--border); text-decoration:none; background:var(--bg); transition:background .12s; position:relative; }
-.post:last-child { border-bottom:none; }
-.post::before { content:''; position:absolute; left:0; top:0; bottom:0; width:2px; background:transparent; transition:background .12s; }
-.post:hover { background:var(--bg2); }
-.post:hover::before { background:var(--lime); }
-.post-tags { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
-.ptag { font-size:9px; letter-spacing:.1em; text-transform:uppercase; padding:2px 7px; border:1px solid; }
-.ptag-cuda { color:var(--blue); border-color:rgba(96,168,240,.3); }
-.ptag-cute { color:var(--lime); border-color:rgba(200,240,96,.3); }
-.ptag-perf { color:var(--amber); border-color:rgba(240,184,64,.3); }
-.ptag-infra { color:#e870a0; border-color:rgba(232,112,160,.3); }
-.ptag-arch { color:#a070f0; border-color:rgba(160,112,240,.3); }
-.post-title { font-size:17px; font-family:var(--serif); color:var(--text); margin-bottom:7px; line-height:1.3; }
-.post-excerpt { font-size:12px; color:var(--text3); line-height:1.65; max-width:580px; }
-.post-date { font-size:10px; color:var(--text3); }
-.post-arr { font-size:18px; color:var(--text3); align-self:center; transition:all .12s; }
-.post:hover .post-arr { color:var(--lime); transform:translateX(3px); }
+.btn-solid:hover { background: var(--ink2); }
 
-/* ─── Projects ─── */
-.proj-grid { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--border); border:1px solid var(--border); }
-.proj { background:var(--bg); padding:30px 28px; text-decoration:none; display:block; transition:background .12s; position:relative; overflow:hidden; }
-.proj::after { content:attr(data-bg); position:absolute; right:-16px; bottom:-16px; font-family:var(--display); font-size:72px; letter-spacing:.04em; color:rgba(200,240,96,.03); line-height:1; pointer-events:none; }
-.proj:hover { background:var(--bg3); }
-.proj-head { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
-.proj-name { font-size:13px; color:var(--lime); font-weight:500; }
-.proj-gh { font-size:10px; color:var(--text3); border:1px solid var(--border2); padding:2px 8px; text-decoration:none; transition:all .12s; }
-.proj:hover .proj-gh { border-color:var(--lime); color:var(--lime); }
-.proj-desc { font-size:12px; color:var(--text3); line-height:1.65; margin-bottom:18px; }
-.proj-chips { display:flex; gap:6px; flex-wrap:wrap; }
-.chip { font-size:9px; letter-spacing:.08em; padding:2px 7px; background:var(--bg3); border:1px solid var(--border2); color:var(--text2); }
-.proj-star { font-size:10px; color:var(--amber); margin-top:12px; display:flex; align-items:center; gap:4px; }
+.btn-outline {
+  background: transparent;
+  color: var(--ink2);
+  border: 1px solid var(--rule2);
+}
 
-/* ─── Papers ─── */
-.papers { border:1px solid var(--border); }
-.paper { padding:16px 24px; border-bottom:1px solid var(--border); display:flex; gap:16px; align-items:flex-start; }
-.paper:last-child { border-bottom:none; }
-.paper-arch { font-size:9px; letter-spacing:.1em; text-transform:uppercase; padding:2px 7px; border:1px solid var(--border2); color:var(--text3); flex-shrink:0; margin-top:2px; }
-.paper-title { font-size:12px; color:var(--text); margin-bottom:3px; line-height:1.45; }
-.paper-meta { font-size:10px; color:var(--text3); }
-.paper-meta a { color:var(--blue); text-decoration:none; }
-.paper-meta a:hover { text-decoration:underline; }
+.btn-outline:hover { border-color: var(--ink3); color: var(--ink); }
 
-/* ─── Contact ─── */
-.contact-grid { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
-.contact-big { font-family:var(--display); font-size:clamp(40px,6vw,72px); line-height:.95; letter-spacing:.04em; color:var(--text); margin-bottom:16px; }
-.contact-big span { color:var(--lime); }
-.contact-sub { font-size:13px; color:var(--text3); line-height:1.7; }
-.clinks { }
-.clink { display:flex; justify-content:space-between; align-items:center; padding:16px 0; border-bottom:1px solid var(--border); text-decoration:none; transition:all .12s; }
-.clink:first-child { border-top:1px solid var(--border); }
-.clink-l { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text2); transition:color .12s; }
-.clink-r { font-size:12px; color:var(--text3); transition:color .12s; }
-.clink:hover .clink-l, .clink:hover .clink-r { color:var(--lime); }
+.hero-aside { padding-bottom: 4px; }
 
-/* ─── Footer ─── */
-footer { border-top:1px solid var(--border); }
-.foot-inner { max-width:1120px; margin:0 auto; padding:24px 32px; display:flex; justify-content:space-between; align-items:center; }
-.foot-l { font-size:10px; color:var(--text3); letter-spacing:.08em; }
-.foot-r { font-size:10px; color:var(--text3); }
-.foot-r span { color:var(--lime); }
+.stat-block {
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
 
-/* ─── Animations ─── */
-.reveal { opacity:0; transform:translateY(20px); transition:opacity .55s ease, transform .55s ease; }
-.reveal.in { opacity:1; transform:none; }
-.reveal-d1 { transition-delay:.07s; }
-.reveal-d2 { transition-delay:.14s; }
-.reveal-d3 { transition-delay:.21s; }
-.reveal-d4 { transition-delay:.28s; }
+.stat-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--rule);
+}
 
-@media(max-width:768px) {
-  .hero-bottom, .about-grid, .wins-grid, .proj-grid, .contact-grid { grid-template-columns:1fr; }
-  .hero-name { font-size:clamp(56px,18vw,100px); }
-  .phases { grid-template-columns:1fr 1fr; }
-  .rung { grid-template-columns:40px 1fr; }
-  .rung-tag { display:none; }
-  .wrap { padding:0 20px; }
+.stat-row:last-child { border-bottom: none; }
+
+.stat-val {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+.stat-key {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink3);
+}
+
+.stack-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  padding: 3px 9px;
+  border: 1px solid var(--rule2);
+  border-radius: 2px;
+  color: var(--ink3);
+  background: var(--paper2);
+}
+
+.tag.lit { border-color: var(--green); color: var(--green); background: var(--green-light); }
+
+/* ── SECTION ── */
+.section {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 72px 40px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.sec-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 48px;
+}
+
+.sec-num {
+  font-size: 11px;
+  color: var(--ink3);
+  letter-spacing: 0.08em;
+}
+
+.sec-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.sec-rule {
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+
+/* ── GEMM LADDER ── */
+.ladder { position: relative; padding-left: 32px; }
+
+.ladder-rail {
+  position: absolute;
+  left: 6px; top: 8px; bottom: 8px;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--green), var(--rule) 80%);
+}
+
+.rung {
+  position: relative;
+  padding-bottom: 36px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.rung.in { opacity: 1; transform: translateY(0); }
+
+.rung-dot {
+  position: absolute;
+  left: -28px;
+  top: 5px;
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1px solid var(--rule2);
+}
+
+.rung.done .rung-dot { background: var(--green); border-color: var(--green); }
+.rung.current .rung-dot { background: var(--orange); border-color: var(--orange); box-shadow: 0 0 0 3px var(--orange-light); }
+
+.rung-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.rung-n { font-size: 10px; color: var(--ink3); }
+
+.rung-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px;
+  color: var(--ink);
+}
+
+.rung-gain {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  letter-spacing: 0.04em;
+}
+
+.rung-gain.g { background: var(--green-light); color: var(--green); border: 1px solid #b5d4c4; }
+.rung-gain.o { background: var(--orange-light); color: var(--orange); border: 1px solid #e8c4b0; }
+
+.rung-desc { font-size: 12px; color: var(--ink3); line-height: 1.7; max-width: 600px; }
+
+/* ── RESULTS ── */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.res-card {
+  background: var(--paper);
+  padding: 28px 24px;
+  transition: background 0.15s;
+}
+
+.res-card:hover { background: var(--paper2); }
+
+.res-hw {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink3);
+  margin-bottom: 12px;
+}
+
+.res-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 44px;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.res-num.g { color: var(--green); }
+.res-num.o { color: var(--orange); }
+.res-num.b { color: var(--blue); }
+
+.res-label { font-size: 11px; color: var(--ink3); margin-bottom: 12px; }
+
+.res-desc { font-size: 11px; color: var(--ink2); line-height: 1.7; }
+
+.res-link {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--green);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 1px;
+  transition: opacity 0.15s;
+}
+
+.res-link:hover { opacity: 0.7; }
+
+/* ── PROJECTS ── */
+.projects-list { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
+
+.proj {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 20px;
+  align-items: center;
+  padding: 22px 24px;
+  border-bottom: 1px solid var(--rule);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.proj:last-child { border-bottom: none; }
+.proj:hover { background: var(--paper2); }
+
+.proj-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.proj-desc { font-size: 11px; color: var(--ink3); line-height: 1.6; }
+
+.proj-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+
+.proj-arrow {
+  font-size: 18px;
+  color: var(--ink3);
+  transition: transform 0.15s, color 0.15s;
+}
+
+.proj:hover .proj-arrow { color: var(--ink); transform: translate(2px, -2px); }
+
+/* ── WRITING ── */
+.writing-list { border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
+
+.write-item {
+  display: grid;
+  grid-template-columns: 80px 1fr 90px 20px;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--rule);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.write-item:last-child { border-bottom: none; }
+.write-item:hover { background: var(--paper2); }
+.write-item.dim { opacity: 0.5; pointer-events: none; }
+
+.write-cat { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--green); }
+.write-cat.muted { color: var(--ink3); }
+
+.write-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.write-date { font-size: 11px; color: var(--ink3); text-align: right; }
+.write-arr { color: var(--ink3); text-align: right; font-size: 14px; }
+
+/* ── CONTACT ── */
+.contact-grid { display: grid; grid-template-columns: 1fr 320px; gap: 80px; align-items: start; }
+
+.contact-head {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 4vw, 48px);
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  line-height: 1.1;
+  margin-bottom: 20px;
+}
+
+.contact-head em { font-style: italic; color: var(--green); }
+
+.contact-sub { font-size: 12px; color: var(--ink3); line-height: 1.8; margin-bottom: 28px; max-width: 400px; }
+
+.socials { border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
+
+.soc {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--rule);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.soc:last-child { border-bottom: none; }
+.soc:hover { background: var(--paper2); }
+
+.soc-left { display: flex; align-items: center; gap: 12px; }
+.soc-plat { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink3); width: 64px; }
+.soc-handle { font-size: 12px; color: var(--ink); }
+.soc-arr { font-size: 13px; color: var(--ink3); transition: transform 0.15s; }
+.soc:hover .soc-arr { transform: translateX(3px); }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--rule);
+  padding: 20px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--ink3);
+  letter-spacing: 0.04em;
+  max-width: 100%;
+}
+
+/* ── DEBUG JOURNAL ── */
+#journal { background: var(--paper2); }
+
+.journal-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--paper);
+  border: 1px solid var(--rule2);
+  border-radius: 2px;
+  padding: 7px 12px;
+  flex: 1;
+  max-width: 280px;
+}
+
+.search-wrap input {
+  border: none;
+  background: transparent;
+  font-family: 'Azeret Mono', monospace;
+  font-size: 12px;
+  color: var(--ink);
+  outline: none;
+  width: 100%;
+}
+
+.j-filters { display: flex; gap: 4px; }
+
+.j-tab {
+  font-family: 'Azeret Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--rule2);
+  border-radius: 2px;
+  padding: 6px 12px;
+  color: var(--ink3);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.j-tab.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+.j-list { display: flex; flex-direction: column; gap: 12px; }
+
+.j-card {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  position: relative;
+}
+
+.j-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--green);
+}
+
+.j-card:hover { border-color: var(--rule2); box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+.j-card.open { cursor: default; }
+.j-card.open:hover { box-shadow: none; }
+
+.j-card-top {
+  padding: 18px 20px 18px 24px;
+}
+
+.j-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.j-card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px;
+  color: var(--ink);
+  line-height: 1.4;
+  flex: 1;
+}
+
+.j-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.solo-badge {
+  background: var(--orange-light);
+  color: var(--orange);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid #e8c4b0;
+}
+
+.j-date { font-size: 10px; color: var(--ink3); }
+
+.j-preview { font-size: 11px; color: var(--ink3); line-height: 1.6; }
+
+.j-body {
+  display: none;
+  border-top: 1px solid var(--rule);
+  padding: 20px 24px;
+}
+
+.j-card.open .j-body { display: block; }
+.j-card.open .j-preview { display: none; }
+
+.j-sections { display: flex; flex-direction: column; gap: 16px; }
+
+.j-sec-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink3);
+  margin-bottom: 4px;
+}
+
+.j-sec-val {
+  font-size: 12px;
+  color: var(--ink);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.j-sec-val.hl {
+  background: var(--green-light);
+  border-left: 2px solid var(--green);
+  padding: 8px 12px;
+  font-size: 11.5px;
+}
+
+.j-card-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.j-btn {
+  font-family: 'Azeret Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  background: transparent;
+  border: 1px solid var(--rule2);
+  border-radius: 2px;
+  padding: 5px 10px;
+  color: var(--ink3);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.j-btn:hover { color: var(--ink); border-color: var(--ink3); }
+.j-btn.del:hover { color: #b03030; border-color: #e8b0b0; background: #fff5f5; }
+
+/* Form */
+.j-form {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 28px 24px;
+  margin-bottom: 28px;
+  display: none;
+  animation: jfSlide 0.18s ease;
+}
+
+.j-form.open { display: block; }
+
+@keyframes jfSlide {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.j-form-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  margin-bottom: 22px;
+  color: var(--ink);
+}
+
+.j-fields { display: grid; gap: 16px; }
+
+.jf {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.jf label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink3);
+}
+
+.jf input, .jf textarea {
+  font-family: 'Azeret Mono', monospace;
+  font-size: 12px;
+  background: var(--paper2);
+  border: 1px solid var(--rule2);
+  border-radius: 2px;
+  padding: 9px 12px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  resize: vertical;
+}
+
+.jf input:focus, .jf textarea:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px var(--green-light);
+}
+
+.jf textarea { min-height: 72px; }
+
+.jf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.time-input-wrap {
+  background: var(--orange-light);
+  border: 1px solid #e8c4b0;
+  border-radius: 2px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.time-input-wrap label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--orange);
+}
+
+.time-input-wrap input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #e8c4b0;
+  border-radius: 0;
+  padding: 4px 0;
+  font-size: 22px;
+  color: var(--orange);
+  width: 100%;
+}
+
+.time-input-wrap input:focus { box-shadow: none; border-color: var(--orange); }
+.time-hint { font-size: 10px; color: var(--orange); opacity: 0.7; }
+
+.j-form-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.j-save {
+  font-family: 'Azeret Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  border-radius: 2px;
+  padding: 9px 18px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.j-save:hover { background: var(--ink2); }
+
+.j-cancel {
+  font-family: 'Azeret Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  background: transparent;
+  color: var(--ink3);
+  border: 1px solid var(--rule2);
+  border-radius: 2px;
+  padding: 9px 18px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.j-cancel:hover { border-color: var(--ink3); color: var(--ink); }
+
+.j-empty {
+  text-align: center;
+  padding: 64px 24px;
+  color: var(--ink3);
+}
+
+.j-empty-icon { font-size: 32px; margin-bottom: 14px; opacity: 0.4; }
+
+.j-empty h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  color: var(--ink);
+  font-weight: 400;
+  margin-bottom: 8px;
+}
+
+.j-empty p { font-size: 11px; color: var(--ink3); max-width: 280px; margin: 0 auto; line-height: 1.7; }
+
+.j-stats-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.j-stat-pill {
+  font-size: 11px;
+  color: var(--ink3);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 5px 12px;
+}
+
+.j-stat-pill b { color: var(--ink); font-weight: 500; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 20px; right: 20px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: 'Azeret Mono', monospace;
+  font-size: 11px;
+  padding: 9px 16px;
+  border-radius: 3px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.18s, transform 0.18s;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* Reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.reveal.in { opacity: 1; transform: translateY(0); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .hero { grid-template-columns: 1fr; gap: 40px; padding: 56px 20px 48px; }
+  .hero-aside { display: none; }
+  .section { padding: 48px 20px; }
+  .results-grid { grid-template-columns: 1fr; }
+  .contact-grid { grid-template-columns: 1fr; gap: 32px; }
+  .write-item { grid-template-columns: 70px 1fr 70px; }
+  .write-arr { display: none; }
+  footer { padding: 16px 20px; flex-direction: column; gap: 6px; text-align: center; }
+  .jf-row { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
 
-<div id="cur"></div>
-<div id="cur-r"></div>
-
-<div class="hero-bg"><div class="grid-lines"></div></div>
-
-<!-- Nav -->
+<!-- NAV -->
 <nav>
-  <div class="nav-wrap">
-    <a href="#" class="logo">BM</a>
-    <div class="nav-r">
-      <a href="#about">about</a>
-      <a href="#journey">100 days</a>
-      <a href="#writing">writing</a>
-      <a href="#projects">projects</a>
-      <a href="#contact">contact</a>
-      <div class="blinker">B200 live</div>
-    </div>
-  </div>
+  <a href="#" class="logo">Bikram Majhi</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#ladder">GEMM</a></li>
+    <li><a href="#results">Results</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#writing">Writing</a></li>
+    <li><a href="#journal">Journal</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-right">Bhubaneswar · IIT Jodhpur</div>
 </nav>
 
-<!-- Hero -->
-<div class="wrap">
+<!-- HERO -->
 <div class="hero">
-  <div class="hero-top">
-    <div class="eyebrow reveal">IIT Jodhpur · GPU Systems · Bhubaneswar, India</div>
-    <div class="hero-name reveal reveal-d1">
-      BIKRAM<br>
-      <span class="outline">MA</span><span class="lime">JHI</span>
-    </div>
-    <div class="hero-sub reveal reveal-d2">
-      <em>"I torture GPUs for science."</em><br>
-      Turning memory-bound into compute-bound, one kernel at a time.
-    </div>
-  </div>
-  <div class="hero-bottom reveal reveal-d3">
-    <div class="hero-stats">
-      <div class="hs"><span class="hs-v">57+</span><span class="hs-l">Days logged</span></div>
-      <div class="hs"><span class="hs-v">121%</span><span class="hs-l">vs cuBLAS T4</span></div>
-      <div class="hs"><span class="hs-v">36★</span><span class="hs-l">GitHub stars</span></div>
-      <div class="hs"><span class="hs-v">sm_100</span><span class="hs-l">Blackwell native</span></div>
-    </div>
-    <div class="hero-quote">
-      "The goal: develop a strong theoretical<br>and practical understanding of<br>GPU-based high-performance computing."
+  <div>
+    <div class="hero-label">GPU Systems Engineer</div>
+    <div class="hero-name">Bikram<br><em>Majhi</em></div>
+    <p class="hero-sub">
+      I write CUDA kernels from scratch and benchmark them against cuBLAS. 
+      Right now I'm deep in <strong>Blackwell B200</strong> — sm_100 native kernels, 
+      FP4/FP8 data paths, CuTe DSL. Every day is a commit.
+    </p>
+    <div class="hero-cta">
+      <a href="#results" class="btn btn-solid">View Results</a>
+      <a href="https://github.com/bikrammajhi/100-days-of-GPU" target="_blank" class="btn btn-outline">100 Days of GPU →</a>
     </div>
   </div>
-</div>
+  <div class="hero-aside">
+    <div class="stat-block">
+      <div class="stat-row">
+        <span class="stat-key">vs cuBLAS · T4</span>
+        <span class="stat-val" style="color:var(--green)">121%</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-key">vs cuBLAS · P100</span>
+        <span class="stat-val" style="color:var(--orange)">96%</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-key">Days logged</span>
+        <span class="stat-val">57+</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-key">Current hw</span>
+        <span class="stat-val" style="font-size:14px;">B200</span>
+      </div>
+    </div>
+    <div class="stack-row">
+      <span class="tag lit">CUDA C++</span>
+      <span class="tag lit">CuTe DSL</span>
+      <span class="tag lit">PTX</span>
+      <span class="tag lit">CUTLASS</span>
+      <span class="tag">Triton</span>
+      <span class="tag">cuBLAS</span>
+      <span class="tag">Nsight</span>
+      <span class="tag">Modal</span>
+    </div>
+  </div>
 </div>
 
-<!-- About -->
-<section id="about">
-<div class="wrap">
-  <div class="sec-head reveal"><span class="sec-n">01</span><h2 class="sec-t">About</h2><div class="sec-rule"></div></div>
-  <div class="about-grid">
-    <div class="about-body reveal">
-      <p>I'm a student at <strong>IIT Jodhpur</strong> who spends most of his time squeezing TFLOPS out of NVIDIA GPUs. My approach is always bottom-up — I want to understand what happens at the hardware level before I trust any abstraction above it.</p>
-      <p>My flagship project is <strong>100 Days of GPU</strong> — a public daily log starting from GPU vs CPU architecture, through CUDA programming model, OS internals, memory hierarchies, all the way to <strong>CuTe DSL and Tensor Core programming</strong>. Every day is a commit. 272 commits in.</p>
-      <p>I've already <strong>outperformed cuBLAS by 121% on Tesla T4</strong> (non-Tensor Core path) and hit <strong>96% of cuBLAS on P100</strong>. Current obsession: Blackwell B200, <code>sm_100</code>, FP4 data paths, and the new Transformer Engine. Running kernels on Modal with CUDA 13.1.</p>
-      <p>I read SemiAnalysis newsletters, microbenchmarking papers from Volta through Blackwell, and the PMPP book. I care about the Roofline model, arithmetic intensity, L2 cache partitioning, and why warp divergence kills you.</p>
+<!-- ABOUT -->
+<section class="section" id="about">
+  <div class="sec-head reveal">
+    <span class="sec-num">01</span>
+    <h2 class="sec-title">About</h2>
+    <div class="sec-rule"></div>
+  </div>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:start;" class="reveal">
+    <div>
+      <p style="font-size:13px; color:var(--ink2); line-height:1.85; margin-bottom:14px;">
+        I’m someone who likes understanding what actually happens inside a GPU.
+        My approach is always bottom-up — understand the hardware before trusting any abstraction above it.
+      </p>
+      <p style="font-size:13px; color:var(--ink2); line-height:1.85; margin-bottom:14px;">
+        My flagship project, <strong style="color:var(--ink)">100 Days of GPU</strong>, is a public daily log. 
+        It started from GPU vs CPU architecture, went through CUDA programming and OS internals, 
+        and is now at CuTe DSL and Tensor Core programming on Blackwell.
+      </p>
+      <p style="font-size:13px; color:var(--ink2); line-height:1.85;">
+        Lately into : <strong style="color:var(--ink)">sm_100, FP4 data paths, and the Transformer Engine on B200</strong>.
+      </p>
     </div>
-    <div class="about-stack reveal reveal-d1">
-      <div class="stack-block">
-        <div class="sl">Kernel stack</div>
-        <div class="stack-row"><span class="sr-name">CUDA C++ / PTX</span><div class="sr-dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div></div></div>
-        <div class="stack-row"><span class="sr-name">CuTe DSL / CUTLASS</span><div class="sr-dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div></div></div>
-        <div class="stack-row"><span class="sr-name">cuBLAS / cuDNN</span><div class="sr-dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div></div></div>
-        <div class="stack-row"><span class="sr-name">Triton</span><div class="sr-dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div></div></div>
-        <div class="stack-row"><span class="sr-name">Nsight Compute</span><div class="sr-dots"><div class="dot on"></div><div class="dot on"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div></div></div>
-        <div class="stack-row"><span class="sr-name">Mojo / ThunderKittens</span><div class="sr-dots"><div class="dot on"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
-      </div>
-      <div class="reading" style="margin-top:32px;">
-        <div class="sl">Currently reading</div>
-        <div class="r-item"><span class="r-bullet">▸</span>Dissecting the NVIDIA Blackwell Architecture with Microbenchmarks</div>
-        <div class="r-item"><span class="r-bullet">▸</span>The Ultra-Scale Playbook: Training LLMs on GPU Clusters</div>
-        <div class="r-item"><span class="r-bullet">▸</span>NVIDIA Tensor Core Evolution: Volta to Blackwell (SemiAnalysis)</div>
-        <div class="r-item"><span class="r-bullet">▸</span>Dissecting Hopper: TMA, Tensor Core, Memory Subsystem</div>
+    <div>
+      <div style="font-size:10px; text-transform:uppercase; letter-spacing:0.09em; color:var(--ink3); margin-bottom:12px;">// reading</div>
+      <div style="border:1px solid var(--rule); border-radius:3px; overflow:hidden;">
+        <div style="display:flex; gap:10px; align-items:flex-start; padding:12px 16px; border-bottom:1px solid var(--rule);">
+          <span style="color:var(--green); flex-shrink:0;">▸</span>
+          <span style="font-size:11.5px; color:var(--ink2); line-height:1.6;">Dissecting the NVIDIA Blackwell Architecture with Microbenchmarks</span>
+        </div>
+        <div style="display:flex; gap:10px; align-items:flex-start; padding:12px 16px; border-bottom:1px solid var(--rule);">
+          <span style="color:var(--green); flex-shrink:0;">▸</span>
+          <span style="font-size:11.5px; color:var(--ink2); line-height:1.6;">The Ultra-Scale Playbook: Training LLMs on GPU Clusters</span>
+        </div>
+        <div style="display:flex; gap:10px; align-items:flex-start; padding:12px 16px; border-bottom:1px solid var(--rule);">
+          <span style="color:var(--green); flex-shrink:0;">▸</span>
+          <span style="font-size:11.5px; color:var(--ink2); line-height:1.6;">NVIDIA Tensor Core Evolution: Volta to Blackwell (SemiAnalysis)</span>
+        </div>
+        <div style="display:flex; gap:10px; align-items:flex-start; padding:12px 16px;">
+          <span style="color:var(--green); flex-shrink:0;">▸</span>
+          <span style="font-size:11.5px; color:var(--ink2); line-height:1.6;">Dissecting Hopper: TMA, Tensor Core, Memory Subsystem</span>
+        </div>
       </div>
     </div>
   </div>
-</div>
 </section>
 
-<!-- 100 Days Journey -->
-<section id="journey">
-<div class="wrap">
-  <div class="sec-head reveal"><span class="sec-n">02</span><h2 class="sec-t">100 Days of GPU</h2><div class="sec-rule"></div></div>
-  <p class="days-intro reveal">
-    A <strong>public daily log</strong> of my GPU learning journey — committed to GitHub every day.
-    Starting from GPU vs CPU architecture, working through CUDA, OS internals, memory hierarchies, warp mechanics,
-    all the way to CuTe DSL, Tensor Cores, and Blackwell. <strong>272 commits, 36 stars, 5 forks.</strong>
+<!-- GEMM LADDER -->
+<section class="section" id="ladder">
+  <div class="sec-head reveal">
+    <span class="sec-num">02</span>
+    <h2 class="sec-title">The GEMM Ladder</h2>
+    <div class="sec-rule"></div>
+  </div>
+  <div class="ladder" id="ladder-steps">
+    <div class="ladder-rail"></div>
+    <div class="rung done">
+      <div class="rung-dot"></div>
+      <div class="rung-meta">
+        <span class="rung-n">01</span>
+        <span class="rung-name">Naive kernel</span>
+        <span class="rung-gain g">0.075 TFLOPS</span>
+      </div>
+      <p class="rung-desc">1 thread → 1 output. Pure algorithm. Teaches make_layout, stride, and what a GPU actually does with your code.</p>
+    </div>
+    <div class="rung done">
+      <div class="rung-dot"></div>
+      <div class="rung-meta">
+        <span class="rung-n">02</span>
+        <span class="rung-name">Coalesced global memory</span>
+        <span class="rung-gain g">~3× gain</span>
+      </div>
+      <p class="rung-desc">Reorganize thread-data mapping so a warp reads a contiguous 128-byte cache line. local_tile + make_coord.</p>
+    </div>
+    <div class="rung done">
+      <div class="rung-dot"></div>
+      <div class="rung-meta">
+        <span class="rung-n">03</span>
+        <span class="rung-name">Shared memory tiling</span>
+        <span class="rung-gain g">~20× gain</span>
+      </div>
+      <p class="rung-desc">Load a tile once into SRAM cooperatively. Reuse it across BM threads. DRAM traffic cut by 128×. sync_threads is the contract.</p>
+    </div>
+    <div class="rung done">
+      <div class="rung-dot"></div>
+      <div class="rung-meta">
+        <span class="rung-n">04</span>
+        <span class="rung-name">Register file tiling</span>
+        <span class="rung-gain g">~80× gain</span>
+      </div>
+      <p class="rung-desc">local_partition assigns each thread its smem slice into registers. Inner loop runs zero memory stalls. Pure RF math.</p>
+    </div>
+    <div class="rung done">
+      <div class="rung-dot"></div>
+      <div class="rung-meta">
+        <span class="rung-n">05</span>
+        <span class="rung-name">Hierarchical warp tiling (CuTe)</span>
+        <span class="rung-gain g">~500× gain</span>
+      </div>
+      <p class="rung-desc">Three-level composition: threadblock → warp → 16×16 MMA. composition() chains layouts without pointer arithmetic.</p>
+    </div>
+    <div class="rung current">
+      <div class="rung-dot"></div>
+      <div class="rung-meta">
+        <span class="rung-n">06</span>
+        <span class="rung-name">Tensor Core MMA · sm_100</span>
+        <span class="rung-gain o">target: 75 TFLOPS</span>
+      </div>
+      <p class="rung-desc">Native Blackwell mma.sync. FP4/FP8 Tensor Core data paths. Transformer Engine. Approaching cuBLAS on 183 GB HBM3e.</p>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section class="section" id="results">
+  <div class="sec-head reveal">
+    <span class="sec-num">03</span>
+    <h2 class="sec-title">Results</h2>
+    <div class="sec-rule"></div>
+  </div>
+  <div class="results-grid reveal">
+    <div class="res-card">
+      <div class="res-hw">Tesla T4 · Custom GEMM</div>
+      <div class="res-num g">121%</div>
+      <div class="res-label">of cuBLAS performance</div>
+      <p class="res-desc">Handwritten CUDA outperforming cuBLAS on T4 (non-Tensor Core). Coalesced access + smem tiling + register blocking.</p>
+      <a href="https://gist.github.com/bikrammajhi/1892de169821509c819761abd6bd758e" target="_blank" class="res-link">View gist →</a>
+    </div>
+    <div class="res-card">
+      <div class="res-hw">NVIDIA P100 · Custom GEMM</div>
+      <div class="res-num o">96%</div>
+      <div class="res-label">of cuBLAS performance</div>
+      <p class="res-desc">Reaching 96% of cuBLAS on P100. Arithmetic intensity optimized, memory-bound bottleneck eliminated through hierarchical tiling.</p>
+      <a href="https://gist.github.com/bikrammajhi/372864a2a8abbed01fc977b4b0c125ed" target="_blank" class="res-link">View gist →</a>
+    </div>
+    <div class="res-card">
+      <div class="res-hw">100 Days of GPU · GitHub</div>
+      <div class="res-num b">36★</div>
+      <div class="res-label">272 commits · 5 forks</div>
+      <p class="res-desc">Public daily log. 57+ days completed. CUDA, CUTLASS, Triton, PTX, Nsight. Actively maintained.</p>
+      <a href="https://github.com/bikrammajhi/100-days-of-GPU" target="_blank" class="res-link">View repo →</a>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section class="section" id="projects">
+  <div class="sec-head reveal">
+    <span class="sec-num">04</span>
+    <h2 class="sec-title">Projects</h2>
+    <div class="sec-rule"></div>
+  </div>
+  <div class="projects-list reveal">
+    <a href="https://github.com/bikrammajhi/100-days-of-GPU" target="_blank" class="proj">
+      <div>
+        <div class="proj-name">100-days-of-GPU</div>
+        <p class="proj-desc">Public daily log. 57+ days, 272 commits. GPU arch → CUDA → OS internals → CuTe DSL → Tensor Cores → Blackwell.</p>
+        <div class="proj-tags">
+          <span class="tag lit">CUDA C++</span><span class="tag lit">CuTe</span><span class="tag">Triton</span><span class="tag">PTX</span><span class="tag">Mojo</span>
+        </div>
+      </div>
+      <span class="proj-arrow">↗</span>
+    </a>
+    <a href="#" class="proj">
+      <div>
+        <div class="proj-name">blackwell-gemm</div>
+        <p class="proj-desc">Handwritten GEMM kernels on B200. 6 optimization stages benchmarked against cuBLAS. Current: sm_100 native.</p>
+        <div class="proj-tags">
+          <span class="tag lit">CUDA C++</span><span class="tag lit">sm_100</span><span class="tag">cuBLAS</span><span class="tag">Modal</span>
+        </div>
+      </div>
+      <span class="proj-arrow">↗</span>
+    </a>
+    <a href="#" class="proj">
+      <div>
+        <div class="proj-name">cute-modal-runner</div>
+        <p class="proj-desc">Modal runner for CuTe DSL Python kernels and raw .cu CUDA files. One command dispatches both. CUDA 13.1, nvcc sm_100, B200.</p>
+        <div class="proj-tags">
+          <span class="tag">Python</span><span class="tag">Modal</span><span class="tag lit">CuTe DSL</span>
+        </div>
+      </div>
+      <span class="proj-arrow">↗</span>
+    </a>
+    <a href="https://www.kaggle.com/code/bikrammajhi22/nvidia-cutlas" target="_blank" class="proj">
+      <div>
+        <div class="proj-name">CUTLASS deep dive</div>
+        <p class="proj-desc">Kaggle notebook on NVIDIA CUTLASS — template hierarchy, tile iterators, MMA operations.</p>
+        <div class="proj-tags">
+          <span class="tag">CUTLASS</span><span class="tag">Python</span><span class="tag">Kaggle</span>
+        </div>
+      </div>
+      <span class="proj-arrow">↗</span>
+    </a>
+  </div>
+</section>
+
+<!-- WRITING -->
+<section class="section" id="writing">
+  <div class="sec-head reveal">
+    <span class="sec-num">05</span>
+    <h2 class="sec-title">Writing</h2>
+    <div class="sec-rule"></div>
+  </div>
+  <div class="writing-list reveal">
+    <a href="https://bikrammajhi.github.io/blogs/blackwell-modal-setup.html" class="write-item">
+      <span class="write-cat">infraCUDA</span>
+      <span class="write-title">Running CUDA kernels on a Blackwell B200 with Modal</span>
+      <span class="write-date">Mar 2026</span>
+      <span class="write-arr">→</span>
+    </a>
+    <div class="write-item dim">
+      <span class="write-cat muted">soon</span>
+      <span class="write-title">CuTe DSL from scratch: layouts, tiles, and composition</span>
+      <span class="write-date">—</span>
+      <span class="write-arr"></span>
+    </div>
+    <div class="write-item dim">
+      <span class="write-cat muted">soon</span>
+      <span class="write-title">Why your GEMM is 1000× slower than cuBLAS — and how to fix it</span>
+      <span class="write-date">—</span>
+      <span class="write-arr"></span>
+    </div>
+    <div class="write-item dim">
+      <span class="write-cat muted">soon</span>
+      <span class="write-title">Microbenchmarking Blackwell: what's new in sm_100</span>
+      <span class="write-date">—</span>
+      <span class="write-arr"></span>
+    </div>
+  </div>
+</section>
+
+<!-- DEBUG JOURNAL -->
+<section class="section" id="journal">
+  <div class="sec-head reveal">
+    <span class="sec-num">06</span>
+    <h2 class="sec-title">Debug Journal</h2>
+    <div class="sec-rule"></div>
+  </div>
+  <p style="font-size:12px; color:var(--ink3); line-height:1.8; max-width:520px; margin-bottom:32px;" class="reveal">
+    Write down bugs you solved alone and how. Reviewing it builds pattern recognition and confidence. 
+    Think first, ask later.
   </p>
 
-  <!-- 100-dot grid (57 done, 1 active, rest upcoming) -->
-  <div class="days-grid reveal" id="days-grid"></div>
-  <div class="days-legend reveal">
-    <div class="dl"><div class="dl-box" style="background:var(--lime2)"></div>Completed</div>
-    <div class="dl"><div class="dl-box" style="background:var(--lime);box-shadow:0 0 5px var(--lime)"></div>Current</div>
-    <div class="dl"><div class="dl-box" style="background:var(--border)"></div>Upcoming</div>
-  </div>
+  <div class="reveal">
+    <div class="j-stats-row">
+      <div class="j-stat-pill">total entries <b id="j-total">0</b></div>
+      <div class="j-stat-pill">avg solo time <b id="j-avg">—</b> min</div>
+      <button class="btn btn-solid" onclick="jToggleForm()" style="font-size:11px; padding:8px 16px; margin-left:auto;">+ New Entry</button>
+    </div>
 
-  <div class="phases reveal" style="margin-top:32px;">
-    <div class="phase">
-      <div class="ph-range">Days 001–018</div>
-      <div class="ph-title">CUDA Foundations</div>
-      <div class="ph-items">GPU arch, kernels, memory hierarchy, coalescing, shared mem, async execution</div>
-      <span class="ph-badge ph-done">done</span>
-    </div>
-    <div class="phase">
-      <div class="ph-range">Days 019–044</div>
-      <div class="ph-title">OS + Performance</div>
-      <div class="ph-items">OS internals, virtual memory, scheduling, warp shuffle, cooperative groups, profiling</div>
-      <span class="ph-badge ph-done">done</span>
-    </div>
-    <div class="phase">
-      <div class="ph-range">Days 045–057</div>
-      <div class="ph-title">CuTe + Tensor Cores</div>
-      <div class="ph-items">CuTe layouts, mma.sync, Tensor Core programming, CUTLASS abstractions</div>
-      <span class="ph-badge ph-active">active →</span>
-    </div>
-    <div class="phase">
-      <div class="ph-range">Days 058–100</div>
-      <div class="ph-title">Blackwell + Beyond</div>
-      <div class="ph-items">sm_100 native kernels, FP4 Tensor Cores, FlashAttention, Triton, ThunderKittens</div>
-      <span class="ph-badge ph-next">upcoming</span>
-    </div>
-  </div>
-</div>
-</section>
-
-<!-- Wins -->
-<section>
-<div class="wrap">
-  <div class="sec-head reveal"><span class="sec-n">03</span><h2 class="sec-t">Results</h2><div class="sec-rule"></div></div>
-  <div class="wins-grid">
-    <div class="win-card reveal" data-num="1">
-      <div class="win-icon">Custom GEMM kernel · Tesla T4</div>
-      <div class="win-num win-green">121%</div>
-      <div class="win-title">of cuBLAS performance</div>
-      <div class="win-desc">Handwritten CUDA GEMM outperforming cuBLAS on Tesla T4 (non-Tensor Core path). Coalesced access + smem tiling + register blocking.</div>
-      <a href="https://gist.github.com/bikrammajhi/1892de169821509c819761abd6bd758e" class="win-link" target="_blank">View gist →</a>
-    </div>
-    <div class="win-card reveal reveal-d1" data-num="2">
-      <div class="win-icon">Custom GEMM kernel · NVIDIA P100</div>
-      <div class="win-num win-amber">96%</div>
-      <div class="win-title">of cuBLAS performance</div>
-      <div class="win-desc">Reaching 96% of cuBLAS on P100. Arithmetic intensity optimized, memory-bound bottleneck eliminated through hierarchical tiling.</div>
-      <a href="https://gist.github.com/bikrammajhi/372864a2a8abbed01fc977b4b0c125ed" class="win-link" target="_blank">View gist →</a>
-    </div>
-    <div class="win-card reveal reveal-d2" data-num="3">
-      <div class="win-icon">100 Days of GPU · GitHub</div>
-      <div class="win-num win-green">36★</div>
-      <div class="win-title">stars, 272 commits</div>
-      <div class="win-desc">Public daily log of GPU learning — CUDA, CUTLASS, Triton, PTX, Nsight. 57+ days completed, 5 forks, actively maintained.</div>
-      <a href="https://github.com/bikrammajhi/100-days-of-GPU" class="win-link" target="_blank">View repo →</a>
-    </div>
-    <div class="win-card reveal reveal-d3" data-num="4">
-      <div class="win-icon">Current target · Blackwell B200</div>
-      <div class="win-num" style="color:var(--blue);">B200</div>
-      <div class="win-title">sm_100 native kernels</div>
-      <div class="win-desc">Running CUDA 13.1 + nvcc sm_100 on B200 via Modal. Benchmarking handwritten kernels against cuBLAS. Closing the gap on 183GB HBM3e hardware.</div>
-    </div>
-  </div>
-</div>
-</section>
-
-<!-- Optimization Ladder -->
-<section>
-<div class="wrap">
-  <div class="sec-head reveal"><span class="sec-n">04</span><h2 class="sec-t">The GEMM ladder</h2><div class="sec-rule"></div></div>
-  <div class="ladder reveal">
-    <div class="rung done">
-      <div class="rung-n">01</div>
-      <div><div class="rung-title">Naive kernel</div><div class="rung-desc">1 thread → 1 output. Pure algorithm. Teaches make_layout, stride, and what a GPU actually does with your code.</div></div>
-      <div class="rung-tag">0.075 TFLOPS</div>
-    </div>
-    <div class="rung done">
-      <div class="rung-n">02</div>
-      <div><div class="rung-title">Coalesced global memory</div><div class="rung-desc">Reorganize thread-data mapping so a warp reads a contiguous 128-byte cache line. local_tile + make_coord.</div></div>
-      <div class="rung-tag">~3× gain</div>
-    </div>
-    <div class="rung done">
-      <div class="rung-n">03</div>
-      <div><div class="rung-title">Shared memory tiling</div><div class="rung-desc">Load a tile once into SRAM cooperatively. Reuse it across BM threads. DRAM traffic cut by 128×. sync_threads is the contract.</div></div>
-      <div class="rung-tag">~20× gain</div>
-    </div>
-    <div class="rung done">
-      <div class="rung-n">04</div>
-      <div><div class="rung-title">Register file tiling</div><div class="rung-desc">local_partition assigns each thread its smem slice into registers. Inner loop runs zero memory stalls. Pure RF math.</div></div>
-      <div class="rung-tag">~80× gain</div>
-    </div>
-    <div class="rung done">
-      <div class="rung-n">05</div>
-      <div><div class="rung-title">Hierarchical warp tiling (CuTe)</div><div class="rung-desc">Three-level composition: threadblock → warp → 16×16 MMA. composition() chains layouts without pointer arithmetic.</div></div>
-      <div class="rung-tag">~500× gain</div>
-    </div>
-    <div class="rung active">
-      <div class="rung-n">06</div>
-      <div><div class="rung-title">Tensor Core MMA · sm_100</div><div class="rung-desc">Native Blackwell mma.sync. FP4 / FP8 Tensor Core data paths. Transformer Engine. Approaching cuBLAS on 183GB HBM3e.</div></div>
-      <div class="rung-tag">target: 75 TFLOPS</div>
-    </div>
-  </div>
-</div>
-</section>
-
-<!-- Writing -->
-<section id="writing">
-<div class="wrap">
-  <div class="sec-head reveal"><span class="sec-n">05</span><h2 class="sec-t">Writing</h2><div class="sec-rule"></div></div>
-  <div class="posts reveal">
-    <a href="./blogs/blackwell-modal-setup.html" class="post">
-      <div>
-        <div class="post-tags"><span class="ptag ptag-infra">infra</span><span class="ptag ptag-cuda">CUDA</span><span class="post-date" style="margin-left:4px">Mar 2026</span></div>
-        <div class="post-title">Running CUDA kernels on a Blackwell B200 with Modal</div>
-        <div class="post-excerpt">How to set up a cloud GPU workflow that compiles and runs .cu files on a real B200 from your laptop — CUDA 13.1, nvcc sm_100, no server management.</div>
+    <!-- Journal Form -->
+    <div class="j-form" id="j-form">
+      <div class="j-form-title">New debug entry</div>
+      <div class="j-fields">
+        <div class="jf">
+          <label>Bug description</label>
+          <textarea id="jf-bug" placeholder="What broke? What was the error?"></textarea>
+        </div>
+        <div class="jf">
+          <label>My hypothesis</label>
+          <textarea id="jf-hypo" placeholder="What do I think is causing it, and why?"></textarea>
+        </div>
+        <div class="jf-row">
+          <div class="time-input-wrap">
+            <label>⏱ Solo time (minutes)</label>
+            <input type="number" id="jf-time" placeholder="0" min="0">
+            <span class="time-hint">before asking AI</span>
+          </div>
+          <div class="jf">
+            <label>Date</label>
+            <input type="date" id="jf-date">
+          </div>
+        </div>
+        <div class="jf">
+          <label>Solution found</label>
+          <textarea id="jf-sol" placeholder="What actually fixed it?"></textarea>
+        </div>
+        <div class="jf">
+          <label>What I learned</label>
+          <textarea id="jf-learn" placeholder="What concept or pattern do I now understand better?"></textarea>
+        </div>
       </div>
-      <div class="post-arr">→</div>
-    </a>
-    <a href="#" class="post">
-      <div>
-        <div class="post-tags"><span class="ptag ptag-cute">CuTe DSL</span><span class="post-date" style="margin-left:4px">Coming soon</span></div>
-        <div class="post-title">CuTe DSL from scratch: layouts, tiles, and composition</div>
-        <div class="post-excerpt">make_layout is just a function from coordinates to linear offsets. Five stages from naive to hierarchical MMA — every abstraction earns its place.</div>
+      <div class="j-form-actions">
+        <button class="j-cancel" onclick="jToggleForm()">Cancel</button>
+        <button class="j-save" onclick="jSave()">Save Entry</button>
       </div>
-      <div class="post-arr">→</div>
-    </a>
-    <a href="#" class="post">
-      <div>
-        <div class="post-tags"><span class="ptag ptag-perf">perf</span><span class="ptag ptag-cuda">CUDA</span><span class="post-date" style="margin-left:4px">Coming soon</span></div>
-        <div class="post-title">Why your GEMM is 1000× slower than cuBLAS — and how to fix it</div>
-        <div class="post-excerpt">Benchmark-driven walkthrough of every optimization level. Real numbers on B200. Each stage cuts the gap. The final boss is arithmetic intensity.</div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="journal-toolbar">
+      <div class="search-wrap">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.1"/><path d="M8.5 8.5L11 11" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+        <input type="text" id="j-search" placeholder="Search..." oninput="jRender()">
       </div>
-      <div class="post-arr">→</div>
-    </a>
-    <a href="#" class="post">
-      <div>
-        <div class="post-tags"><span class="ptag ptag-arch">architecture</span><span class="post-date" style="margin-left:4px">Coming soon</span></div>
-        <div class="post-title">Microbenchmarking Blackwell: what's new in sm_100</div>
-        <div class="post-excerpt">Following the Dissecting-the-GPU paper series from Volta through Hopper to Blackwell. What changed in the memory hierarchy, Tensor Engine, and TMA.</div>
+      <div class="j-filters">
+        <button class="j-tab active" onclick="jFilter('all',this)">All</button>
+        <button class="j-tab" onclick="jFilter('solo',this)">Solo wins</button>
+        <button class="j-tab" onclick="jFilter('recent',this)">Recent</button>
       </div>
-      <div class="post-arr">→</div>
-    </a>
+    </div>
+
+    <div class="j-list" id="j-list"></div>
   </div>
-</div>
 </section>
 
-<!-- Projects -->
-<section id="projects">
-<div class="wrap">
-  <div class="sec-head reveal"><span class="sec-n">06</span><h2 class="sec-t">Projects</h2><div class="sec-rule"></div></div>
-  <div class="proj-grid">
-    <a href="https://github.com/bikrammajhi/100-days-of-GPU" class="proj" data-bg="GPU" target="_blank">
-      <div class="proj-head"><span class="proj-name">100-days-of-GPU</span><span class="proj-gh">GitHub ↗</span></div>
-      <p class="proj-desc">Public daily log of GPU learning. 57+ days, 272 commits. GPU arch → CUDA → OS internals → CuTe DSL → Tensor Cores → Blackwell.</p>
-      <div class="proj-chips"><span class="chip">CUDA C++</span><span class="chip">CuTe</span><span class="chip">Triton</span><span class="chip">PTX</span><span class="chip">Mojo</span></div>
-      <div class="proj-star">★ 36 stars · 5 forks</div>
-    </a>
-    <a href="#" class="proj" data-bg="GEMM" target="_blank">
-      <div class="proj-head"><span class="proj-name">blackwell-gemm</span><span class="proj-gh">GitHub ↗</span></div>
-      <p class="proj-desc">Handwritten GEMM kernels on B200. 6 optimization stages benchmarked vs cuBLAS. 121% of cuBLAS on T4. 96% on P100. Current: sm_100.</p>
-      <div class="proj-chips"><span class="chip">CUDA C++</span><span class="chip">sm_100</span><span class="chip">cuBLAS</span><span class="chip">Modal</span></div>
-    </a>
-    <a href="#" class="proj" data-bg="CUTE" target="_blank">
-      <div class="proj-head"><span class="proj-name">cute-modal-runner</span><span class="proj-gh">GitHub ↗</span></div>
-      <p class="proj-desc">Modal-based runner for both CuTe DSL Python kernels and raw .cu CUDA files. One command dispatches both. CUDA 13.1, nvcc sm_100, B200.</p>
-      <div class="proj-chips"><span class="chip">Python</span><span class="chip">Modal</span><span class="chip">CuTe DSL</span><span class="chip">CUDA 13.1</span></div>
-    </a>
-    <a href="https://www.kaggle.com/code/bikrammajhi22/nvidia-cutlas" class="proj" data-bg="CUTLASS" target="_blank">
-      <div class="proj-head"><span class="proj-name">CUTLASS deep dive (Kaggle)</span><span class="proj-gh">Kaggle ↗</span></div>
-      <p class="proj-desc">Notebook diving into NVIDIA CUTLASS — template hierarchy, tile iterators, MMA operations. Companion to the 100-days journey.</p>
-      <div class="proj-chips"><span class="chip">CUTLASS</span><span class="chip">Python</span><span class="chip">Kaggle</span></div>
-    </a>
+<!-- CONTACT -->
+<section class="section" id="contact">
+  <div class="sec-head reveal">
+    <span class="sec-num">07</span>
+    <h2 class="sec-title">Contact</h2>
+    <div class="sec-rule"></div>
   </div>
-</div>
-</section>
-
-<!-- Papers -->
-<section>
-<div class="wrap">
-  <div class="sec-head reveal"><span class="sec-n">07</span><h2 class="sec-t">Papers I study</h2><div class="sec-rule"></div></div>
-  <div class="papers reveal">
-    <div class="paper">
-      <span class="paper-arch">Blackwell</span>
-      <div><div class="paper-title">Dissecting the NVIDIA Blackwell Architecture with Microbenchmarks</div><div class="paper-meta"><a href="https://arxiv.org/pdf/2507.10789" target="_blank">arXiv:2507.10789 ↗</a> · Next-gen Transformer Engine, evolved memory hierarchy, sm_100</div></div>
-    </div>
-    <div class="paper">
-      <span class="paper-arch">Hopper</span>
-      <div><div class="paper-title">Dissecting the NVIDIA Hopper Architecture through Microbenchmarking and Multi-level Analysis</div><div class="paper-meta"><a href="https://arxiv.org/pdf/2501.12084" target="_blank">arXiv:2501.12084 ↗</a> · H100, TMA, Tensor Core design, memory subsystem</div></div>
-    </div>
-    <div class="paper">
-      <span class="paper-arch">Ampere</span>
-      <div><div class="paper-title">Demystifying the NVIDIA Ampere Architecture through Microbenchmarking</div><div class="paper-meta"><a href="https://arxiv.org/pdf/2208.11174" target="_blank">arXiv:2208.11174 ↗</a> · A100, 3rd-gen Tensor Cores, L2 partitioning</div></div>
-    </div>
-    <div class="paper">
-      <span class="paper-arch">General</span>
-      <div><div class="paper-title">Dissecting Tensor Cores via Microbenchmarks: Latency, Throughput and Numeric Behaviors</div><div class="paper-meta"><a href="https://arxiv.org/pdf/2206.02874" target="_blank">arXiv:2206.02874 ↗</a> · Low-level Tensor Core analysis across architectures</div></div>
-    </div>
-    <div class="paper">
-      <span class="paper-arch">Volta</span>
-      <div><div class="paper-title">Dissecting the NVIDIA Volta GPU Architecture via Microbenchmarking</div><div class="paper-meta"><a href="https://arxiv.org/pdf/1804.06826" target="_blank">arXiv:1804.06826 ↗</a> · First Tensor Core architecture — SM and memory hierarchy analysis</div></div>
-    </div>
-  </div>
-</div>
-</section>
-
-<!-- Contact -->
-<section id="contact">
-<div class="wrap">
-  <div class="sec-head reveal"><span class="sec-n">08</span><h2 class="sec-t">Contact</h2><div class="sec-rule"></div></div>
   <div class="contact-grid">
     <div class="reveal">
-      <div class="contact-big">LET'S TALK<br><span>KERNELS.</span></div>
-      <p class="contact-sub">Working on GPU optimization, CUDA kernels, CuTe DSL, or Blackwell? Always happy to connect with people who care about what happens at the hardware level.</p>
+      <div class="contact-head">Let's talk<br><em>kernels.</em></div>
+      <p class="contact-sub">
+        Working on GPU optimization, CUDA kernels, CuTe DSL, or Blackwell? 
+        Always happy to connect with people who care about what happens at the hardware level.
+      </p>
+      <a href="mailto:bikrammajhi@example.com" class="btn btn-solid">Send a message →</a>
     </div>
-    <div class="clinks reveal reveal-d1">
-      <a href="https://github.com/bikrammajhi" class="clink" target="_blank">
-        <span class="clink-l">GitHub</span><span class="clink-r">@bikrammajhi →</span>
-      </a>
-      <a href="https://x.com/nearlypi" class="clink" target="_blank">
-        <span class="clink-l">Twitter / X</span><span class="clink-r">@nearlypi →</span>
-      </a>
-      <a href="https://www.linkedin.com/in/bikrammajhi" class="clink" target="_blank">
-        <span class="clink-l">LinkedIn</span><span class="clink-r">bikrammajhi →</span>
-      </a>
-      <a href="https://www.kaggle.com/bikrammajhi22" class="clink" target="_blank">
-        <span class="clink-l">Kaggle</span><span class="clink-r">bikrammajhi22 →</span>
-      </a>
+    <div class="reveal" style="transition-delay:0.1s">
+      <div class="socials">
+        <a href="https://github.com/bikrammajhi" target="_blank" class="soc">
+          <div class="soc-left">
+            <span class="soc-plat">GitHub</span>
+            <span class="soc-handle">@bikrammajhi</span>
+          </div>
+          <span class="soc-arr">→</span>
+        </a>
+        <a href="https://x.com/nearlypi" target="_blank" class="soc">
+          <div class="soc-left">
+            <span class="soc-plat">Twitter</span>
+            <span class="soc-handle">@nearlypi</span>
+          </div>
+          <span class="soc-arr">→</span>
+        </a>
+        <a href="https://www.linkedin.com/in/bikrammajhi" target="_blank" class="soc">
+          <div class="soc-left">
+            <span class="soc-plat">LinkedIn</span>
+            <span class="soc-handle">bikrammajhi</span>
+          </div>
+          <span class="soc-arr">→</span>
+        </a>
+        <a href="https://www.kaggle.com/bikrammajhi22" target="_blank" class="soc">
+          <div class="soc-left">
+            <span class="soc-plat">Kaggle</span>
+            <span class="soc-handle">bikrammajhi22</span>
+          </div>
+          <span class="soc-arr">→</span>
+        </a>
+      </div>
     </div>
   </div>
-</div>
 </section>
 
 <footer>
-  <div class="foot-inner">
-    <div class="foot-l">© 2026 BIKRAM MAJHI · IIT JODHPUR · BHUBANESWAR, INDIA</div>
-    <div class="foot-r">built with <span>nvcc -O3 -arch=sm_100</span></div>
-  </div>
+  <span>© 2026 Bikram Majhi · IIT Jodhpur · Bhubaneswar, India</span>
+  <span style="font-family:'Azeret Mono'; letter-spacing:0.02em; color:var(--rule2);">nvcc -O3 -arch=sm_100</span>
 </footer>
 
-<script>
-// Cursor
-const cur = document.getElementById('cur'), ring = document.getElementById('cur-r');
-let mx=0,my=0,rx=0,ry=0;
-document.addEventListener('mousemove',e=>{
-  mx=e.clientX; my=e.clientY;
-  cur.style.left=(mx-3)+'px'; cur.style.top=(my-3)+'px';
-});
-(function animRing(){
-  rx+=(mx-rx-14)*.1; ry+=(my-ry-14)*.1;
-  ring.style.left=rx+'px'; ring.style.top=ry+'px';
-  requestAnimationFrame(animRing);
-})();
-document.querySelectorAll('a,button').forEach(el=>{
-  el.addEventListener('mouseenter',()=>cur.style.transform='scale(2.5)');
-  el.addEventListener('mouseleave',()=>cur.style.transform='scale(1)');
-});
+<div class="toast" id="toast"></div>
 
-// 100-day dots
-const grid = document.getElementById('days-grid');
-for(let i=0;i<100;i++){
-  const d=document.createElement('div');
-  d.className='day-dot'+(i<57?' done':i===57?' current':'');
-  d.title=i<57?`Day ${i+1} — completed`:i===57?`Day ${i+1} — current`:`Day ${i+1} — upcoming`;
-  grid.appendChild(d);
+<script>
+// ── SCROLL REVEAL ──
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); }
+  });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+// Ladder stagger
+const ladderObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      document.querySelectorAll('.rung').forEach((r, i) => {
+        setTimeout(() => r.classList.add('in'), i * 110);
+      });
+      ladderObs.disconnect();
+    }
+  });
+}, { threshold: 0.1 });
+const ladderEl = document.getElementById('ladder-steps');
+if (ladderEl) ladderObs.observe(ladderEl);
+
+// ── JOURNAL ──
+let jEntries = JSON.parse(localStorage.getItem('bm-debug-journal') || '[]');
+let jActiveFilter = 'all';
+let jExpandedId = null;
+
+document.getElementById('jf-date').valueAsDate = new Date();
+
+function jPersist() {
+  localStorage.setItem('bm-debug-journal', JSON.stringify(jEntries));
+  jUpdateStats();
+  jRender();
 }
 
-// Scroll reveal
-const obs=new IntersectionObserver(entries=>{
-  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target); } });
-},{threshold:0.08});
-document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+function jToggleForm() {
+  const f = document.getElementById('j-form');
+  f.classList.toggle('open');
+  if (f.classList.contains('open')) document.getElementById('jf-bug').focus();
+  else jClearForm();
+}
 
-// Hero reveals immediately
-document.querySelectorAll('.hero .reveal').forEach(el=>el.classList.add('in'));
+function jClearForm() {
+  ['jf-bug','jf-hypo','jf-sol','jf-learn'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('jf-time').value = '';
+  document.getElementById('jf-date').valueAsDate = new Date();
+}
+
+function jSave() {
+  const bug = document.getElementById('jf-bug').value.trim();
+  if (!bug) { jToast('Bug description required'); return; }
+  jEntries.unshift({
+    id: Date.now(),
+    bug,
+    hypothesis: document.getElementById('jf-hypo').value.trim(),
+    soloTime: parseInt(document.getElementById('jf-time').value) || 0,
+    date: document.getElementById('jf-date').value || new Date().toISOString().split('T')[0],
+    solution: document.getElementById('jf-sol').value.trim(),
+    learned: document.getElementById('jf-learn').value.trim(),
+  });
+  jPersist();
+  jToggleForm();
+  jToast('Entry saved');
+}
+
+function jDelete(id) {
+  jEntries = jEntries.filter(e => e.id !== id);
+  if (jExpandedId === id) jExpandedId = null;
+  jPersist();
+  jToast('Entry deleted');
+}
+
+function jToggleExpand(id) {
+  jExpandedId = jExpandedId === id ? null : id;
+  jRender();
+}
+
+function jFilter(f, el) {
+  jActiveFilter = f;
+  document.querySelectorAll('.j-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  jRender();
+}
+
+function jUpdateStats() {
+  document.getElementById('j-total').textContent = jEntries.length;
+  const times = jEntries.filter(e => e.soloTime > 0).map(e => e.soloTime);
+  const avg = times.length ? Math.round(times.reduce((a,b)=>a+b,0)/times.length) : null;
+  document.getElementById('j-avg').textContent = avg !== null ? avg : '—';
+}
+
+function jRender() {
+  const q = (document.getElementById('j-search').value || '').toLowerCase();
+  const list = document.getElementById('j-list');
+
+  let filtered = jEntries.filter(e => {
+    return [e.bug,e.hypothesis,e.solution,e.learned].join(' ').toLowerCase().includes(q);
+  });
+
+  if (jActiveFilter === 'solo') filtered = filtered.filter(e => e.soloTime >= 5);
+  if (jActiveFilter === 'recent') {
+    const cut = new Date(); cut.setDate(cut.getDate() - 7);
+    filtered = filtered.filter(e => new Date(e.date) >= cut);
+  }
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="j-empty">
+      <div class="j-empty-icon">📓</div>
+      <h3>${jEntries.length === 0 ? 'No entries yet' : 'No matches'}</h3>
+      <p>${jEntries.length === 0 ? 'Log your next debugging session — even a 5-minute solo attempt counts.' : 'Try a different search or filter.'}</p>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(e => {
+    const isOpen = jExpandedId === e.id;
+    const d = new Date(e.date + 'T00:00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    return `<div class="j-card ${isOpen?'open':''}" ${isOpen?'':'onclick="jToggleExpand('+e.id+')"'}>
+      <div class="j-card-top">
+        <div class="j-card-head">
+          <div class="j-card-title">${esc(e.bug)}</div>
+          <div class="j-meta">
+            ${e.soloTime > 0 ? `<span class="solo-badge">⏱ ${e.soloTime}m solo</span>` : ''}
+            <span class="j-date">${d}</span>
+          </div>
+        </div>
+        <div class="j-preview">${esc(e.hypothesis || e.solution || e.learned || '—')}</div>
+      </div>
+      <div class="j-body">
+        <div class="j-sections">
+          ${e.hypothesis ? `<div><div class="j-sec-label">My Hypothesis</div><div class="j-sec-val">${esc(e.hypothesis)}</div></div>` : ''}
+          ${e.solution ? `<div><div class="j-sec-label">Solution</div><div class="j-sec-val hl">${esc(e.solution)}</div></div>` : ''}
+          ${e.learned ? `<div><div class="j-sec-label">What I Learned</div><div class="j-sec-val">${esc(e.learned)}</div></div>` : ''}
+        </div>
+        <div class="j-card-actions">
+          <button class="j-btn del" onclick="event.stopPropagation();jDelete(${e.id})">Delete</button>
+          <button class="j-btn" onclick="event.stopPropagation();jToggleExpand(${e.id})">Collapse</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function jToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+jUpdateStats();
+jRender();
 </script>
 </body>
 </html>
