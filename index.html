@@ -4,11 +4,42 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bikram Majhi</title>
+
+<!-- ── FONT OPTIONS: Uncomment ONE set below ── -->
+
+<!-- Option A: Elegant (Default) - Serif headings + Monospace body -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Azeret+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<!-- Option B: Modern - Clean sans + Developer mono
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+-->
+
+<!-- Option C: Minimal - System fonts + IBM Plex Mono
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+-->
+
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  /* ── FONT STACK: Change ONE line to switch styles ── */
+  /* Option A (Default) */
+  --font-serif: 'Playfair Display', serif;
+  --font-mono: 'Azeret Mono', monospace;
+  --font-sans: system-ui, -apple-system, sans-serif;
+  
+  /* Option B (Modern) - Uncomment these + comment above:
+  --font-serif: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  */
+  
+  /* Option C (Minimal) - Uncomment these + comment above:
+  --font-serif: system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --font-sans: system-ui, -apple-system, sans-serif;
+  */
+
   /* Light theme (default) */
   --paper: #f4f1eb;
   --paper2: #ede9e0;
@@ -25,25 +56,25 @@
 }
 
 [data-theme="dark"] {
-  /* Dark theme */
-  --paper: #1a1816;
-  --paper2: #23211e;
+  /* Dark theme - DEEPER */
+  --paper: #0f0d0c;
+  --paper2: #161412;
   --ink: #f4f1eb;
-  --ink2: #d9d4c8;
-  --ink3: #a8a198;
-  --rule: #3d3a35;
-  --rule2: #514d47;
+  --ink2: #d1ccc3;
+  --ink3: #8a837b;
+  --rule: #24211e;
+  --rule2: #332f2b;
   --green: #6fb894;
-  --green-light: #2a3a32;
+  --green-light: #16221c;
   --orange: #e69a6e;
-  --orange-light: #3a2a22;
+  --orange-light: #261c14;
   --blue: #6a94b8;
 }
 
 html { scroll-behavior: smooth; }
 
 body {
-  font-family: 'Azeret Mono', monospace;
+  font-family: var(--font-mono);
   background: var(--paper);
   color: var(--ink);
   font-size: 12.5px;
@@ -66,15 +97,22 @@ nav {
   transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
+.affiliation {
+  font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+  background: var(--green-light); color: var(--green);
+  padding: 2px 6px; border-radius: 2px; border: 1px solid var(--green);
+  font-weight: 500;
+}
+
 .text-subtle {
-  font-family: 'Azeret Mono', monospace;
+  font-family: var(--font-mono);
   letter-spacing: 0.02em;
   color: var(--ink3);
   transition: color 0.2s ease;
 }
 
 .logo {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-serif);
   font-size: 18px;
   color: var(--ink);
   text-decoration: none;
@@ -169,7 +207,7 @@ nav {
 }
 
 .hero-name {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-serif);
   font-size: clamp(52px, 7vw, 88px);
   line-height: 1;
   letter-spacing: -0.03em;
@@ -202,7 +240,7 @@ nav {
 }
 
 .btn {
-  font-family: 'Azeret Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -251,7 +289,7 @@ nav {
 .stat-row:last-child { border-bottom: none; }
 
 .stat-val {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-serif);
   font-size: 22px;
   color: var(--ink);
   letter-spacing: -0.02em;
@@ -309,7 +347,7 @@ nav {
 }
 
 .sec-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-serif);
   font-size: 28px;
   letter-spacing: -0.02em;
   color: var(--ink);
@@ -369,7 +407,7 @@ nav {
 .rung-n { font-size: 10px; color: var(--ink3); transition: color 0.2s ease; }
 
 .rung-name {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-serif);
   font-size: 17px;
   color: var(--ink);
   transition: color 0.2s ease;
@@ -382,8 +420,8 @@ nav {
   letter-spacing: 0.04em;
 }
 
-.rung-gain.g { background: var(--green-light); color: var(--green); border: 1px solid #b5d4c4; }
-.rung-gain.o { background: var(--orange-light); color: var(--orange); border: 1px solid #e8c4b0; }
+.rung-gain.g { background: var(--green-light); color: var(--green); border: 1px solid color-mix(in srgb, var(--green) 30%, transparent); }
+.rung-gain.o { background: var(--orange-light); color: var(--orange); border: 1px solid color-mix(in srgb, var(--orange) 30%, transparent); }
 
 .rung-desc { font-size: 12px; color: var(--ink3); line-height: 1.7; max-width: 600px; transition: color 0.2s ease; }
 
@@ -417,7 +455,7 @@ nav {
 }
 
 .res-num {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-serif);
   font-size: 44px;
   letter-spacing: -0.03em;
   line-height: 1;
@@ -465,7 +503,7 @@ nav {
 .proj:hover { background: var(--paper2); }
 
 .proj-name {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-serif);
   font-size: 16px;
   color: var(--ink);
   margin-bottom: 4px;
@@ -506,7 +544,7 @@ nav {
 .write-cat.muted { color: var(--ink3); }
 
 .write-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-serif);
   font-size: 15px;
   color: var(--ink);
   transition: color 0.2s ease;
@@ -519,7 +557,7 @@ nav {
 .contact-grid { display: grid; grid-template-columns: 1fr 320px; gap: 80px; align-items: start; }
 
 .contact-head {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-serif);
   font-size: clamp(32px, 4vw, 48px);
   letter-spacing: -0.03em;
   color: var(--ink);
@@ -595,7 +633,7 @@ footer {
 .search-wrap input {
   border: none;
   background: transparent;
-  font-family: 'Azeret Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--ink);
   outline: none;
@@ -606,7 +644,7 @@ footer {
 .j-filters { display: flex; gap: 4px; }
 
 .j-tab {
-  font-family: 'Azeret Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -660,7 +698,7 @@ footer {
 }
 
 .j-card-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-serif);
   font-size: 15px;
   color: var(--ink);
   line-height: 1.4;
@@ -677,7 +715,7 @@ footer {
   letter-spacing: 0.04em;
   padding: 2px 8px;
   border-radius: 2px;
-  border: 1px solid #e8c4b0;
+  border: 1px solid color-mix(in srgb, var(--orange) 30%, transparent);
 }
 
 .j-date { font-size: 10px; color: var(--ink3); transition: color 0.2s ease; }
@@ -728,7 +766,7 @@ footer {
 }
 
 .j-btn {
-  font-family: 'Azeret Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.04em;
   background: transparent;
@@ -763,7 +801,7 @@ footer {
 }
 
 .j-form-title {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-serif);
   font-size: 18px;
   margin-bottom: 22px;
   color: var(--ink);
@@ -787,7 +825,7 @@ footer {
 }
 
 .jf input, .jf textarea {
-  font-family: 'Azeret Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   background: var(--paper2);
   border: 1px solid var(--rule2);
@@ -810,7 +848,7 @@ footer {
 
 .time-input-wrap {
   background: var(--orange-light);
-  border: 1px solid #e8c4b0;
+  border: 1px solid color-mix(in srgb, var(--orange) 30%, transparent);
   border-radius: 2px;
   padding: 10px 12px;
   display: flex;
@@ -828,7 +866,7 @@ footer {
 .time-input-wrap input {
   background: transparent;
   border: none;
-  border-bottom: 1px solid #e8c4b0;
+  border-bottom: 1px solid color-mix(in srgb, var(--orange) 30%, transparent);
   border-radius: 0;
   padding: 4px 0;
   font-size: 22px;
@@ -847,7 +885,7 @@ footer {
 }
 
 .j-save {
-  font-family: 'Azeret Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.04em;
   background: var(--ink);
@@ -862,7 +900,7 @@ footer {
 .j-save:hover { background: var(--ink2); }
 
 .j-cancel {
-  font-family: 'Azeret Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.04em;
   background: transparent;
@@ -886,7 +924,7 @@ footer {
 .j-empty-icon { font-size: 32px; margin-bottom: 14px; opacity: 0.4; }
 
 .j-empty h3 {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--font-serif);
   font-size: 18px;
   color: var(--ink);
   font-weight: 400;
@@ -921,7 +959,7 @@ footer {
   bottom: 20px; right: 20px;
   background: var(--ink);
   color: var(--paper);
-  font-family: 'Azeret Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   padding: 9px 16px;
   border-radius: 3px;
@@ -989,7 +1027,7 @@ footer {
     <li><a href="#contact">Contact</a></li>
   </ul>
   <div style="display:flex;align-items:center;">
-    <div class="nav-right">IISER-K × IIT-J · India</div>
+     <span class="affiliation">IISER-K × IIT-J</span>
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
       <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="12" cy="12" r="5"></circle>
