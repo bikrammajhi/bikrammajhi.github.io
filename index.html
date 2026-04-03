@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +9,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  /* Light theme (default) */
   --paper: #f4f1eb;
   --paper2: #ede9e0;
   --ink: #1c1a17;
@@ -23,6 +24,22 @@
   --blue: #2a4a6b;
 }
 
+[data-theme="dark"] {
+  /* Dark theme */
+  --paper: #1a1816;
+  --paper2: #23211e;
+  --ink: #f4f1eb;
+  --ink2: #d9d4c8;
+  --ink3: #a8a198;
+  --rule: #3d3a35;
+  --rule2: #514d47;
+  --green: #6fb894;
+  --green-light: #2a3a32;
+  --orange: #e69a6e;
+  --orange-light: #3a2a22;
+  --blue: #6a94b8;
+}
+
 html { scroll-behavior: smooth; }
 
 body {
@@ -31,6 +48,7 @@ body {
   color: var(--ink);
   font-size: 12.5px;
   line-height: 1.7;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* ── NAV ── */
@@ -45,6 +63,14 @@ nav {
   justify-content: space-between;
   padding: 0 40px;
   height: 52px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.text-subtle {
+  font-family: 'Azeret Mono', monospace;
+  letter-spacing: 0.02em;
+  color: var(--ink3);
+  transition: color 0.2s ease;
 }
 
 .logo {
@@ -53,6 +79,7 @@ nav {
   color: var(--ink);
   text-decoration: none;
   letter-spacing: -0.02em;
+  transition: color 0.2s ease;
 }
 
 .nav-links {
@@ -76,7 +103,36 @@ nav {
   font-size: 11px;
   color: var(--ink3);
   letter-spacing: 0.05em;
+  transition: color 0.2s ease;
 }
+
+/* Theme Toggle Button */
+.theme-toggle {
+  background: transparent;
+  border: 1px solid var(--rule2);
+  border-radius: 2px;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink3);
+  transition: all 0.15s ease;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  border-color: var(--ink3);
+  color: var(--ink);
+  background: var(--paper2);
+}
+
+.theme-toggle .sun-icon { display: none; }
+.theme-toggle .moon-icon { display: block; }
+
+[data-theme="dark"] .theme-toggle .sun-icon { display: block; }
+[data-theme="dark"] .theme-toggle .moon-icon { display: none; }
 
 /* ── HERO ── */
 .hero {
@@ -88,6 +144,7 @@ nav {
   gap: 60px;
   align-items: end;
   border-bottom: 1px solid var(--rule);
+  transition: border-color 0.2s ease;
 }
 
 .hero-label {
@@ -99,6 +156,7 @@ nav {
   display: flex;
   align-items: center;
   gap: 10px;
+  transition: color 0.2s ease;
 }
 
 .hero-label::before {
@@ -107,6 +165,7 @@ nav {
   width: 24px;
   height: 1px;
   background: var(--ink3);
+  transition: background-color 0.2s ease;
 }
 
 .hero-name {
@@ -116,11 +175,13 @@ nav {
   letter-spacing: -0.03em;
   color: var(--ink);
   margin-bottom: 28px;
+  transition: color 0.2s ease;
 }
 
 .hero-name em {
   font-style: italic;
   color: var(--green);
+  transition: color 0.2s ease;
 }
 
 .hero-sub {
@@ -129,6 +190,7 @@ nav {
   line-height: 1.8;
   max-width: 520px;
   margin-bottom: 40px;
+  transition: color 0.2s ease;
 }
 
 .hero-sub strong { color: var(--ink); font-weight: 500; }
@@ -147,7 +209,7 @@ nav {
   text-decoration: none;
   padding: 10px 20px;
   border-radius: 2px;
-  transition: all 0.15s;
+  transition: all 0.15s ease;
   cursor: pointer;
   border: none;
 }
@@ -174,6 +236,7 @@ nav {
   border-radius: 3px;
   overflow: hidden;
   margin-bottom: 20px;
+  transition: border-color 0.2s ease;
 }
 
 .stat-row {
@@ -182,6 +245,7 @@ nav {
   justify-content: space-between;
   padding: 12px 16px;
   border-bottom: 1px solid var(--rule);
+  transition: border-color 0.2s ease;
 }
 
 .stat-row:last-child { border-bottom: none; }
@@ -191,6 +255,7 @@ nav {
   font-size: 22px;
   color: var(--ink);
   letter-spacing: -0.02em;
+  transition: color 0.2s ease;
 }
 
 .stat-key {
@@ -198,6 +263,7 @@ nav {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--ink3);
+  transition: color 0.2s ease;
 }
 
 .stack-row {
@@ -214,6 +280,7 @@ nav {
   border-radius: 2px;
   color: var(--ink3);
   background: var(--paper2);
+  transition: all 0.2s ease;
 }
 
 .tag.lit { border-color: var(--green); color: var(--green); background: var(--green-light); }
@@ -224,6 +291,7 @@ nav {
   margin: 0 auto;
   padding: 72px 40px;
   border-bottom: 1px solid var(--rule);
+  transition: border-color 0.2s ease;
 }
 
 .sec-head {
@@ -237,6 +305,7 @@ nav {
   font-size: 11px;
   color: var(--ink3);
   letter-spacing: 0.08em;
+  transition: color 0.2s ease;
 }
 
 .sec-title {
@@ -244,12 +313,14 @@ nav {
   font-size: 28px;
   letter-spacing: -0.02em;
   color: var(--ink);
+  transition: color 0.2s ease;
 }
 
 .sec-rule {
   flex: 1;
   height: 1px;
   background: var(--rule);
+  transition: background-color 0.2s ease;
 }
 
 /* ── GEMM LADDER ── */
@@ -260,6 +331,7 @@ nav {
   left: 6px; top: 8px; bottom: 8px;
   width: 1px;
   background: linear-gradient(to bottom, var(--green), var(--rule) 80%);
+  transition: background 0.2s ease;
 }
 
 .rung {
@@ -280,6 +352,7 @@ nav {
   border-radius: 50%;
   background: var(--paper);
   border: 1px solid var(--rule2);
+  transition: all 0.2s ease;
 }
 
 .rung.done .rung-dot { background: var(--green); border-color: var(--green); }
@@ -293,12 +366,13 @@ nav {
   flex-wrap: wrap;
 }
 
-.rung-n { font-size: 10px; color: var(--ink3); }
+.rung-n { font-size: 10px; color: var(--ink3); transition: color 0.2s ease; }
 
 .rung-name {
   font-family: 'Playfair Display', serif;
   font-size: 17px;
   color: var(--ink);
+  transition: color 0.2s ease;
 }
 
 .rung-gain {
@@ -311,7 +385,7 @@ nav {
 .rung-gain.g { background: var(--green-light); color: var(--green); border: 1px solid #b5d4c4; }
 .rung-gain.o { background: var(--orange-light); color: var(--orange); border: 1px solid #e8c4b0; }
 
-.rung-desc { font-size: 12px; color: var(--ink3); line-height: 1.7; max-width: 600px; }
+.rung-desc { font-size: 12px; color: var(--ink3); line-height: 1.7; max-width: 600px; transition: color 0.2s ease; }
 
 /* ── RESULTS ── */
 .results-grid {
@@ -322,12 +396,13 @@ nav {
   border: 1px solid var(--rule);
   border-radius: 3px;
   overflow: hidden;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .res-card {
   background: var(--paper);
   padding: 28px 24px;
-  transition: background 0.15s;
+  transition: background 0.15s ease;
 }
 
 .res-card:hover { background: var(--paper2); }
@@ -338,6 +413,7 @@ nav {
   letter-spacing: 0.08em;
   color: var(--ink3);
   margin-bottom: 12px;
+  transition: color 0.2s ease;
 }
 
 .res-num {
@@ -352,9 +428,9 @@ nav {
 .res-num.o { color: var(--orange); }
 .res-num.b { color: var(--blue); }
 
-.res-label { font-size: 11px; color: var(--ink3); margin-bottom: 12px; }
+.res-label { font-size: 11px; color: var(--ink3); margin-bottom: 12px; transition: color 0.2s ease; }
 
-.res-desc { font-size: 11px; color: var(--ink2); line-height: 1.7; }
+.res-desc { font-size: 11px; color: var(--ink2); line-height: 1.7; transition: color 0.2s ease; }
 
 .res-link {
   display: inline-block;
@@ -372,7 +448,7 @@ nav {
 .res-link:hover { opacity: 0.7; }
 
 /* ── PROJECTS ── */
-.projects-list { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
+.projects-list { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; transition: border-color 0.2s ease; }
 
 .proj {
   display: grid;
@@ -382,7 +458,7 @@ nav {
   padding: 22px 24px;
   border-bottom: 1px solid var(--rule);
   text-decoration: none;
-  transition: background 0.15s;
+  transition: background 0.15s ease, border-color 0.2s ease;
 }
 
 .proj:last-child { border-bottom: none; }
@@ -393,9 +469,10 @@ nav {
   font-size: 16px;
   color: var(--ink);
   margin-bottom: 4px;
+  transition: color 0.2s ease;
 }
 
-.proj-desc { font-size: 11px; color: var(--ink3); line-height: 1.6; }
+.proj-desc { font-size: 11px; color: var(--ink3); line-height: 1.6; transition: color 0.2s ease; }
 
 .proj-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
 
@@ -408,7 +485,7 @@ nav {
 .proj:hover .proj-arrow { color: var(--ink); transform: translate(2px, -2px); }
 
 /* ── WRITING ── */
-.writing-list { border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
+.writing-list { border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; transition: border-color 0.2s ease; }
 
 .write-item {
   display: grid;
@@ -418,24 +495,25 @@ nav {
   padding: 18px 24px;
   border-bottom: 1px solid var(--rule);
   text-decoration: none;
-  transition: background 0.15s;
+  transition: background 0.15s ease, border-color 0.2s ease;
 }
 
 .write-item:last-child { border-bottom: none; }
 .write-item:hover { background: var(--paper2); }
 .write-item.dim { opacity: 0.5; pointer-events: none; }
 
-.write-cat { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--green); }
+.write-cat { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--green); transition: color 0.2s ease; }
 .write-cat.muted { color: var(--ink3); }
 
 .write-title {
   font-family: 'Playfair Display', serif;
   font-size: 15px;
   color: var(--ink);
+  transition: color 0.2s ease;
 }
 
-.write-date { font-size: 11px; color: var(--ink3); text-align: right; }
-.write-arr { color: var(--ink3); text-align: right; font-size: 14px; }
+.write-date { font-size: 11px; color: var(--ink3); text-align: right; transition: color 0.2s ease; }
+.write-arr { color: var(--ink3); text-align: right; font-size: 14px; transition: color 0.2s ease; }
 
 /* ── CONTACT ── */
 .contact-grid { display: grid; grid-template-columns: 1fr 320px; gap: 80px; align-items: start; }
@@ -447,13 +525,14 @@ nav {
   color: var(--ink);
   line-height: 1.1;
   margin-bottom: 20px;
+  transition: color 0.2s ease;
 }
 
-.contact-head em { font-style: italic; color: var(--green); }
+.contact-head em { font-style: italic; color: var(--green); transition: color 0.2s ease; }
 
-.contact-sub { font-size: 12px; color: var(--ink3); line-height: 1.8; margin-bottom: 28px; max-width: 400px; }
+.contact-sub { font-size: 12px; color: var(--ink3); line-height: 1.8; margin-bottom: 28px; max-width: 400px; transition: color 0.2s ease; }
 
-.socials { border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; }
+.socials { border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; transition: border-color 0.2s ease; }
 
 .soc {
   display: flex;
@@ -462,16 +541,16 @@ nav {
   padding: 14px 18px;
   border-bottom: 1px solid var(--rule);
   text-decoration: none;
-  transition: background 0.15s;
+  transition: background 0.15s ease, border-color 0.2s ease;
 }
 
 .soc:last-child { border-bottom: none; }
 .soc:hover { background: var(--paper2); }
 
 .soc-left { display: flex; align-items: center; gap: 12px; }
-.soc-plat { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink3); width: 64px; }
-.soc-handle { font-size: 12px; color: var(--ink); }
-.soc-arr { font-size: 13px; color: var(--ink3); transition: transform 0.15s; }
+.soc-plat { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink3); width: 64px; transition: color 0.2s ease; }
+.soc-handle { font-size: 12px; color: var(--ink); transition: color 0.2s ease; }
+.soc-arr { font-size: 13px; color: var(--ink3); transition: transform 0.15s, color 0.2s ease; }
 .soc:hover .soc-arr { transform: translateX(3px); }
 
 /* ── FOOTER ── */
@@ -485,10 +564,11 @@ footer {
   color: var(--ink3);
   letter-spacing: 0.04em;
   max-width: 100%;
+  transition: border-color 0.2s ease, color 0.2s ease;
 }
 
 /* ── DEBUG JOURNAL ── */
-#journal { background: var(--paper2); }
+#journal { background: var(--paper2); transition: background-color 0.2s ease; }
 
 .journal-toolbar {
   display: flex;
@@ -509,6 +589,7 @@ footer {
   padding: 7px 12px;
   flex: 1;
   max-width: 280px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .search-wrap input {
@@ -519,6 +600,7 @@ footer {
   color: var(--ink);
   outline: none;
   width: 100%;
+  transition: color 0.2s ease;
 }
 
 .j-filters { display: flex; gap: 4px; }
@@ -534,7 +616,7 @@ footer {
   padding: 6px 12px;
   color: var(--ink3);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.15s ease;
 }
 
 .j-tab.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
@@ -548,7 +630,7 @@ footer {
   padding: 0;
   overflow: hidden;
   cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
   position: relative;
 }
 
@@ -558,6 +640,7 @@ footer {
   left: 0; top: 0; bottom: 0;
   width: 2px;
   background: var(--green);
+  transition: background-color 0.2s ease;
 }
 
 .j-card:hover { border-color: var(--rule2); box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
@@ -582,6 +665,7 @@ footer {
   color: var(--ink);
   line-height: 1.4;
   flex: 1;
+  transition: color 0.2s ease;
 }
 
 .j-meta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
@@ -596,14 +680,15 @@ footer {
   border: 1px solid #e8c4b0;
 }
 
-.j-date { font-size: 10px; color: var(--ink3); }
+.j-date { font-size: 10px; color: var(--ink3); transition: color 0.2s ease; }
 
-.j-preview { font-size: 11px; color: var(--ink3); line-height: 1.6; }
+.j-preview { font-size: 11px; color: var(--ink3); line-height: 1.6; transition: color 0.2s ease; }
 
 .j-body {
   display: none;
   border-top: 1px solid var(--rule);
   padding: 20px 24px;
+  transition: border-color 0.2s ease;
 }
 
 .j-card.open .j-body { display: block; }
@@ -617,6 +702,7 @@ footer {
   letter-spacing: 0.09em;
   color: var(--ink3);
   margin-bottom: 4px;
+  transition: color 0.2s ease;
 }
 
 .j-sec-val {
@@ -624,6 +710,7 @@ footer {
   color: var(--ink);
   line-height: 1.7;
   white-space: pre-wrap;
+  transition: color 0.2s ease;
 }
 
 .j-sec-val.hl {
@@ -650,7 +737,7 @@ footer {
   padding: 5px 10px;
   color: var(--ink3);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.15s ease;
 }
 
 .j-btn:hover { color: var(--ink); border-color: var(--ink3); }
@@ -665,6 +752,7 @@ footer {
   margin-bottom: 28px;
   display: none;
   animation: jfSlide 0.18s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .j-form.open { display: block; }
@@ -679,6 +767,7 @@ footer {
   font-size: 18px;
   margin-bottom: 22px;
   color: var(--ink);
+  transition: color 0.2s ease;
 }
 
 .j-fields { display: grid; gap: 16px; }
@@ -694,6 +783,7 @@ footer {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--ink3);
+  transition: color 0.2s ease;
 }
 
 .jf input, .jf textarea {
@@ -705,7 +795,7 @@ footer {
   padding: 9px 12px;
   color: var(--ink);
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease, color 0.2s ease;
   resize: vertical;
 }
 
@@ -766,7 +856,7 @@ footer {
   border-radius: 2px;
   padding: 9px 18px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s ease;
 }
 
 .j-save:hover { background: var(--ink2); }
@@ -781,7 +871,7 @@ footer {
   border-radius: 2px;
   padding: 9px 18px;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.15s ease;
 }
 
 .j-cancel:hover { border-color: var(--ink3); color: var(--ink); }
@@ -790,6 +880,7 @@ footer {
   text-align: center;
   padding: 64px 24px;
   color: var(--ink3);
+  transition: color 0.2s ease;
 }
 
 .j-empty-icon { font-size: 32px; margin-bottom: 14px; opacity: 0.4; }
@@ -800,6 +891,7 @@ footer {
   color: var(--ink);
   font-weight: 400;
   margin-bottom: 8px;
+  transition: color 0.2s ease;
 }
 
 .j-empty p { font-size: 11px; color: var(--ink3); max-width: 280px; margin: 0 auto; line-height: 1.7; }
@@ -818,6 +910,7 @@ footer {
   border: 1px solid var(--rule);
   border-radius: 2px;
   padding: 5px 12px;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .j-stat-pill b { color: var(--ink); font-weight: 500; }
@@ -834,7 +927,7 @@ footer {
   border-radius: 3px;
   opacity: 0;
   transform: translateY(6px);
-  transition: opacity 0.18s, transform 0.18s;
+  transition: opacity 0.18s ease, transform 0.18s ease;
   pointer-events: none;
   z-index: 1000;
 }
@@ -854,6 +947,7 @@ footer {
 @media (max-width: 768px) {
   nav { padding: 0 20px; }
   .nav-links { display: none; }
+  .nav-right { display: none; }
   .hero { grid-template-columns: 1fr; gap: 40px; padding: 56px 20px 48px; }
   .hero-aside { display: none; }
   .section { padding: 48px 20px; }
@@ -863,6 +957,20 @@ footer {
   .write-arr { display: none; }
   footer { padding: 16px 20px; flex-direction: column; gap: 6px; text-align: center; }
   .jf-row { grid-template-columns: 1fr; }
+}
+
+/* Print styles - always use light theme for printing */
+@media print {
+  [data-theme="dark"] {
+    --paper: #fff;
+    --paper2: #f5f5f5;
+    --ink: #000;
+    --ink2: #333;
+    --ink3: #666;
+    --rule: #ddd;
+    --rule2: #ccc;
+  }
+  .theme-toggle { display: none; }
 }
 </style>
 </head>
@@ -880,7 +988,18 @@ footer {
     <li><a href="#journal">Journal</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
-  <div class="nav-right">Bhubaneswar · IIT Jodhpur</div>
+  <div style="display:flex;align-items:center;">
+    <div class="nav-right">IISER-K × IIT-J · India</div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+      <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="5"></circle>
+        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+      </svg>
+      <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
+  </div>
 </nav>
 
 <!-- HERO -->
@@ -940,7 +1059,7 @@ footer {
   <div style="display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:start;" class="reveal">
     <div>
       <p style="font-size:13px; color:var(--ink2); line-height:1.85; margin-bottom:14px;">
-        I’m someone who likes understanding what actually happens inside a GPU.
+        I'm someone who likes understanding what actually happens inside a GPU.
         My approach is always bottom-up — understand the hardware before trusting any abstraction above it.
       </p>
       <p style="font-size:13px; color:var(--ink2); line-height:1.85; margin-bottom:14px;">
@@ -1286,13 +1405,44 @@ footer {
 </section>
 
 <footer>
-  <span>© 2026 Bikram Majhi · IIT Jodhpur · Bhubaneswar, India</span>
-  <span style="font-family:'Azeret Mono'; letter-spacing:0.02em; color:var(--rule2);">nvcc -O3 -arch=sm_100</span>
+  <span>© 2026 Bikram Majhi · IISER-K × IIT-J, India</span>
+  <span class="text-subtle">nvcc -O3 -arch=sm_100</span>
 </footer>
 
 <div class="toast" id="toast"></div>
 
 <script>
+// ── THEME TOGGLE ──
+const themeToggle = document.getElementById('themeToggle');
+const html = document.documentElement;
+
+// Check for saved preference or system preference
+const savedTheme = localStorage.getItem('theme');
+const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+  html.setAttribute('data-theme', 'dark');
+}
+
+themeToggle?.addEventListener('click', () => {
+  const current = html.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  
+  // Optional: brief animation feedback
+  themeToggle.style.transform = 'scale(0.9)';
+  setTimeout(() => themeToggle.style.transform = '', 150);
+});
+
+// Listen for system theme changes (if user hasn't set preference)
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+  if (!localStorage.getItem('theme')) {
+    html.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+  }
+});
+
 // ── SCROLL REVEAL ──
 const obs = new IntersectionObserver(entries => {
   entries.forEach(e => {
