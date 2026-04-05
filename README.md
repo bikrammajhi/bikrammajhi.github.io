@@ -1,2 +1,2 @@
-# bikrammajh.github.io
+# bikrammajhi.github.io
 My website
