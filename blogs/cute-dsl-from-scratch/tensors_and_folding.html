@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tensors & Folding — Bikram Majhi</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Azeret+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #f4f1eb;
+  --paper2: #ede9e0;
+  --ink: #1c1a17;
+  --ink2: #3d3a35;
+  --ink3: #7a7570;
+  --rule: #d9d4c8;
+  --rule2: #c4bfb2;
+  --green: #2a5c45;
+  --green-light: #e8f0ec;
+  --orange: #b85c2a;
+  --orange-light: #f5ece6;
+  --blue: #2a4a6b;
+  --code-bg: var(--paper2);
+
+  --row:    var(--blue);
+  --col:    var(--orange);
+  --red:    var(--green);
+  --batch:  var(--orange);
+
+  --font-serif: 'Playfair Display', serif;
+  --font-mono: 'Azeret Mono', monospace;
+  --font-sans: system-ui, -apple-system, sans-serif;
+}
+
+[data-theme="dark"] {
+  --paper: #0f0d0c;
+  --paper2: #161412;
+  --ink: #f4f1eb;
+  --ink2: #d1ccc3;
+  --ink3: #8a837b;
+  --rule: #24211e;
+  --rule2: #332f2b;
+  --green: #6fb894;
+  --green-light: #16221c;
+  --orange: #e69a6e;
+  --orange-light: #261c14;
+  --blue: #6a94b8;
+  --code-bg: var(--paper2);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
+html { scroll-behavior: smooth; }
+
+body{
+  font-family: var(--font-mono);
+  background:var(--paper);
+  color:var(--ink);
+  font-size: 12.5px;
+  line-height:1.7;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ── NAV ── */
+.blog-nav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 52px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.blog-nav .logo {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+.blog-nav-back {
+  font-size: 11px;
+  color: var(--ink3);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: color 0.15s;
+}
+.blog-nav-back:hover { color: var(--ink); }
+.theme-toggle {
+  background: transparent;
+  border: 1px solid var(--rule2);
+  border-radius: 2px;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink3);
+  transition: all 0.15s ease;
+}
+.theme-toggle:hover {
+  border-color: var(--ink3);
+  color: var(--ink);
+  background: var(--paper2);
+}
+.theme-toggle .sun-icon { display: none; }
+.theme-toggle .moon-icon { display: block; }
+[data-theme="dark"] .theme-toggle .sun-icon { display: block; }
+[data-theme="dark"] .theme-toggle .moon-icon { display: none; }
+
+/* ── HERO ── */
+.hero{
+  padding:60px 24px 48px;
+  text-align:center;
+  border-bottom:1px solid var(--rule);
+  position:relative;
+  overflow:hidden;
+  transition: border-color 0.2s ease;
+}
+.hero::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(ellipse 70% 55% at 30% 0%,rgba(42,74,107,.06) 0%,transparent 65%),
+    radial-gradient(ellipse 50% 40% at 75% 0%,rgba(184,92,42,.05) 0%,transparent 60%);
+  pointer-events:none;
+}
+.hero-chip{
+  display:inline-block;
+  font-family:var(--font-mono);
+  font-size:10px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--green);
+  background: var(--green-light);
+  border:1px solid var(--green);
+  border-radius:2px;
+  padding:3px 12px;
+  margin-bottom:22px;
+}
+.hero h1{
+  font-family:var(--font-serif);
+  font-size:clamp(30px,5vw,54px);
+  font-weight:400;
+  color:var(--ink);
+  letter-spacing:-.03em;
+  line-height:1.1;
+  max-width:680px;
+  margin:0 auto 14px;
+}
+.hero h1 em{color:var(--green);font-style:italic;}
+.hero-sub{
+  font-family:var(--font-serif);
+  font-style:italic;
+  font-size:15px;
+  color:var(--ink3);
+  max-width:500px;
+  margin:0 auto 26px;
+  line-height:1.7;
+}
+.hero-meta{
+  font-family:var(--font-mono);
+  font-size:10px;
+  color:var(--ink3);
+  display:flex;gap:20px;justify-content:center;flex-wrap:wrap;
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+}
+
+/* ── LAYOUT ── */
+.page{max-width:780px;margin:0 auto;padding:0 24px;}
+section{padding:54px 0 0;}
+
+.sec-label{
+  font-family:var(--font-mono);
+  font-size:10px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--green);
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:12px;
+  transition: color 0.2s ease;
+}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--rule);transition:background-color 0.2s ease;}
+
+h2{
+  font-family:var(--font-serif);
+  font-size:26px;font-weight:400;
+  color:var(--ink);
+  letter-spacing:-.02em;
+  line-height:1.2;
+  margin-bottom:18px;
+  transition: color 0.2s ease;
+}
+p{margin-bottom:16px;color:var(--ink2);line-height:1.8;}
+p:last-child{margin-bottom:0;}
+strong{color:var(--ink);font-weight:500;}
+
+/* ── CODE ── */
+.code-block{
+  background:var(--code-bg);
+  border:1px solid var(--rule);
+  border-radius:3px;
+  padding:18px 22px;
+  margin:22px 0;
+  overflow-x:auto;
+  position:relative;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.code-block::before{
+  content:attr(data-lang);
+  position:absolute;top:10px;right:14px;
+  font-family:var(--font-mono);font-size:10px;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink3);
+  transition: color 0.2s ease;
+}
+.code-block code{
+  font-family:var(--font-mono);font-size:12.5px;
+  line-height:1.75;color:var(--ink);white-space:pre;display:block;
+}
+.kw{color:var(--green);font-weight:500;} .fn{color:var(--ink);} .st{color:var(--green);}
+.num{color:var(--orange);} .cm{color:var(--ink3);font-style:italic;}
+.idx-s{color:var(--blue);} .idx-q{color:var(--orange);}
+.idx-ur{color:var(--green);} .idx-t{color:var(--orange);}
+
+/* ── CALLOUT ── */
+.callout{
+  border-left:3px solid var(--green);
+  background:var(--green-light);
+  padding:14px 18px;margin:22px 0;
+  border-radius:0 3px 3px 0;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.callout.teal{border-color:var(--green);background:var(--green-light);}
+.callout.rose{border-color:var(--orange);background:var(--orange-light);}
+.callout.amber{border-color:var(--orange);background:var(--orange-light);}
+.callout-title{
+  font-family:var(--font-mono);font-size:10px;font-weight:500;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--green);margin-bottom:7px;
+}
+.callout.teal .callout-title{color:var(--green);}
+.callout.rose .callout-title{color:var(--orange);}
+.callout.amber .callout-title{color:var(--orange);}
+.callout p{font-size:12.5px;margin:0;color:var(--ink2);line-height:1.8;}
+
+code{
+  font-family:var(--font-mono);font-size:12px;
+  background:var(--paper2);
+  padding:1px 6px;border-radius:2px;color:var(--green);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.math{
+  font-family:var(--font-mono);font-size:13px;
+  background:var(--code-bg);border:1px solid var(--rule);
+  border-radius:3px;padding:13px 22px;margin:18px 0;
+  color:var(--ink);text-align:center;letter-spacing:.03em;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* ── RANK LADDER ── */
+.rank-ladder{
+  display:flex;flex-direction:column;gap:8px;margin:24px 0;
+}
+.rank-row{
+  display:flex;align-items:center;gap:14px;
+  background:var(--paper);border:1px solid var(--rule);
+  border-radius:3px;padding:11px 16px;
+  transition:background 0.15s ease, border-color 0.2s ease;
+}
+.rank-row:hover{border-color:var(--rule2);background:var(--paper2);}
+.rank-badge{
+  font-family:var(--font-mono);font-size:10px;font-weight:500;
+  color:var(--ink);padding:3px 10px;border-radius:2px;
+  white-space:nowrap;flex-shrink:0;
+  min-width:70px;text-align:center;
+}
+.rank-desc{font-size:12.5px;color:var(--ink2);}
+.rank-desc span{font-family:var(--font-mono);font-size:12px;}
+
+/* ── MODE CLASSIFIER ── */
+.mode-wrap{
+  background:var(--paper);border:1px solid var(--rule);
+  border-radius:3px;padding:24px;margin:24px 0;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.mode-title{
+  font-family:var(--font-serif);font-size:16px;font-weight:400;
+  color:var(--ink);margin-bottom:4px;
+}
+.mode-subtitle{
+  font-family:var(--font-mono);font-size:10px;color:var(--ink3);
+  margin-bottom:20px;letter-spacing:0.04em;
+}
+.einsum-display{
+  font-family:var(--font-mono);font-size:13px;
+  background:var(--code-bg);border:1px solid var(--rule);
+  border-radius:3px;padding:12px 18px;margin-bottom:20px;
+  text-align:center;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  color:var(--ink);
+}
+.mode-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  margin-bottom:20px;
+}
+@media(max-width:520px){.mode-grid{grid-template-columns:1fr;}}
+.mode-card{
+  border-radius:3px;padding:14px 16px;border:1px solid var(--rule);
+  cursor:default;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.mode-card.row  {background:rgba(42,74,107,.08); border-color:rgba(42,74,107,.25);}
+.mode-card.col  {background:rgba(184,92,42,.08); border-color:rgba(184,92,42,.25);}
+.mode-card.redm {background:rgba(42,92,69,.08); border-color:rgba(42,92,69,.25);}
+.mode-card.bat  {background:rgba(184,92,42,.08);  border-color:rgba(184,92,42,.25);}
+.mode-card-title{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;font-weight:500;margin-bottom:6px;
+}
+.mode-card.row  .mode-card-title{color:var(--blue);}
+.mode-card.col  .mode-card-title{color:var(--orange);}
+.mode-card.redm .mode-card-title{color:var(--green);}
+.mode-card.bat  .mode-card-title{color:var(--orange);}
+.mode-card-indices{
+  font-family:var(--font-mono);font-size:18px;font-weight:500;
+  margin-bottom:4px;
+}
+.mode-card.row  .mode-card-indices{color:var(--blue);}
+.mode-card.col  .mode-card-indices{color:var(--orange);}
+.mode-card.redm .mode-card-indices{color:var(--green);}
+.mode-card.bat  .mode-card-indices{color:var(--orange);}
+.mode-card-size{font-size:11px;color:var(--ink3);}
+.mode-card-rule{font-size:11px;color:var(--ink3);font-style:italic;}
+.mode-tensor-display{
+  display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start;
+}
+.tensor-box{
+  background:var(--code-bg);border:1px solid var(--rule);
+  border-radius:3px;padding:10px 14px;flex:1;min-width:120px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.tensor-box-name{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink3);margin-bottom:6px;
+}
+.tensor-box-val{font-family:var(--font-mono);font-size:12px;color:var(--ink);}
+.tensor-box-val span{cursor:default;}
+
+/* ── FOLDING VIZ ── */
+.fold-viz{
+  background:var(--paper);border:1px solid var(--rule);
+  border-radius:3px;padding:24px;margin:24px 0;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.fold-tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
+.fold-tab{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.05em;
+  padding:6px 14px;border-radius:2px;
+  border:1px solid var(--rule2);background:var(--paper2);
+  color:var(--ink3);cursor:pointer;transition:all .15s;
+  text-transform:uppercase;
+}
+.fold-tab:hover{border-color:var(--ink3);color:var(--ink);}
+.fold-tab.active{background:var(--ink);border-color:var(--ink);color:var(--paper);}
+.fold-panel{display:none;}
+.fold-panel.active{display:block;}
+
+/* physical tape */
+.phys-tape{
+  display:flex;gap:3px;margin-bottom:14px;flex-wrap:wrap;
+}
+.phys-cell{
+  width:38px;height:38px;
+  border:1px solid var(--rule);border-radius:3px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:var(--font-mono);flex-shrink:0;
+  transition:all .2s;
+}
+.phys-cell .pc-letter{font-size:14px;font-weight:500;color:var(--ink);}
+.phys-cell .pc-offset{font-size:9px;color:var(--ink3);}
+
+/* color groups */
+.grp0{background:rgba(42,74,107,.12);border-color:rgba(42,74,107,.35);}
+.grp1{background:rgba(184,92,42,.12);border-color:rgba(184,92,42,.35);}
+.grp2{background:rgba(42,92,69,.12);border-color:rgba(42,92,69,.35);}
+.grp3{background:rgba(184,92,42,.18);border-color:rgba(184,92,42,.4);}
+
+/* 3d tensor grid */
+.tensor3d-wrap{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px;}
+.slice-wrap{display:flex;flex-direction:column;gap:4px;}
+.slice-label{
+  font-family:var(--font-mono);font-size:10px;color:var(--ink3);
+  text-align:center;letter-spacing:.06em;margin-bottom:2px;
+}
+.slice-grid{display:flex;flex-direction:column;gap:3px;}
+.slice-row{display:flex;gap:3px;}
+.t-cell{
+  width:48px;height:36px;
+  border:1px solid var(--rule);border-radius:3px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:var(--font-mono);flex-shrink:0;cursor:default;
+  transition:all .15s;
+}
+.t-cell:hover{transform:translateY(-2px);box-shadow:0 3px 10px rgba(0,0,0,.07);}
+.t-cell .tc-letter{font-size:13px;font-weight:500;color:var(--ink);}
+.t-cell .tc-coord{font-size:9px;color:var(--ink3);}
+.t-cell .tc-off{font-size:9px;color:var(--ink3);}
+
+/* matrix grids */
+.mat-wrap{margin-bottom:14px;}
+.mat-label{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink3);margin-bottom:8px;
+}
+.mat-grid{display:inline-flex;flex-direction:column;gap:3px;}
+.mat-row{display:flex;gap:3px;}
+.m-cell{
+  width:48px;height:36px;
+  border:1px solid var(--rule);border-radius:3px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:var(--font-mono);flex-shrink:0;cursor:default;
+  transition:all .15s;
+}
+.m-cell:hover{transform:translateY(-2px);box-shadow:0 3px 10px rgba(0,0,0,.07);}
+.m-cell .mc-letter{font-size:13px;font-weight:500;color:var(--ink);}
+.m-cell .mc-coord{font-size:9px;color:var(--ink3);}
+
+.info-band{
+  background:var(--code-bg);border:1px solid var(--rule);
+  border-radius:3px;padding:11px 16px;margin-top:14px;
+  font-family:var(--font-mono);font-size:11px;line-height:1.8;
+  color:var(--ink2);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.info-band .ib-ok{color:var(--green);}
+.info-band .ib-warn{color:var(--orange);}
+
+/* impossible tag */
+.impossible-tag{
+  display:inline-block;
+  background:var(--orange-light);border:1px solid rgba(184,92,42,.3);
+  border-radius:2px;padding:1px 8px;
+  font-family:var(--font-mono);font-size:10px;color:var(--orange);
+  margin-left:6px;vertical-align:middle;
+}
+
+/* ── GEMM FUNNEL ── */
+.gemm-funnel{
+  margin:24px 0;
+}
+.gf-row{
+  display:grid;grid-template-columns:1fr 32px 1fr;gap:8px;
+  align-items:center;margin-bottom:8px;
+}
+.gf-box{
+  background:var(--paper);border:1px solid var(--rule);
+  border-radius:3px;padding:12px 15px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.gf-box-label{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink3);margin-bottom:5px;
+}
+.gf-box-val{font-family:var(--font-mono);font-size:12px;color:var(--ink);}
+.gf-box-val span{font-weight:500;}
+.gf-arrow{text-align:center;color:var(--green);font-size:16px;line-height:1;}
+
+/* dimension pills */
+.dim-pills{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0;}
+.dim-pill{
+  font-family:var(--font-mono);font-size:11px;
+  padding:5px 12px;border-radius:2px;
+  border:1px solid transparent;
+}
+.dim-pill.m{background:rgba(42,74,107,.1);border-color:rgba(42,74,107,.25);color:var(--blue);}
+.dim-pill.n{background:rgba(184,92,42,.1);border-color:rgba(184,92,42,.25);color:var(--orange);}
+.dim-pill.k{background:rgba(42,92,69,.1);border-color:rgba(42,92,69,.25);color:var(--green);}
+.dim-pill.l{background:rgba(184,92,42,.1);border-color:rgba(184,92,42,.25);color:var(--orange);}
+
+/* ── FOOTER ── */
+hr{border:none;border-top:1px solid var(--rule);margin:54px 0 0;transition:border-color 0.2s ease;}
+.footer{padding:28px 0 44px;text-align:center;}
+.footer p{font-family:var(--font-mono);font-size:10px;color:var(--ink3);letter-spacing:0.04em;}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="blog-nav">
+  <a href="../../index.html#writing" class="blog-nav-back">← Writing</a>
+  <a href="../../index.html" class="logo">Bikram Majhi</a>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="5"></circle>
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+    </svg>
+    <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+  </button>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="page">
+    <div class="hero-chip">§ Layout Theory · Chapter 1.3</div>
+    <h1>Every Tensor Contraction is a <em>Batched GEMM</em></h1>
+    <p class="hero-sub">How tensor folding collapses arbitrary einsum expressions into four nested loops — and why the layout object makes that zero-cost.</p>
+    <div class="hero-meta">
+      <span>~10 min read</span>
+      <span>interactive</span>
+      <span>tensors · einsum · GEMM · folding</span>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- §1 TENSOR BASICS -->
+<section>
+  <div class="sec-label">§1 — Tensors</div>
+  <h2>Scalars, vectors, matrices — and beyond</h2>
+
+  <p>A <strong>tensor</strong> is just a multi-dimensional array. The word "rank" (or "order") counts how many indices you need to address a single element. Most programmers are comfortable up to rank 2; the machinery here generalises cleanly to arbitrary rank.</p>
+
+  <div class="rank-ladder">
+    <div class="rank-row">
+      <div class="rank-badge" style="background:var(--paper2);color:var(--ink3);">Rank&nbsp;0</div>
+      <div class="rank-desc">Scalar <span>α</span> — a single number, no indices needed.</div>
+    </div>
+    <div class="rank-row">
+      <div class="rank-badge" style="background:var(--blue);color:#fff;">Rank&nbsp;1</div>
+      <div class="rank-desc">Vector <span>a<sub>i</sub></span>, with <span>0 ≤ i &lt; I</span>. One index.</div>
+    </div>
+    <div class="rank-row">
+      <div class="rank-badge" style="background:var(--orange);color:#fff;">Rank&nbsp;2</div>
+      <div class="rank-desc">Matrix <span>A<sub>mn</sub></span>, with <span>0 ≤ m &lt; M</span> and <span>0 ≤ n &lt; N</span>. Two indices.</div>
+    </div>
+    <div class="rank-row">
+      <div class="rank-badge" style="background:var(--green);color:#fff;">Rank&nbsp;3+</div>
+      <div class="rank-desc">Three-way array <span>A<sub>mnp</sub></span> and beyond. Each new dimension is a new index with its own bound.</div>
+    </div>
+  </div>
+
+  <p>Summation over repeated indices that appear on only one side of an equation is <strong>Einstein notation</strong>. For example, matrix multiplication <code>C_mn = A_mk B_kn</code> sums over the shared index <code>k</code>. The same convention scales to any number of indices and any rank — this is the <strong>einsum</strong> interface in NumPy and PyTorch.</p>
+
+  <div class="callout">
+    <div class="callout-title">Notation</div>
+    <p>In the rest of this post, <strong>bold letters</strong> denote tensors, <strong>lowercase</strong> letters denote indices, and their corresponding <strong>uppercase</strong> letters denote the bound of that index.</p>
+  </div>
+</section>
+
+<!-- §2 TENSOR CONTRACTION -->
+<section>
+  <div class="sec-label">§2 — Tensor Contractions</div>
+  <h2>An einsum you might find in a real model</h2>
+
+  <p>Here is a concrete contraction — realistic in the sense that attention mechanisms and convolutions produce expressions of exactly this shape:</p>
+
+  <div class="math">C<sub>stqp</sub> = A<sub>stupr</sub> · B<sub>qtru</sub></div>
+
+  <p>A rank-5 tensor times a rank-4 tensor, summing over shared indices <code>u</code> and <code>r</code>, producing a rank-4 result. In NumPy:</p>
+
+  <div class="code-block" data-lang="python">
+    <code><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+S, T, U, P, R, Q = <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">5</span>
+
+A = np.<span class="fn">random</span>.randn(S, T, U, P, R)  <span class="cm"># shape (2,3,4,2,3)</span>
+B = np.<span class="fn">random</span>.randn(Q, T, R, U)    <span class="cm"># shape (5,3,3,4)</span>
+C = np.<span class="fn">einsum</span>(<span class="st">'stupr,qtru->stqp'</span>, A, B) <span class="cm"># shape (2,3,5,2)</span></code>
+  </div>
+
+  <p>Before we can map this to any hardware-friendly kernel, we need to understand the <em>role</em> each index plays. There are exactly four roles possible, and every index of every contraction fits into exactly one.</p>
+</section>
+
+<!-- §3 MODE CLASSIFICATION -->
+<section>
+  <div class="sec-label">§3 — Mode Classification</div>
+  <h2>Four types of index, exhaustively</h2>
+
+  <p>Look at which tensors each index appears in. That alone determines its type:</p>
+
+  <div class="mode-wrap">
+    <div class="mode-title">Interactive Mode Classifier</div>
+    <div class="mode-subtitle">// C<sub>stqp</sub> = A<sub>stupr</sub> · B<sub>qtru</sub> — hover a card to see the rule</div>
+
+    <div class="einsum-display">
+      C[<span class="idx-s">s</span><span class="idx-t">t</span><span class="idx-q">q</span><span class="idx-s">p</span>] = A[<span class="idx-s">s</span><span class="idx-t">t</span><span class="idx-ur">u</span><span class="idx-s">p</span><span class="idx-ur">r</span>] · B[<span class="idx-q">q</span><span class="idx-t">t</span><span class="idx-ur">r</span><span class="idx-ur">u</span>]
+    </div>
+
+    <div class="mode-grid">
+      <div class="mode-card row">
+        <div class="mode-card-title">Row modes m̂</div>
+        <div class="mode-card-indices">s, p</div>
+        <div class="mode-card-size">folded size M = S×P = 4</div>
+        <div class="mode-card-rule">In A and C — not in B</div>
+      </div>
+      <div class="mode-card col">
+        <div class="mode-card-title">Column modes n̂</div>
+        <div class="mode-card-indices">q</div>
+        <div class="mode-card-size">folded size N = Q = 5</div>
+        <div class="mode-card-rule">In B and C — not in A</div>
+      </div>
+      <div class="mode-card redm">
+        <div class="mode-card-title">Reduction modes k̂</div>
+        <div class="mode-card-indices">u, r</div>
+        <div class="mode-card-size">folded size K = U×R = 12</div>
+        <div class="mode-card-rule">In A and B — not in C</div>
+      </div>
+      <div class="mode-card bat">
+        <div class="mode-card-title">Batch modes ℓ̂</div>
+        <div class="mode-card-indices">t</div>
+        <div class="mode-card-size">folded size L = T = 3</div>
+        <div class="mode-card-rule">In A, B, and C</div>
+      </div>
+    </div>
+
+    <div class="mode-tensor-display">
+      <div class="tensor-box">
+        <div class="tensor-box-name">Tensor A — stupr</div>
+        <div class="tensor-box-val">
+          <span class="idx-s">s</span><span class="idx-t">t</span><span class="idx-ur">u</span><span class="idx-s">p</span><span class="idx-ur">r</span>
+        </div>
+      </div>
+      <div class="tensor-box">
+        <div class="tensor-box-name">Tensor B — qtru</div>
+        <div class="tensor-box-val">
+          <span class="idx-q">q</span><span class="idx-t">t</span><span class="idx-ur">r</span><span class="idx-ur">u</span>
+        </div>
+      </div>
+      <div class="tensor-box">
+        <div class="tensor-box-name">Tensor C — stqp</div>
+        <div class="tensor-box-val">
+          <span class="idx-s">s</span><span class="idx-t">t</span><span class="idx-q">q</span><span class="idx-s">p</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p>Once every index is classified, the contraction can be rewritten in a <strong>canonical grouped form</strong>, where each position holds a group of modes rather than a single index:</p>
+
+  <div class="math">C<sub>(<span class="idx-s">sp</span>)(<span class="idx-q">q</span>)(<span class="idx-t">t</span>)</sub> = A<sub>(<span class="idx-s">sp</span>)(<span class="idx-ur">ur</span>)(<span class="idx-t">t</span>)</sub> · B<sub>(<span class="idx-q">q</span>)(<span class="idx-ur">ur</span>)(<span class="idx-t">t</span>)</sub></div>
+
+  <p>The parentheses are not cosmetic — they represent <em>folding</em> multiple tensor modes into a single multi-index. This is the core operation we explore next.</p>
+</section>
+
+<!-- §4 FOLDING VIZ -->
+<section>
+  <div class="sec-label">§4 — Tensor Folding</div>
+  <h2>A 2×2×2 tensor, three different views</h2>
+
+  <p>Let's build intuition on a small example before returning to the full contraction. Take 8 elements — labelled <code>a</code> through <code>h</code> — laid out contiguously in memory at offsets 0–7.</p>
+
+  <p>A <strong>2×2×2 tensor</strong> with stride <code>(2, 1, 4)</code> provides one view. Folding the third mode into the first gives a <strong>4×2 matrix</strong>. Folding the third mode into the second gives a <strong>2×4 matrix</strong> — but that view turns out to be impossible to represent with a flat stride. Click the tabs to explore all three.</p>
+
+  <div class="fold-viz">
+    <div class="fold-tabs">
+      <div class="fold-tab active" onclick="switchTab('phys')">Physical (1D)</div>
+      <div class="fold-tab" onclick="switchTab('t3d')">Rank-3 Tensor</div>
+      <div class="fold-tab" onclick="switchTab('m4x2')">4×2 Matrix</div>
+      <div class="fold-tab" onclick="switchTab('m2x4')">2×4 Matrix</div>
+    </div>
+
+    <!-- PHYSICAL -->
+    <div class="fold-panel active" id="panel-phys">
+      <div class="mat-label">8 contiguous elements at offsets 0–7</div>
+      <div class="phys-tape" id="phys-tape"></div>
+      <div class="info-band">
+        <span class="ib-ok">Layout:</span> (1, 8) : (0, 1)  —  shape 8, stride 1, base at 0.<br>
+        This is the raw physical view. Every other representation is just a different <em>coordinate system</em> onto the same bytes.
+      </div>
+    </div>
+
+    <!-- RANK-3 -->
+    <div class="fold-panel" id="panel-t3d">
+      <div class="mat-label">Shape (2, 2, 2) : Stride (2, 1, 4)</div>
+      <div class="tensor3d-wrap" id="tensor3d-wrap"></div>
+      <div class="info-band">
+        <span class="ib-ok">Layout:</span> (2, 2, 2) : (2, 1, 4) — three modes, each size 2.<br>
+        Element at (m, n, p) lives at offset <strong>2m + 1n + 4p</strong>.
+        Hover a cell to verify.
+      </div>
+    </div>
+
+    <!-- 4×2 -->
+    <div class="fold-panel" id="panel-m4x2">
+      <div class="mat-label">Shape (4, 2) : Stride (2, 1) — fold mode 2 into mode 0</div>
+      <div class="mat-wrap" id="mat-4x2-wrap"></div>
+      <div class="info-band">
+        <span class="ib-ok">✓ Flat representation exists:</span> Shape (4, 2), Stride (2, 1).<br>
+        The CuTe notation is <strong>((2,2), 2) : ((2,4), 1)</strong> — the first mode is itself a pair (size-2 within-slice × size-2 across-slices). The flat (coalesced) form merges these into a single stride-2 dimension of size 4. Both are valid.
+      </div>
+    </div>
+
+    <!-- 2×4 -->
+    <div class="fold-panel" id="panel-m2x4">
+      <div class="mat-label">Shape (2, 4) — fold mode 2 into mode 1 <span class="impossible-tag">no flat stride</span></div>
+      <div class="mat-wrap" id="mat-2x4-wrap"></div>
+      <div class="info-band">
+        <span class="ib-warn">✗ No flat stride exists for the second dimension.</span><br>
+        The four column indices {0,1,4,5} in the second column have offsets that jump by 1 within a slice and by 4 across slices — there is no single integer stride that produces this pattern. CuTe can still represent it as <strong>(2,(2,2)) : (2,(1,4))</strong> — a nested stride — but libraries like NumPy or PyTorch cannot.
+      </div>
+    </div>
+  </div>
+
+  <div class="callout teal">
+    <div class="callout-title">The Key Point</div>
+    <p>Tensor folding is <em>always a zero-copy operation</em> — it is just a change of view. No elements move. The layout object (shape + stride) is rewritten; the underlying data is not. Whether a flat representation exists depends on the memory layout of the original tensor and which modes you group together.</p>
+  </div>
+</section>
+
+<!-- §5 CANONICAL GEMM -->
+<section>
+  <div class="sec-label">§5 — The Canonical Form</div>
+  <h2>Any tensor contraction folds into one loop nest</h2>
+
+  <p>With mode classification and folding in hand, we can write down the universal form of every tensor contraction:</p>
+
+  <div class="math">C<sub>m̂ n̂ ℓ̂</sub> = A<sub>m̂ k̂ ℓ̂</sub> · B<sub>n̂ k̂ ℓ̂</sub></div>
+
+  <p>Each hat-mode (<code>m̂</code>, <code>n̂</code>, <code>k̂</code>, <code>ℓ̂</code>) may be a single index or a <em>multi-mode</em> — a group of folded indices. Because of the colexicographic bijection from Chapter 1.2, we can still loop over any multi-mode with a single flat index. The result is a <strong>batched GEMM with four nested loops</strong>:</p>
+
+  <div class="code-block" data-lang="c">
+    <code><span class="kw">for</span> (<span class="kw">int</span> <span class="idx-t">l</span> = <span class="num">0</span>; <span class="idx-t">l</span> &lt; L; ++<span class="idx-t">l</span>)          <span class="cm">// batch (ℓ̂ = t)    L=3</span>
+  <span class="kw">for</span> (<span class="kw">int</span> <span class="idx-s">m</span> = <span class="num">0</span>; <span class="idx-s">m</span> &lt; M; ++<span class="idx-s">m</span>)        <span class="cm">// row   (m̂ = s,p)  M=4</span>
+    <span class="kw">for</span> (<span class="kw">int</span> <span class="idx-q">n</span> = <span class="num">0</span>; <span class="idx-q">n</span> &lt; N; ++<span class="idx-q">n</span>)      <span class="cm">// col   (n̂ = q)    N=5</span>
+      <span class="kw">for</span> (<span class="kw">int</span> <span class="idx-ur">k</span> = <span class="num">0</span>; <span class="idx-ur">k</span> &lt; K; ++<span class="idx-ur">k</span>)    <span class="cm">// red   (k̂ = u,r)  K=12</span>
+        C(<span class="idx-s">m</span>,<span class="idx-q">n</span>,<span class="idx-t">l</span>) += A(<span class="idx-s">m</span>,<span class="idx-ur">k</span>,<span class="idx-t">l</span>) * B(<span class="idx-q">n</span>,<span class="idx-ur">k</span>,<span class="idx-t">l</span>);</code>
+  </div>
+
+  <p>For our running example (<code>C_stqp = A_stupr · B_qtru</code>), the folded dimensions are:</p>
+
+  <div class="dim-pills">
+    <div class="dim-pill m">M = S×P = 4   (row: s, p)</div>
+    <div class="dim-pill n">N = Q = 5      (col: q)</div>
+    <div class="dim-pill k">K = U×R = 12  (reduction: u, r)</div>
+    <div class="dim-pill l">L = T = 3      (batch: t)</div>
+  </div>
+
+  <p>The folding process — reshaping and transposing — is shown in the pipeline below. Critically, this is exactly what NumPy's <code>reshape</code> and <code>transpose</code> do (or what CuTe's layout composition does, without touching data at all):</p>
+
+  <div class="gemm-funnel">
+    <div class="gf-row">
+      <div class="gf-box">
+        <div class="gf-box-label">A original</div>
+        <div class="gf-box-val">shape (S,T,U,P,R) = (2,3,4,2,3)</div>
+      </div>
+      <div class="gf-arrow">→</div>
+      <div class="gf-box">
+        <div class="gf-box-label">A folded — transpose + reshape</div>
+        <div class="gf-box-val"><span style="color:var(--row)">sp</span>, <span style="color:var(--red)">ur</span>, <span style="color:var(--batch)">t</span> → shape (4, 12, 3)</div>
+      </div>
+    </div>
+    <div class="gf-row">
+      <div class="gf-box">
+        <div class="gf-box-label">B original</div>
+        <div class="gf-box-val">shape (Q,T,R,U) = (5,3,3,4)</div>
+      </div>
+      <div class="gf-arrow">→</div>
+      <div class="gf-box">
+        <div class="gf-box-label">B folded — transpose + reshape</div>
+        <div class="gf-box-val"><span style="color:var(--col)">q</span>, <span style="color:var(--red)">ur</span>, <span style="color:var(--batch)">t</span> → shape (5, 12, 3)</div>
+      </div>
+    </div>
+    <div class="gf-row">
+      <div class="gf-box">
+        <div class="gf-box-label">C result</div>
+        <div class="gf-box-val">shape (M,N,L) = (4, 5, 3)</div>
+      </div>
+      <div class="gf-arrow">→</div>
+      <div class="gf-box">
+        <div class="gf-box-label">C unfolded — reshape + transpose</div>
+        <div class="gf-box-val">→ shape (S,T,Q,P) = (2,3,5,2)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout amber">
+    <div class="callout-title">Verified</div>
+    <p>The four-loop batched GEMM operating on folded A and B produces output that is numerically identical to the direct <code>np.einsum('stupr,qtru->stqp', A, B)</code> call. The einsum is the <em>specification</em>; the batched GEMM is the <em>implementation</em>.</p>
+  </div>
+</section>
+
+<!-- §6 CLOSING -->
+<section>
+  <div class="sec-label">§6 — Implications</div>
+  <h2>One kernel to rule them all</h2>
+
+  <p>This is not just a theoretical result. It means that a single, well-optimised batched GEMM implementation — say, cuBLAS or CUTLASS — can evaluate:</p>
+
+  <p><strong>Any matrix multiplication (GEMM):</strong> trivially, since it's already a batched GEMM with L=1.<br>
+  <strong>Any tensor contraction (GETT):</strong> via mode classification and folding as shown here.<br>
+  <strong>Any convolution (CONV):</strong> by expressing the sliding-window as a Toeplitz matrix fold (im2col).<br>
+  <strong>Any attention mechanism:</strong> by grouping head/sequence/feature dimensions into m̂, n̂, k̂, ℓ̂.</p>
+
+  <p>Optimisations — tiling, vectorisation, register blocking, warp-level parallelism — can all be applied to the <em>canonical four-loop form</em> and then lifted back to the original tensor contraction via layout composition. This is the architecture of CUTLASS: a composable system of layouts that express both the data and the algorithm, where an optimised schedule is just a different layout composition on the same underlying kernel.</p>
+
+  <div class="callout rose">
+    <div class="callout-title">What comes next</div>
+    <p>Section 2.6.2 covers how to construct folded layouts automatically for generic GEMM and its applications. Section 3.3 shows how the optimisation transformations themselves are expressed as layouts composing with data layouts — closing the loop between algorithm and data representation.</p>
+  </div>
+</section>
+
+<hr>
+<div class="footer">
+  <p>Part of a series on Layout Theory for Systems Programmers · tensors all the way down</p>
+</div>
+
+</div><!-- /page -->
+
+<script>
+// ── TAB SWITCH ──────────────────────────────────────────────
+function switchTab(id){
+  document.querySelectorAll('.fold-tab').forEach((t,i)=>{
+    const ids=['phys','t3d','m4x2','m2x4'];
+    t.classList.toggle('active', ids[i]===id);
+  });
+  document.querySelectorAll('.fold-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+}
+
+// ── DATA ────────────────────────────────────────────────────
+const LABELS = ['a','b','c','d','e','f','g','h'];
+// offset = 2m + 1n + 4p  for shape(2,2,2) stride(2,1,4)
+function off3d(m,n,p){return 2*m+1*n+4*p;}
+
+const GROUPS = [
+  {letters:['a','b'], cls:'grp0'}, // offsets 0,1
+  {letters:['c','d'], cls:'grp1'}, // offsets 2,3
+  {letters:['e','f'], cls:'grp2'}, // offsets 4,5
+  {letters:['g','h'], cls:'grp3'}, // offsets 6,7
+];
+function groupCls(letter){
+  for(const g of GROUPS) if(g.letters.includes(letter)) return g.cls;
+  return '';
+}
+
+// ── PHYSICAL TAPE ───────────────────────────────────────────
+(function(){
+  const tape = document.getElementById('phys-tape');
+  for(let i=0;i<8;i++){
+    const c=document.createElement('div');
+    c.className='phys-cell '+groupCls(LABELS[i]);
+    c.innerHTML=`<span class="pc-letter">${LABELS[i]}</span><span class="pc-offset">[${i}]</span>`;
+    tape.appendChild(c);
+  }
+})();
+
+// ── RANK-3 TENSOR ───────────────────────────────────────────
+(function(){
+  const wrap=document.getElementById('tensor3d-wrap');
+  for(let p=0;p<2;p++){
+    const sw=document.createElement('div');
+    sw.className='slice-wrap';
+    const sl=document.createElement('div');
+    sl.className='slice-label';
+    sl.textContent=`p = ${p}`;
+    const sg=document.createElement('div');
+    sg.className='slice-grid';
+    for(let n=0;n<2;n++){
+      const row=document.createElement('div');
+      row.className='slice-row';
+      for(let m=0;m<2;m++){
+        const o=off3d(m,n,p);
+        const letter=LABELS[o];
+        const cell=document.createElement('div');
+        cell.className='t-cell '+groupCls(letter);
+        cell.title=`(m=${m},n=${n},p=${p}) → offset ${o}`;
+        cell.innerHTML=`<span class="tc-letter">${letter}</span><span class="tc-coord">(${m},${n},${p})</span>`;
+        row.appendChild(cell);
+      }
+      sg.appendChild(row);
+    }
+    sw.appendChild(sl); sw.appendChild(sg); wrap.appendChild(sw);
+  }
+})();
+
+// 4×2 matrix: row index i ∈ 0..3, col index j ∈ 0..1
+// flat stride (2,1): offset = 2*i + 1*j
+// corresponds to folding p into m: (m_orig, p) → i = m_orig + 2*p
+function off4x2(i,j){return 2*i+1*j;}
+(function(){
+  const wrap=document.getElementById('mat-4x2-wrap');
+  const g=document.createElement('div');g.className='mat-grid';
+  for(let i=0;i<4;i++){
+    const row=document.createElement('div');row.className='mat-row';
+    for(let j=0;j<2;j++){
+      const o=off4x2(i,j);
+      const letter=LABELS[o];
+      const cell=document.createElement('div');
+      cell.className='m-cell '+groupCls(letter);
+      cell.title=`(i=${i},j=${j}) → offset ${o}`;
+      cell.innerHTML=`<span class="mc-letter">${letter}</span><span class="mc-coord">(${i},${j})</span>`;
+      row.appendChild(cell);
+    }
+    g.appendChild(row);
+  }
+  wrap.appendChild(g);
+})();
+
+// 2×4 matrix: row i ∈ 0..1, col j ∈ 0..3
+// stride (2, ???): offset for row i, col j:
+// j = n_orig + 2*p (n_orig∈{0,1}, p∈{0,1})
+// so j∈{0,1} → p=0, j∈{2,3} → p=1, n_orig=j%2
+function off2x4(i,j){
+  // i = m ∈ {0,1}, j encodes (n_orig, p): j%2=n_orig, j//2=p
+  const n_orig=j%2, p=Math.floor(j/2);
+  return 2*i + 1*n_orig + 4*p;
+}
+(function(){
+  const wrap=document.getElementById('mat-2x4-wrap');
+  const g=document.createElement('div');g.className='mat-grid';
+  for(let i=0;i<2;i++){
+    const row=document.createElement('div');row.className='mat-row';
+    for(let j=0;j<4;j++){
+      const o=off2x4(i,j);
+      const letter=LABELS[o];
+      const cell=document.createElement('div');
+      cell.className='m-cell '+groupCls(letter);
+      cell.title=`(i=${i},j=${j}) → offset ${o}`;
+      cell.innerHTML=`<span class="mc-letter">${letter}</span><span class="mc-coord">(${i},${j})</span>`;
+      row.appendChild(cell);
+    }
+    g.appendChild(row);
+  }
+  wrap.appendChild(g);
+})();
+</script>
+
+<!-- Theme Toggle Script -->
+<script>
+(function(){
+  const html = document.documentElement;
+  const btn = document.getElementById('themeToggle');
+  const saved = localStorage.getItem('theme');
+  if (saved) {
+    html.setAttribute('data-theme', saved);
+  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    html.setAttribute('data-theme', 'dark');
+  }
+  btn.addEventListener('click', function() {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  });
+})();
+</script>
+</body>
+</html>
