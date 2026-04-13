@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2.3 Stride — CuTe Layouts</title>
+
+<!-- FONT STACK: Playfair Display (serif) + Azeret Mono (mono) to match main site -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Azeret+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Font stack from main site */
+  --font-serif: 'Playfair Display', serif;
+  --font-mono: 'Azeret Mono', monospace;
+  --font-sans: system-ui, -apple-system, sans-serif;
+
+  /* Light theme (default) - matching main site */
+  --paper: #f4f1eb;
+  --paper2: #ede9e0;
+  --ink: #1c1a17;
+  --ink2: #3d3a35;
+  --ink3: #7a7570;
+  --rule: #d9d4c8;
+  --rule2: #c4bfb2;
+  --green: #2a5c45;
+  --green-light: #e8f0ec;
+  --orange: #b85c2a;
+  --orange-light: #f5ece6;
+  --blue: #2a4a6b;
+}
+
+[data-theme="dark"] {
+  /* Dark theme from main site */
+  --paper: #0f0d0c;
+  --paper2: #161412;
+  --ink: #f4f1eb;
+  --ink2: #d1ccc3;
+  --ink3: #8a837b;
+  --rule: #24211e;
+  --rule2: #332f2b;
+  --green: #6fb894;
+  --green-light: #16221c;
+  --orange: #e69a6e;
+  --orange-light: #261c14;
+  --blue: #6a94b8;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-mono);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12.5px;
+  line-height: 1.7;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ── NAV ── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 52px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.logo {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+  transition: color 0.2s ease;
+}
+
+.nav-links {
+  display: flex;
+  gap: 28px;
+  list-style: none;
+  margin: 0;
+}
+
+.nav-links a {
+  font-size: 11px;
+  color: var(--ink3);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: color 0.15s;
+}
+
+.nav-links a:hover { color: var(--ink); }
+
+.theme-toggle {
+  background: transparent;
+  border: 1px solid var(--rule2);
+  border-radius: 2px;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink3);
+  transition: all 0.15s ease;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  border-color: var(--ink3);
+  color: var(--ink);
+  background: var(--paper2);
+}
+
+.theme-toggle .sun-icon { display: none; }
+.theme-toggle .moon-icon { display: block; }
+
+[data-theme="dark"] .theme-toggle .sun-icon { display: block; }
+[data-theme="dark"] .theme-toggle .moon-icon { display: none; }
+
+/* ── HERO / HEADER ── */
+.hero {
+  padding: 80px 40px 60px;
+  max-width: 1080px;
+  margin: 0 auto;
+  border-bottom: 1px solid var(--rule);
+  transition: border-color 0.2s ease;
+}
+
+.hero-label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: color 0.2s ease;
+}
+
+.hero-label::before {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  height: 1px;
+  background: var(--ink3);
+  transition: background-color 0.2s ease;
+}
+
+.hero-title {
+  font-family: var(--font-serif);
+  font-size: clamp(44px, 5vw, 72px);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  margin-bottom: 20px;
+  transition: color 0.2s ease;
+}
+
+.hero-title em {
+  font-style: italic;
+  color: var(--green);
+  transition: color 0.2s ease;
+}
+
+.hero-sub {
+  font-size: 13px;
+  color: var(--ink2);
+  line-height: 1.8;
+  max-width: 600px;
+  margin-bottom: 20px;
+  transition: color 0.2s ease;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 24px;
+  font-size: 11px;
+  color: var(--ink3);
+  letter-spacing: 0.04em;
+  flex-wrap: wrap;
+  transition: color 0.2s ease;
+}
+
+.hero-meta span::before { content: '// '; color: var(--rule2); margin-right: 4px; }
+
+/* ── CONTENT LAYOUT ── */
+.content {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+section {
+  padding: 72px 0;
+  border-bottom: 1px solid var(--rule);
+  transition: border-color 0.2s ease;
+}
+
+section:last-of-type { border-bottom: none; }
+
+.section-label {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: color 0.2s ease;
+}
+
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+  transition: background-color 0.2s ease;
+}
+
+h2 {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 28px;
+  transition: color 0.2s ease;
+  line-height: 1.3;
+}
+
+h3 {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 28px 0 16px;
+  transition: color 0.2s ease;
+}
+
+p {
+  margin-bottom: 16px;
+  color: var(--ink2);
+  line-height: 1.8;
+}
+
+p:last-child { margin-bottom: 0; }
+
+strong { color: var(--ink); font-weight: 500; }
+em { color: var(--green); font-style: italic; }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--rule);
+  padding: 28px 40px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--ink3);
+  letter-spacing: 0.04em;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+footer p { margin: 0; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .hero { padding: 56px 20px 48px; }
+  .content { padding: 0 20px; }
+  section { padding: 48px 0; }
+  footer { padding: 20px; }
+}
+
+/* ── REVEAL ANIMATIONS ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.reveal.in { opacity: 1; transform: translateY(0); }
+
+/* Alias old variable names to new theme variables for compatibility */
+:root {
+  --math: var(--purple, #6a4a9e); --red: #c0392b;
+  --mono: var(--font-mono); --serif: var(--font-serif); --sans: var(--font-sans);
+}
+[data-theme="dark"] {
+  --bg: var(--paper); --surface: var(--paper2); --surface2: var(--paper2);
+  --border: var(--rule); --border2: var(--rule2);
+  --accent: var(--blue); --accent2: var(--orange); --accent3: var(--green);
+  --text: var(--ink); --text-dim: var(--ink2); --text-faint: var(--ink3);
+  --math: var(--purple, #c4b5fd); --red: #f06292;
+  --mono: var(--font-mono); --serif: var(--font-serif); --sans: var(--font-sans);
+}
+
+  /* ── HEADER ── */
+  header {
+    padding: 80px 0 60px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  header::before {
+    content: '';
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 300px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(91,141,238,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .chapter-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(91,141,238,0.35);
+    padding: 4px 12px;
+    border-radius: 2px;
+    margin-bottom: 28px;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(40px, 6vw, 68px);
+    line-height: 1.08;
+    color: #eef0f7;
+    margin-bottom: 20px;
+    letter-spacing: -0.01em;
+  }
+  h1 em { color: var(--accent); font-style: italic; }
+  .subtitle {
+    max-width: 560px;
+    margin: 0 auto;
+    color: var(--text-dim);
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  /* ── TOC ── */
+  .toc {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    justify-content: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .toc a {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    transition: color 0.2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .toc a::before { content: '§'; color: var(--text-faint); }
+  .toc a:hover { color: var(--accent); }
+
+  /* ── MAIN CONTAINER ── */
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  section {
+    padding: 64px 0 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  section:last-child { border-bottom: none; }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: 32px;
+    color: #eef0f7;
+    margin-bottom: 24px;
+    line-height: 1.2;
+  }
+  h3 {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin: 40px 0 12px;
+  }
+  p { margin-bottom: 18px; color: var(--text); font-weight: 300; }
+  p:last-child { margin-bottom: 0; }
+
+  strong { color: #eef0f7; font-weight: 500; }
+  em { color: var(--math); font-style: italic; }
+  code {
+    font-family: var(--mono);
+    font-size: 13.5px;
+    background: var(--surface2);
+    color: var(--accent3);
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  /* ── DEFINITION BOX ── */
+  .definition {
+    border-left: 2px solid var(--math);
+    background: linear-gradient(90deg, rgba(196,181,253,0.05) 0%, transparent 100%);
+    padding: 20px 24px;
+    margin: 28px 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .definition .def-label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--math);
+    margin-bottom: 8px;
+    opacity: 0.7;
+  }
+  .definition p { margin-bottom: 8px; font-size: 15px; }
+
+  /* ── MATH DISPLAY ── */
+  .math-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px 28px;
+    margin: 20px 0;
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--math);
+    overflow-x: auto;
+    line-height: 2;
+  }
+  .math-block .comment { color: var(--text-faint); font-size: 12px; }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 24px 0;
+    font-size: 13.5px;
+  }
+  .code-block .cb-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .code-block .cb-lang {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  .code-block .cb-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .code-block pre {
+    padding: 18px 20px;
+    overflow-x: auto;
+    line-height: 1.7;
+    font-family: var(--mono);
+  }
+  .kw { color: #79b8ff; }
+  .fn { color: var(--accent3); }
+  .str { color: var(--accent2); }
+  .cm { color: var(--text-faint); font-style: italic; }
+  .num { color: #f97583; }
+  .var { color: var(--text); }
+  .op  { color: var(--math); }
+
+  /* ── OUTPUT BOX ── */
+  .output-box {
+    background: #080a0f;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px 20px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-dim);
+    margin: -12px 0 24px;
+    line-height: 1.8;
+  }
+  .output-box .highlight { color: var(--accent3); }
+  .output-box .ok { color: #5de8b0; }
+
+  /* ── CALLOUT ── */
+  .callout {
+    background: linear-gradient(135deg, rgba(91,141,238,0.07), rgba(93,232,176,0.04));
+    border: 1px solid rgba(91,141,238,0.2);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 28px 0;
+  }
+  .callout .icon { font-size: 18px; margin-bottom: 8px; }
+  .callout p { font-size: 15px; margin-bottom: 0; }
+
+  /* ── INTERACTIVE WIDGETS ── */
+  .widget {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    margin: 32px 0;
+  }
+  .widget-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .widget-title::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+    align-items: center;
+  }
+  .control-group { display: flex; flex-direction: column; gap: 4px; }
+  .control-group label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .control-group input[type=number],
+  .control-group select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 14px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    width: 72px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .control-group input:focus,
+  .control-group select:focus { border-color: var(--accent); }
+  .control-group select { width: 130px; }
+
+  /* Grid canvas for memory visualization */
+  canvas {
+    display: block;
+    border-radius: 4px;
+  }
+
+  /* Memory tape */
+  .tape-container {
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  .tape {
+    display: flex;
+    gap: 3px;
+    min-width: max-content;
+  }
+  .tape-cell {
+    width: 40px; height: 40px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 11px;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    position: relative;
+    cursor: default;
+  }
+  .tape-cell .cell-idx {
+    font-size: 9px;
+    color: var(--text-faint);
+    position: absolute;
+    top: 2px;
+  }
+  .tape-cell .cell-val {
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .tape-cell.active {
+    border-color: var(--accent);
+    background: rgba(91,141,238,0.15);
+    transform: translateY(-3px);
+  }
+  .tape-cell.active .cell-val { color: var(--accent); }
+
+  /* Grid for 2D layout */
+  .grid-vis {
+    display: inline-grid;
+    gap: 3px;
+    margin: 16px 0;
+  }
+  .grid-cell {
+    width: 46px; height: 46px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .grid-cell .coord { color: var(--text-faint); font-size: 9px; }
+  .grid-cell .offset { font-size: 12px; font-weight: 500; color: var(--text); }
+  .grid-cell:hover { border-color: var(--accent2); background: rgba(232,168,76,0.1); }
+  .grid-cell:hover .offset { color: var(--accent2); }
+  .grid-cell.highlighted {
+    border-color: var(--accent);
+    background: rgba(91,141,238,0.18);
+    transform: scale(1.05);
+    z-index: 10;
+  }
+  .grid-cell.highlighted .offset { color: var(--accent); }
+  .grid-label {
+    font-family: var(--mono); font-size: 10px;
+    color: var(--text-dim); text-align: center;
+  }
+
+  /* Stat chips */
+  .stats { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+  .stat {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+  .stat .sk { color: var(--text-dim); }
+  .stat .sv { color: var(--accent3); }
+
+  /* Dot product walkthrough */
+  .dot-step {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 14px;
+    margin: 10px 0;
+  }
+  .dot-term {
+    display: flex; align-items: center; gap: 4px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 4px 10px;
+    transition: all 0.2s;
+  }
+  .dot-term .c { color: var(--accent2); }
+  .dot-term .d { color: var(--accent); }
+  .dot-term .x { color: var(--text-dim); font-size: 11px; }
+  .dot-sum { color: var(--accent3); font-size: 16px; font-weight: 500; }
+  .dot-eq { color: var(--text-dim); }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .tab {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    padding: 8px 16px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+    letter-spacing: 0.05em;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Semimodule cards */
+  .sm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+  @media (max-width: 600px) { .sm-grid { grid-template-columns: 1fr; } }
+  .sm-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+  .sm-card:hover { border-color: var(--accent); }
+  .sm-card .sm-name {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 8px;
+  }
+  .sm-card .sm-formula {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--math);
+    margin: 8px 0;
+    background: var(--surface2);
+    padding: 6px 10px;
+    border-radius: 4px;
+  }
+  .sm-card p { font-size: 13px; margin: 0; color: var(--text-dim); }
+
+  /* Tuple stride viz */
+  .tuple-grid {
+    display: inline-grid;
+    gap: 3px;
+    margin: 12px 0;
+  }
+  .tuple-cell {
+    width: 56px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent3);
+    background: var(--surface2);
+    transition: all 0.15s;
+  }
+  .tuple-cell:hover {
+    border-color: var(--accent3);
+    background: rgba(93,232,176,0.1);
+  }
+
+  /* Highlight row/col */
+  .row-labels, .col-labels {
+    display: flex;
+    gap: 3px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-faint);
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Scroll fade-in */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Annotation */
+  .annotation {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border-radius: 4px;
+    min-height: 28px;
+    transition: color 0.2s;
+  }
+  .annotation.active { color: var(--accent); }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 60px 24px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.05em;
+    border-top: 1px solid var(--border);
+  }
+  footer a { color: var(--text-dim); text-decoration: none; }
+
+  /* Animated underline for key terms */
+  .term {
+    color: var(--accent3);
+    border-bottom: 1px dashed rgba(93,232,176,0.3);
+    cursor: help;
+  }
+
+  /* Progress */
+  .progress-bar {
+    position: fixed; top: 0; left: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    z-index: 2000;
+    transition: width 0.1s;
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="https://bikrammajhi.github.io/" class="logo">Bikram Majhi</a>
+  <ul class="nav-links">
+    <li><a href="/#about">About</a></li>
+    <li><a href="/#ladder">GEMM</a></li>
+    <li><a href="/#results">Results</a></li>
+    <li><a href="/#projects">Projects</a></li>
+    <li><a href="/#writing">Writing</a></li>
+    <li><a href="/#journal">Journal</a></li>
+    <li><a href="/#contact">Contact</a></li>
+  </ul>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="5"></circle>
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+    </svg>
+    <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+  </button>
+</nav>
+
+<!-- HERO -->
+<div class="hero reveal">
+  <div class="hero-label">GPU Programming · CuTe DSL</div>
+  <h1 class="hero-title">CuTe DSL from scratch:<br>From Coordinates to <em>Offsets</em></h1>
+  <p class="hero-sub">How a stride turns a logical grid position into a memory address — and why the same idea generalises far beyond arrays.</p>
+  <div class="hero-meta">
+    <span>March 2026</span>
+    <span>~15 minute read</span>
+    <span>Part 5 of 15</span>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- INTRODUCTION -->
+<section class="reveal">
+  <div class="section-label">§5 — Intuition</div>
+  <h2>You already know this from C arrays</h2>
+
+  <p>If you have ever written a 2-D matrix in C and accessed element <code>[row][col]</code>, you've used a stride. A row-major matrix of shape <code>(M, N)</code> stores its elements linearly in memory: element at row <em>r</em>, column <em>c</em> lives at byte offset</p>
+
+  <div class="math-block">
+    offset = r × N + c × 1
+    <br><span class="comment">            ↑           ↑</span>
+    <br><span class="comment">     row-stride=N  col-stride=1</span>
+  </div>
+
+  <p>The two numbers <strong>(N, 1)</strong> are the <em>strides</em>. They are a recipe: "to move one step in dimension 0, jump N slots; to move one step in dimension 1, jump 1 slot."</p>
+
+  <p>Column-major (Fortran-style) flips them: <strong>(1, M)</strong>. Moving one step in dimension 0 now jumps only 1 slot, while dimension 1 jumps M slots. Same shape, totally different memory layout — controlled entirely by the strides.</p>
+
+  <div class="callout fade-in">
+    <div class="icon">💡</div>
+    <p>The core idea: a <strong>stride</strong> is a tuple of numbers, one per dimension, that tells you how far to jump in memory when you take a unit step along that dimension. The offset for any coordinate is just the <strong>dot product</strong> of coordinate × stride.</p>
+  </div>
+
+  <p>CuTe's Layout abstraction crystallises this intuition into a precise, hierarchically recursive definition — and then generalises it to domains far beyond plain integer offsets.</p>
+</section>
+
+<!-- 2. DEFINITION -->
+<section id="definition" class="fade-in">
+  <h3>Definition 2.15</h3>
+  <h2>Stride and the inner product</h2>
+
+  <div class="definition">
+    <div class="def-label">Definition 2.15 — Stride</div>
+    <p>A <strong>stride</strong> <em>D</em> for a shape <em>S</em> is an HTuple that is congruent with the shape, <em>S ∼ D</em>. It defines a mapping from a natural coordinate <em>c̃ ∈ ℤ<sub>S</sub></em> to the codomain <em>D</em>, given by the <strong>inner_product</strong> operation:</p>
+    <p>For scalars: <code>inner_product(c, d) = c × d</code></p>
+    <p>For tuples: <code>inner_product(c, d) = Σᵢ inner_product(cᵢ, dᵢ)</code></p>
+  </div>
+
+  <p>In the vast majority of cases, strides are just integers, and the result is an integer offset into a flat data array. But the definition deliberately uses the word "codomain <em>D</em>" rather than "integer" — more on that in the <a href="#semimodule" style="color:var(--accent)">semimodule section</a>.</p>
+
+  <h3>The dot product, step by step</h3>
+
+  <p>For a layout with shape <strong>(4, 8)</strong> and stride <strong>(1, 4)</strong> — column-major — the offset for coordinate (m, n) is:</p>
+
+  <div class="math-block">
+    offset(m, n)  =  m × 1  +  n × 4
+    <br><br>
+    offset(0, 0)  =  0 × 1  +  0 × 4  =  <span style="color:var(--accent3)"> 0</span>
+    <br>
+    offset(1, 0)  =  1 × 1  +  0 × 4  =  <span style="color:var(--accent3)"> 1</span>
+    <br>
+    offset(1, 1)  =  1 × 1  +  1 × 4  =  <span style="color:var(--accent3)"> 5</span>
+    <br>
+    offset(2, 5)  =  2 × 1  +  5 × 4  =  <span style="color:var(--accent3)">22</span>
+    <br>
+    offset(3, 7)  =  3 × 1  +  7 × 4  =  <span style="color:var(--accent3)">31</span>
+  </div>
+
+  <p>Notice: stride-0 is <strong>1</strong>, so consecutive rows within a column are adjacent in memory (column-major). If we had used stride <strong>(8, 1)</strong> instead, consecutive columns within a row would be adjacent — that's row-major.</p>
+</section>
+
+<!-- 3. INTERACTIVE LAYOUT -->
+<section id="interactive" class="fade-in">
+  <h3>Interactive</h3>
+  <h2>Play with a 2-D layout</h2>
+
+  <p>Adjust the shape and strides below. Click any cell in the grid to see the dot-product computation. The memory tape at the bottom shows which slots are touched — gaps reveal non-contiguous (strided) access.</p>
+
+  <div class="widget">
+    <div class="widget-title">Layout Explorer — (M, N) : (s₀, s₁)</div>
+
+    <div class="controls">
+      <div class="control-group">
+        <label>M (rows)</label>
+        <input type="number" id="shapeM" value="4" min="1" max="8">
+      </div>
+      <div class="control-group">
+        <label>N (cols)</label>
+        <input type="number" id="shapeN" value="8" min="1" max="8">
+      </div>
+      <div class="control-group">
+        <label>stride s₀</label>
+        <input type="number" id="strideS0" value="1" min="-32" max="32">
+      </div>
+      <div class="control-group">
+        <label>stride s₁</label>
+        <input type="number" id="strideS1" value="4" min="-32" max="32">
+      </div>
+      <div class="control-group">
+        <label>preset</label>
+        <select id="preset">
+          <option value="col">Column-major (4,8):(1,4)</option>
+          <option value="row">Row-major (4,8):(8,1)</option>
+          <option value="skip">Skip rows (4,4):(2,8)</option>
+          <option value="sq">Square (4,4):(1,4)</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <div id="grid-container"></div>
+    </div>
+    <div class="annotation" id="grid-annotation">← hover or click a cell to see the computation</div>
+
+    <div class="stats" id="grid-stats"></div>
+
+    <div style="margin-top:24px;">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text-faint);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">Memory tape (touched offsets highlighted)</div>
+      <div class="tape-container">
+        <div class="tape" id="tape"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. NESTED SHAPES -->
+<section id="nested" class="fade-in">
+  <h3>Hierarchical layouts</h3>
+  <h2>Nested shapes, recursive inner product</h2>
+
+  <p>CuTe shapes can be <em>hierarchical</em> — a dimension can itself be a tuple. The layout <code>((2,2),(4,2)) : ((1,8),(2,16))</code> has nested shape and nested stride. The inner product just recurses:</p>
+
+  <div class="math-block">
+    shape  = ((2, 2), (4, 2))
+    <br>
+    stride = ((1, 8), (2,16))
+    <br><br>
+    offset((a,b),(c,d)) = a×1 + b×8 + c×2 + d×16
+  </div>
+
+  <p>For the natural coordinate at integer index 22:</p>
+
+  <div class="math-block">
+    idx2crd(22, (4,8))          →  flat 2D coord  (2, 5)
+    <br>
+    idx2crd(22, ((2,2),(4,2)))  →  nested coord  ((0,1),(1,1))
+    <br><br>
+    offset = 0×1 + 1×8 + 1×2 + 1×16
+    <br>       = 0  + 8  + 2  + 16
+    <br>       = <span style="color:var(--accent3)">26</span>
+  </div>
+
+  <div class="widget fade-in">
+    <div class="widget-title">Nested layout visualiser — ((2,2),(4,2)) : ((1,8),(2,16))</div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="nested-grid">Grid view</div>
+      <div class="tab" data-tab="nested-trace">Trace index</div>
+    </div>
+
+    <div class="tab-content active" id="nested-grid">
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px;">
+        The outer dimensions are (4, 8) flattened. Hover a cell to expand its nested coordinate decomposition.
+      </p>
+      <div id="nested-grid-container" style="overflow-x:auto;"></div>
+      <div class="annotation" id="nested-annotation">hover a cell</div>
+    </div>
+
+    <div class="tab-content" id="nested-trace">
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px;">Enter an integer index (0–31) to trace it through the nested layout.</p>
+      <div class="controls">
+        <div class="control-group">
+          <label>Integer index i</label>
+          <input type="number" id="traceIdx" value="22" min="0" max="31" style="width:80px;">
+        </div>
+      </div>
+      <div id="trace-output" style="font-family:var(--mono);font-size:13px;line-height:2;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. SEMIMODULE -->
+<section id="semimodule" class="fade-in">
+  <h3>Definition 2.16</h3>
+  <h2>Integer-semimodules: the codomain generalises</h2>
+
+  <p>So far the stride elements have been plain integers. The formal definition asks only that the stride elements come from an <strong>integer-semimodule</strong> — a set with addition and scalar multiplication that obeys three axioms:</p>
+
+  <div class="math-block">
+    1 · m  = m                        <span class="comment">  multiplicative identity</span>
+    <br>
+    m + (n + p)  =  (m + n) + p       <span class="comment">  additive associativity</span>
+    <br>
+    a · (b · m)  =  (ab) · m          <span class="comment">  multiplicative associativity</span>
+  </div>
+
+  <p>No additive identity or inverse is required (hence <em>semi</em>module). This is a very weak algebraic structure. Here are the three most important examples:</p>
+
+  <div class="sm-grid">
+    <div class="sm-card">
+      <div class="sm-name">ℤ — integers</div>
+      <div class="sm-formula">+, ×</div>
+      <p>The usual case. Strides are integers; offsets are integers into a flat array.</p>
+    </div>
+    <div class="sm-card">
+      <div class="sm-name">ℚ — rationals</div>
+      <div class="sm-formula">+, ×</div>
+      <p>Fractional strides. Rarely used in practice but algebraically valid.</p>
+    </div>
+    <div class="sm-card">
+      <div class="sm-name">𝔽₂ — bit field</div>
+      <div class="sm-formula">XOR, AND</div>
+      <p>Strides are bits; the "inner product" is an XOR of masked bits — this generates <strong>swizzle patterns</strong> used in shared-memory bank-conflict avoidance.</p>
+    </div>
+    <div class="sm-card">
+      <div class="sm-name">ℤ<sub>(*, *)</sub> — coord tuples</div>
+      <div class="sm-formula">componentwise +, scale</div>
+      <p>Strides are coordinate tuples; the inner product produces a <strong>coordinate</strong> rather than an offset. This is how CuTe layouts compose with each other.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="icon">🔑</div>
+    <p>The same shape / stride / inner_product framework works for all four. <em>What the layout computes</em> changes based on the codomain; the machinery doesn't. This is what makes CuTe layouts a genuine abstraction rather than a notation hack.</p>
+  </div>
+
+  <h3>𝔽₂ demo — XOR swizzle</h3>
+
+  <div class="widget fade-in">
+    <div class="widget-title">𝔽₂ semimodule — (XOR, AND)</div>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px;">
+      Scalar multiplication in 𝔽₂ is AND with the parity of the integer scalar. Try a few values to see that the three semimodule axioms hold.
+    </p>
+    <div class="controls">
+      <div class="control-group">
+        <label>x ∈ {0,1}</label>
+        <input type="number" id="f2x" value="1" min="0" max="1">
+      </div>
+      <div class="control-group">
+        <label>y ∈ {0,1}</label>
+        <input type="number" id="f2y" value="0" min="0" max="1">
+      </div>
+      <div class="control-group">
+        <label>z ∈ {0,1}</label>
+        <input type="number" id="f2z" value="1" min="0" max="1">
+      </div>
+      <div class="control-group">
+        <label>a ∈ ℤ</label>
+        <input type="number" id="f2a" value="3" min="-9" max="9" style="width:72px;">
+      </div>
+      <div class="control-group">
+        <label>b ∈ ℤ</label>
+        <input type="number" id="f2b" value="2" min="-9" max="9" style="width:72px;">
+      </div>
+    </div>
+    <div id="f2-output" style="font-family:var(--mono);font-size:13px;line-height:2.2;"></div>
+  </div>
+</section>
+
+<!-- 6. COORDINATE STRIDES -->
+<section id="coord-strides" class="fade-in">
+  <h3>ℤ<sub>(*, *)</sub> strides</h3>
+  <h2>Strides that generate coordinates</h2>
+
+  <p>The basis vectors of the rank-2 coordinate semimodule are</p>
+
+  <div class="math-block">
+    e₀ = (1, 0),   e₁ = (0, 1)
+    <br><br>
+    A layout with shape (M, N) and strides (e₀, e₁) maps
+    <br>
+    coordinate (i, j)  →  i × (1,0) + j × (0,1)  =  (i, j)
+    <br><br>
+    <span class="comment">It is the identity: coordinate in = coordinate out.</span>
+  </div>
+
+  <p>More interesting: strides <code>((2,0),(0,3))</code> map <code>(i,j) → (2i, 3j)</code>, dilating coordinates. This is used when composing layouts — one layout's offsets become another layout's coordinates.</p>
+
+  <div class="widget fade-in">
+    <div class="widget-title">Coordinate-valued strides — shape (3,5)</div>
+    <div class="tabs">
+      <div class="tab active" data-tab="cs-identity">Identity  (e₀, e₁)</div>
+      <div class="tab" data-tab="cs-scaled">Scaled  ((2,0),(0,3))</div>
+    </div>
+
+    <div class="tab-content active" id="cs-identity">
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">
+        stride = ((1,0),(0,1)). Each cell shows the <em>output coordinate tuple</em> produced by the inner product.
+      </p>
+      <div id="cs-identity-grid"></div>
+    </div>
+    <div class="tab-content" id="cs-scaled">
+      <p style="font-size:13px;color:var(--text-dim);margin-bottom:12px;">
+        stride = ((2,0),(0,3)). Output coordinate is (2i, 3j) — a scaled version of the input.
+      </p>
+      <div id="cs-scaled-grid"></div>
+    </div>
+  </div>
+
+  <p style="margin-top:28px;">This uniformity — the same inner_product for all codomains — is what lets CuTe express row-major, column-major, swizzled shared memory, tiled tensor layouts, and arbitrary compositions, all with the same three concepts: <strong>shape</strong>, <strong>stride</strong>, <strong>inner product</strong>.</p>
+</section>
+
+<section class="reveal" style="border:none; padding-top:40px; padding-bottom:40px; text-align:center;">
+  <p style="color:var(--ink3); font-size:11px; letter-spacing:0.08em; text-transform:uppercase;">
+    <em>Part 1:</em> Loops Are Just Layouts · <em>Part 2:</em> Tensors & Folding · <em>Part 3:</em> Tuples & HTuples · <em>Part 4:</em> Shape · <strong>Part 5:</strong> Stride · <em>Upcoming:</em> Layout Algebra
+  </p>
+</section>
+
+</div><!-- /content -->
+
+<!-- Footer -->
+<footer>
+  <p>Based on CuTe and CUTLASS documentation. Learn more at <a href="https://github.com/NVIDIA/cutlass" style="color:var(--green);">NVIDIA/CUTLASS</a> and <a href="https://github.com/NVIDIA/cutlass/blob/main/media/docs/cute/" style="color:var(--green);">CuTe Layouts</a>.</p>
+</footer>
+
+<!-- ════════════════════════════════════════════════════════
+     SCRIPTS
+     ════════════════════════════════════════════════════════ -->
+<script>
+// ── Scroll progress ──────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+  document.getElementById('progress').style.width = pct + '%';
+});
+
+// ── Fade-in observer ─────────────────────────────────────
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+
+// Reveal observer for new sections
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+// ── Tabs ─────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const parent = tab.closest('.widget') || tab.closest('section');
+    parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    parent.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab)?.classList.add('active');
+  });
+});
+
+// ── Helper: clamp ─────────────────────────────────────────
+const clamp = (v,a,b) => Math.min(b, Math.max(a,v));
+
+// ── WIDGET 1: 2D Layout Explorer ─────────────────────────
+const presets = {
+  col:  {M:4,N:8,s0:1,s1:4},
+  row:  {M:4,N:8,s0:8,s1:1},
+  skip: {M:4,N:4,s0:2,s1:8},
+  sq:   {M:4,N:4,s0:1,s1:4},
+};
+
+function getLayoutParams() {
+  return {
+    M:  clamp(parseInt(document.getElementById('shapeM').value)||4, 1, 8),
+    N:  clamp(parseInt(document.getElementById('shapeN').value)||8, 1, 8),
+    s0: parseInt(document.getElementById('strideS0').value)||1,
+    s1: parseInt(document.getElementById('strideS1').value)||4,
+  };
+}
+
+function setLayoutParams(p) {
+  document.getElementById('shapeM').value = p.M;
+  document.getElementById('shapeN').value = p.N;
+  document.getElementById('strideS0').value = p.s0;
+  document.getElementById('strideS1').value = p.s1;
+}
+
+document.getElementById('preset').addEventListener('change', e => {
+  setLayoutParams(presets[e.target.value]);
+  renderLayout();
+});
+
+['shapeM','shapeN','strideS0','strideS1'].forEach(id =>
+  document.getElementById(id).addEventListener('input', renderLayout)
+);
+
+function renderLayout() {
+  const {M, N, s0, s1} = getLayoutParams();
+  const gc = document.getElementById('grid-container');
+  const tape = document.getElementById('tape');
+  const stats = document.getElementById('grid-stats');
+  const ann = document.getElementById('grid-annotation');
+
+  // Compute all offsets
+  const offsets = [];
+  for (let n = 0; n < N; n++)
+    for (let m = 0; m < M; m++)
+      offsets.push(m * s0 + n * s1);
+
+  const minOff = Math.min(...offsets);
+  const maxOff = Math.max(...offsets);
+  const cosize = maxOff - minOff + 1;
+  const unique = new Set(offsets).size;
+
+  // Grid
+  gc.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className = 'grid-vis';
+  grid.style.gridTemplateColumns = `repeat(${M}, 46px)`;
+  grid.style.gridTemplateRows = `repeat(${N}, 46px)`;
+
+  offsets.forEach((off, idx) => {
+    const m = idx % M, n = Math.floor(idx / M);
+    const cell = document.createElement('div');
+    cell.className = 'grid-cell';
+    cell.innerHTML = `<span class="coord">(${m},${n})</span><span class="offset">${off}</span>`;
+    cell.dataset.m = m; cell.dataset.n = n; cell.dataset.off = off;
+
+    cell.addEventListener('mouseenter', () => {
+      ann.textContent = `(${m},${n}) · (${s0},${s1}) = ${m}×${s0} + ${n}×${s1} = ${m*s0} + ${n*s1} = ${off}`;
+      ann.classList.add('active');
+      // highlight tape
+      document.querySelectorAll('.tape-cell').forEach(tc => {
+        tc.classList.toggle('active', parseInt(tc.dataset.off) === off);
+      });
+    });
+    cell.addEventListener('mouseleave', () => {
+      ann.classList.remove('active');
+      document.querySelectorAll('.tape-cell').forEach(tc => tc.classList.remove('active'));
+    });
+    grid.appendChild(cell);
+  });
+
+  gc.appendChild(grid);
+
+  // Column label  (dimension 0 = rows)
+  const xLabel = document.createElement('div');
+  xLabel.className = 'grid-label';
+  xLabel.style.marginTop = '4px';
+  xLabel.textContent = `← dimension 0 (M=${M}, stride s₀=${s0}) →`;
+  gc.appendChild(xLabel);
+
+  // Tape
+  const tapeRange = Math.max(cosize, 20);
+  tape.innerHTML = '';
+  for (let i = minOff; i <= minOff + tapeRange - 1 && i <= maxOff + 4; i++) {
+    const tc = document.createElement('div');
+    tc.className = 'tape-cell' + (offsets.includes(i) ? ' active' : '');
+    tc.dataset.off = i;
+    tc.innerHTML = `<span class="cell-idx">${i}</span><span class="cell-val">${offsets.includes(i) ? '●' : '·'}</span>`;
+    tape.appendChild(tc);
+  }
+
+  // Stats
+  stats.innerHTML = `
+    <div class="stat"><span class="sk">shape </span><span class="sv">(${M}, ${N})</span></div>
+    <div class="stat"><span class="sk">stride </span><span class="sv">(${s0}, ${s1})</span></div>
+    <div class="stat"><span class="sk">size </span><span class="sv">${M*N}</span></div>
+    <div class="stat"><span class="sk">cosize </span><span class="sv">${cosize}</span></div>
+    <div class="stat"><span class="sk">unique offsets </span><span class="sv">${unique}</span></div>
+    <div class="stat"><span class="sk">injective </span><span class="sv">${unique===M*N ? '✓ yes' : '✗ no'}</span></div>
+  `;
+}
+
+renderLayout();
+
+// ── WIDGET 2: Nested layout ───────────────────────────────
+// shape ((2,2),(4,2)) : stride ((1,8),(2,16))
+const nShape = [[2,2],[4,2]];
+const nStride = [[1,8],[2,16]];
+
+function nestedOffset(a,b,c,d) {
+  return a*1 + b*8 + c*2 + d*16;
+}
+
+function idxToNested(i) {
+  // flat index i in (4,8) shape → nested coord ((a,b),(c,d))
+  const M=4, N=8;
+  const m = i % M, n = Math.floor(i/M);
+  // m in shape (2,2): a = m%2, b = floor(m/2)
+  const a = m%2, b = Math.floor(m/2);
+  // n in shape (4,2): c = n%4, d = floor(n/4)
+  const c = n%4, dv = Math.floor(n/4);
+  return {m,n,a,b,c,d:dv};
+}
+
+function renderNestedGrid() {
+  const gc = document.getElementById('nested-grid-container');
+  const ann = document.getElementById('nested-annotation');
+  gc.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className = 'grid-vis';
+  grid.style.gridTemplateColumns = `repeat(4, 52px)`;
+
+  for (let i = 0; i < 32; i++) {
+    const {m,n,a,b,c,d} = idxToNested(i);
+    const off = nestedOffset(a,b,c,d);
+    const cell = document.createElement('div');
+    cell.className = 'grid-cell';
+    cell.style.width = '52px'; cell.style.height = '52px';
+    cell.innerHTML = `<span class="coord">(${m},${n})</span><span class="offset">${off}</span>`;
+    cell.addEventListener('mouseenter', () => {
+      ann.textContent = `idx ${i} → flat (${m},${n}) → nested ((${a},${b}),(${c},${d})) → ${a}·1+${b}·8+${c}·2+${d}·16 = ${off}`;
+      ann.classList.add('active');
+    });
+    cell.addEventListener('mouseleave', () => ann.classList.remove('active'));
+    grid.appendChild(cell);
+  }
+
+  const lbl = document.createElement('div');
+  lbl.className = 'grid-label';
+  lbl.style.marginTop = '6px';
+  lbl.textContent = `4 columns × 8 rows = 32 elements  (shape (4,8) for display)`;
+  gc.appendChild(grid);
+  gc.appendChild(lbl);
+}
+
+renderNestedGrid();
+
+// Trace
+function renderTrace() {
+  const i = clamp(parseInt(document.getElementById('traceIdx').value)||22, 0, 31);
+  const {m,n,a,b,c,d} = idxToNested(i);
+  const off = nestedOffset(a,b,c,d);
+  const el = document.getElementById('trace-output');
+  el.innerHTML = `
+    <span style="color:var(--text-dim)">Integer index  </span><span style="color:var(--accent2)">i = ${i}</span><br>
+    <span style="color:var(--text-dim)">Flat 2D coord  </span><span style="color:var(--text)">(m, n) = (${m}, ${n})</span><br>
+    <span style="color:var(--text-dim)">Natural coord  </span><span style="color:var(--text)">((a,b),(c,d)) = ((${a},${b}),(${c},${d}))</span><br>
+    <span style="color:var(--text-dim)">Breakdown      </span><span style="color:var(--math)">${a}×1 + ${b}×8 + ${c}×2 + ${d}×16</span><br>
+    <span style="color:var(--text-dim)">               </span><span style="color:var(--math)">= ${a*1} + ${b*8} + ${c*2} + ${d*16}</span><br>
+    <span style="color:var(--text-dim)">Offset         </span><span style="color:var(--accent3)">= ${off}</span>
+  `;
+}
+renderTrace();
+document.getElementById('traceIdx').addEventListener('input', renderTrace);
+
+// ── WIDGET 3: 𝔽₂ semimodule ─────────────────────────────
+function renderF2() {
+  const x = clamp(parseInt(document.getElementById('f2x').value)||1,0,1);
+  const y = clamp(parseInt(document.getElementById('f2y').value)||0,0,1);
+  const z = clamp(parseInt(document.getElementById('f2z').value)||1,0,1);
+  const a = parseInt(document.getElementById('f2a').value)||3;
+  const b = parseInt(document.getElementById('f2b').value)||2;
+
+  const f2add = (p,q) => p^q;
+  const f2scale = (n,p) => (Math.abs(n)%2) & p;
+
+  // axiom checks
+  const ax1 = f2scale(1,x) === x;
+  const ax2 = f2add(x, f2add(y,z)) === f2add(f2add(x,y),z);
+  const ax3 = f2scale(a, f2scale(b,x)) === f2scale(a*b, x);
+
+  const ok = s => `<span style="color:var(--accent3)">${s} ✓</span>`;
+  const fail = s => `<span style="color:var(--red)">${s} ✗</span>`;
+
+  document.getElementById('f2-output').innerHTML = `
+    <span style="color:var(--text-dim)">x=${x}, y=${y}, z=${z}, a=${a}, b=${b}</span><br><br>
+    1 · x = ${f2scale(1,x)}  &nbsp;  (x = ${x})  &nbsp;  ${ax1 ? ok('multiplicative identity holds') : fail('FAIL')}<br>
+    x ⊕ (y ⊕ z) = ${x} ⊕ (${y} ⊕ ${z}) = ${x} ⊕ ${f2add(y,z)} = ${f2add(x,f2add(y,z))}<br>
+    (x ⊕ y) ⊕ z = (${x} ⊕ ${y}) ⊕ ${z} = ${f2add(x,y)} ⊕ ${z} = ${f2add(f2add(x,y),z)}<br>
+    &nbsp;&nbsp;${ax2 ? ok('additive associativity holds') : fail('FAIL')}<br>
+    a·(b·x) = ${a}·(${b}·${x}) = ${a}·${f2scale(b,x)} = ${f2scale(a,f2scale(b,x))}<br>
+    (a·b)·x = (${a*b})·${x} = ${f2scale(a*b,x)}<br>
+    &nbsp;&nbsp;${ax3 ? ok('multiplicative associativity holds') : fail('FAIL')}
+  `;
+}
+renderF2();
+['f2x','f2y','f2z','f2a','f2b'].forEach(id =>
+  document.getElementById(id).addEventListener('input', renderF2)
+);
+
+// ── WIDGET 4: Coordinate strides ─────────────────────────
+function renderCoordGrids() {
+  const shapes = [[3,5]];
+  const strides = {
+    identity: [[1,0],[0,1]],
+    scaled:   [[2,0],[0,3]],
+  };
+
+  function ipCoord(coord, stride) {
+    // coord and stride are [c0,c1], stride elements are [sc0,sc1]
+    const [c0,c1] = coord;
+    const [s0,s1] = stride;
+    return [c0*s0[0]+c1*s1[0], c0*s0[1]+c1*s1[1]];
+  }
+
+  ['identity','scaled'].forEach(key => {
+    const containerId = key === 'identity' ? 'cs-identity-grid' : 'cs-scaled-grid';
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    const M=3, N=5;
+    const st = strides[key];
+    el.innerHTML = '';
+
+    // Column header
+    const header = document.createElement('div');
+    header.style.display = 'flex';
+    header.style.gap = '3px';
+    header.style.marginBottom = '3px';
+    header.style.paddingLeft = '40px';
+    for (let n=0;n<N;n++) {
+      const lbl = document.createElement('div');
+      lbl.style.cssText = 'width:72px;text-align:center;font-family:var(--mono);font-size:10px;color:var(--text-faint)';
+      lbl.textContent = `j=${n}`;
+      header.appendChild(lbl);
+    }
+    el.appendChild(header);
+
+    for (let m=0; m<M; m++) {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;gap:3px;align-items:center;margin-bottom:3px;';
+
+      const rowLbl = document.createElement('div');
+      rowLbl.style.cssText = 'width:36px;font-family:var(--mono);font-size:10px;color:var(--text-faint);text-align:right;padding-right:4px;';
+      rowLbl.textContent = `i=${m}`;
+      row.appendChild(rowLbl);
+
+      for (let n=0; n<N; n++) {
+        const res = ipCoord([m,n], st);
+        const cell = document.createElement('div');
+        cell.className = 'tuple-cell';
+        cell.style.width = '72px';
+        cell.textContent = `(${res[0]}, ${res[1]})`;
+        row.appendChild(cell);
+      }
+      el.appendChild(row);
+    }
+  });
+}
+
+renderCoordGrids();
+</script>
+
+<!-- Theme toggle script -->
+<script>
+(function(){
+  const saved = localStorage.getItem('theme');
+  const theme = saved || 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+
+  const btn = document.getElementById('themeToggle');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+  }
+})();
+</script>
+</body>
+</html>

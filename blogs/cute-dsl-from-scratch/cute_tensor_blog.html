@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CuTe §2.5 — Tensors</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Azeret+Mono:wght@300;400;500&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --font-serif: 'Playfair Display', serif;
+  --font-mono: 'Azeret Mono', monospace;
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --paper: #f4f1eb;--paper2: #ede9e0;--paper3: #e0dbd0;
+  --ink: #1c1a17;--ink2: #3d3a35;--ink3: #7a7570;
+  --rule: #d9d4c8;--rule2: #c4bfb2;
+  --green: #2a5c45;--green-light: #e8f0ec;
+  --orange: #b85c2a;--orange-light: #f5ece6;
+  --blue: #2a4a6b;
+  --accent: var(--blue);--accent2: var(--green);--accent3: var(--orange);
+  --border: var(--rule);
+  --surface: var(--paper);--surface2: var(--paper2);--surface3: var(--paper2);
+  --mono: var(--font-mono);
+  --serif: var(--font-serif);
+  --sans: var(--font-sans);
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --paper: #0f0d0c;--paper2: #161412;--paper3: #1e1c18;
+    --ink: #f4f1eb;--ink2: #d1ccc3;--ink3: #8a837b;
+    --rule: #24211e;--rule2: #332f2b;
+    --green: #6fb894;--green-light: #16221c;
+    --orange: #e69a6e;--orange-light: #261c14;
+    --blue: #6a94b8;
+    --accent: var(--blue);--accent2: var(--green);--accent3: var(--orange);
+    --border: var(--rule);
+    --surface: var(--paper);--surface2: var(--paper2);--surface3: var(--paper2);
+  }
+}
+
+html{scroll-behavior:smooth}
+body{
+  font-family: var(--font-mono);
+  background: var(--paper);
+  color: var(--ink);
+  line-height: 1.7;
+  font-size: 12.5px;
+  padding: 0 0 4rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:200;background:var(--paper);border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:52px;transition:background-color .2s ease,border-color .2s ease}
+.logo{font-family:var(--font-serif);font-size:18px;color:var(--ink);text-decoration:none;letter-spacing:-.02em;transition:color .2s ease}
+.nav-links{display:flex;gap:28px;list-style:none;margin:0}
+.nav-links a{font-size:11px;color:var(--ink3);text-decoration:none;letter-spacing:.06em;text-transform:uppercase;transition:color .15s}
+.nav-links a:hover{color:var(--ink)}
+.theme-toggle{background:transparent;border:1px solid var(--rule2);border-radius:2px;padding:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink3);transition:all .15s ease;margin-left:12px;flex-shrink:0}
+.theme-toggle:hover{border-color:var(--ink3);color:var(--ink);background:var(--paper2)}
+.theme-toggle .sun-icon{display:none}.theme-toggle .moon-icon{display:block}
+[data-theme="dark"] .theme-toggle .sun-icon{display:block}
+[data-theme="dark"] .theme-toggle .moon-icon{display:none}
+
+/* ── HERO ── */
+.hero{padding:80px 40px 60px;max-width:1080px;margin:0 auto;border-bottom:1px solid var(--rule);transition:border-color .2s ease}
+.hero-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:24px;display:flex;align-items:center;gap:10px;transition:color .2s ease}
+.hero-label::before{content:'';display:inline-block;width:24px;height:1px;background:var(--ink3);transition:background-color .2s ease}
+.hero-title{font-family:var(--font-serif);font-size:clamp(44px,5vw,72px);line-height:1.1;letter-spacing:-.03em;color:var(--ink);margin-bottom:20px;transition:color .2s ease}
+.hero-title em{font-style:italic;color:var(--green);transition:color .2s ease}
+.hero-sub{font-size:13px;color:var(--ink2);line-height:1.8;max-width:600px;margin-bottom:20px;transition:color .2s ease}
+.hero-meta{display:flex;gap:24px;font-size:11px;color:var(--ink3);letter-spacing:.04em;flex-wrap:wrap;transition:color .2s ease}
+.hero-meta span::before{content:'// ';color:var(--rule2);margin-right:4px}
+
+/* ── CONTENT ── */
+.content{max-width:980px;margin:0 auto;padding:0 40px}
+
+section{padding:72px 0;border-bottom:1px solid var(--rule);transition:border-color .2s ease}
+section:last-of-type{border-bottom:none}
+
+.section-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:24px;display:flex;align-items:center;gap:10px;transition:color .2s ease}
+.section-label::after{content:'';flex:1;height:1px;background:var(--rule);transition:background-color .2s ease}
+
+h2{font-family:var(--font-serif);font-size:28px;letter-spacing:-.02em;color:var(--ink);margin-bottom:28px;transition:color .2s ease;line-height:1.3}
+h3{font-family:var(--font-serif);font-size:18px;letter-spacing:-.01em;color:var(--ink);margin:28px 0 16px;transition:color .2s ease}
+
+p{margin-bottom:16px;color:var(--ink2);line-height:1.8}
+p:last-child{margin-bottom:0}
+strong{color:var(--ink);font-weight:500}
+em{color:var(--green);font-style:italic}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--rule);padding:28px 40px;text-align:center;font-size:11px;color:var(--ink3);letter-spacing:.04em;transition:border-color .2s ease,color .2s ease}
+footer p{margin:0}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  nav{padding:0 20px}.nav-links{display:none}
+  .hero{padding:56px 20px 48px}.content{padding:0 20px}
+  section{padding:48px 0}footer{padding:20px}
+}
+
+/* ── REVEAL ANIMATIONS ── */
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .45s ease,transform .45s ease}
+.reveal.in{opacity:1;transform:translateY(0)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent2);margin-bottom:1rem}
+h1.title{font-family:var(--serif);font-size:clamp(2rem,5vw,3rem);font-weight:400;line-height:1.2;color:var(--ink);margin-bottom:1rem}
+h1.title em{font-style:italic;color:var(--accent)}
+.subtitle{font-size:1.05rem;color:var(--ink2);max-width:600px;line-height:1.7}
+.meta{font-family:var(--mono);font-size:11px;color:var(--ink3);margin-top:1.5rem;display:flex;gap:2rem}
+
+.toc{background:var(--surface2);border-left:3px solid var(--accent);padding:1.25rem 1.5rem;margin:2rem 0;border-radius:0 8px 8px 0}
+.toc-title{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink3);margin-bottom:0.75rem}
+.toc ol{padding-left:1.25rem;color:var(--accent);font-size:0.9rem}
+.toc li{margin:0.3rem 0}.toc a{color:var(--accent);text-decoration:none}.toc a:hover{text-decoration:underline}
+
+section{margin:3rem 0}
+h2.section-heading{font-family:var(--serif);font-size:1.7rem;font-weight:400;color:var(--ink);margin-bottom:1rem;padding-top:1rem;border-top:0.5px solid var(--border)}
+h3.sub-heading{font-family:var(--sans);font-size:1rem;font-weight:700;color:var(--ink);margin:1.5rem 0 0.5rem;letter-spacing:0.02em}
+p{margin-bottom:1rem;color:var(--ink2);font-size:0.97rem}
+p strong{color:var(--ink);font-weight:700}
+
+code{font-family:var(--mono);font-size:0.82em;background:var(--surface3);padding:2px 5px;border-radius:4px;color:var(--ink)}
+
+.callout{background:var(--surface2);border:0.5px solid var(--border);border-left:3px solid var(--accent3);border-radius:0 8px 8px 0;padding:1rem 1.25rem;margin:1.5rem 0}
+.callout-label{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent3);margin-bottom:0.4rem}
+.callout p{margin:0;font-size:0.9rem}
+
+.math-block{font-family:var(--mono);font-size:0.88rem;background:var(--surface3);border:0.5px solid var(--border);border-radius:8px;padding:1rem 1.25rem;margin:1.25rem 0;overflow-x:auto;color:var(--ink);line-height:2}
+.math-block .label{font-size:0.78rem;color:var(--ink3);margin-top:0.5rem}
+
+/* ---- INTERACTIVE: Memory Grid ---- */
+.widget{background:var(--surface2);border:0.5px solid var(--border);border-radius:12px;padding:1.5rem;margin:2rem 0}
+.widget-title{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink3);margin-bottom:1rem}
+
+.mem-grid{display:flex;flex-wrap:wrap;gap:3px;margin:1rem 0}
+.mem-cell{width:40px;height:40px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:500;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;border:0.5px solid var(--border)}
+.mem-cell:hover{transform:scale(1.08)}
+.mem-cell.highlight{outline:2px solid var(--accent);outline-offset:1px}
+
+.controls{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;margin-top:1rem}
+.controls label{font-size:13px;color:var(--ink2);display:flex;align-items:center;gap:6px;cursor:pointer}
+.controls input[type=radio]{accent-color:var(--accent)}
+.info-bar{font-family:var(--mono);font-size:12px;color:var(--ink2);margin-top:0.75rem;min-height:1.5em}
+.info-bar span{color:var(--accent);font-weight:500}
+
+/* ---- INTERACTIVE: Tensor Evaluator ---- */
+.tensor-grid{display:inline-grid;gap:2px;margin:0.75rem 0}
+.t-cell{width:36px;height:36px;border-radius:5px;border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;cursor:pointer;transition:background 0.2s,color 0.2s}
+.t-cell:hover,.t-cell.sel{background:var(--accent)!important;color:#fff!important}
+.eval-result{font-family:var(--mono);font-size:0.9rem;background:var(--surface3);border-radius:8px;padding:0.75rem 1rem;margin-top:0.75rem;min-height:2.5em;color:var(--ink)}
+.eval-result .hi{color:var(--accent);font-weight:500}
+
+/* ---- INTERACTIVE: Slicer ---- */
+.slicer-grid{display:inline-grid;gap:2px;margin:0.75rem 0}
+.s-cell{width:32px;height:32px;border-radius:4px;border:0.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;transition:all 0.25s}
+.s-cell.active{background:var(--accent2);color:#fff;border-color:transparent}
+.s-cell.dimmed{opacity:0.25}
+.s-cell.offset-cell{background:var(--accent3);color:#fff;border-color:transparent}
+.slice-controls{display:flex;flex-wrap:wrap;gap:8px;margin:0.75rem 0}
+.slice-btn{font-family:var(--mono);font-size:11px;padding:5px 10px;border-radius:6px;border:0.5px solid var(--border);background:var(--surface3);color:var(--ink2);cursor:pointer;transition:all 0.15s}
+.slice-btn.active{background:var(--accent);color:#fff;border-color:transparent}
+.slice-desc{font-family:var(--mono);font-size:0.82rem;background:var(--surface3);border-radius:8px;padding:0.75rem 1rem;margin-top:0.75rem;color:var(--ink);line-height:1.8}
+.slice-desc .comment{color:var(--ink3)}
+
+/* code block */
+.code-block{background:var(--surface3);border:0.5px solid var(--border);border-radius:8px;padding:1rem 1.25rem;font-family:var(--mono);font-size:0.8rem;line-height:1.9;overflow-x:auto;margin:1.25rem 0}
+.kw{color:var(--accent)}.fn{color:var(--accent2)}.cm{color:var(--ink3);font-style:italic}.st{color:var(--accent3)}.nu{color:#D85A30}
+
+.figure-caption{font-size:0.82rem;color:var(--ink3);text-align:center;margin-top:0.5rem;font-style:italic}
+
+.comparison-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}
+.comp-card{background:var(--surface2);border:0.5px solid var(--border);border-radius:10px;padding:1rem 1.25rem}
+.comp-card h4{font-size:0.88rem;font-weight:700;color:var(--ink);margin-bottom:0.75rem}
+.comp-card ul{padding-left:1.1rem;font-size:0.85rem;color:var(--ink2)}
+.comp-card li{margin:0.3rem 0}
+.comp-card.pro{border-top:2px solid var(--accent2)}
+.comp-card.con{border-top:2px solid var(--accent3)}
+
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin:0.5rem 0}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink2)}
+.swatch{width:14px;height:14px;border-radius:3px}
+
+hr.section-rule{border:none;border-top:0.5px solid var(--border);margin:3rem 0}
+
+@media(max-width:500px){.comparison-grid{grid-template-columns:1fr}.mem-cell{width:32px;height:32px}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="https://bikrammajhi.github.io/" class="logo">Bikram Majhi</a>
+  <ul class="nav-links">
+    <li><a href="/#about">About</a></li>
+    <li><a href="/#ladder">GEMM</a></li>
+    <li><a href="/#results">Results</a></li>
+    <li><a href="/#projects">Projects</a></li>
+    <li><a href="/#writing">Writing</a></li>
+    <li><a href="/#journal">Journal</a></li>
+    <li><a href="/#contact">Contact</a></li>
+  </ul>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="5"></circle>
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+    </svg>
+    <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+  </button>
+</nav>
+
+<!-- HERO -->
+<div class="hero reveal">
+  <div class="hero-label">GPU Programming · CuTe DSL</div>
+  <h1 class="hero-title">CuTe DSL from scratch:<br>Tensors are <em>Layouts Wearing Gloves</em></h1>
+  <p class="hero-sub">A layout maps coordinates to integers. A tensor maps coordinates to <em>values</em>. The glue is an accessor — a pointer-like object that can be offset and dereferenced.</p>
+  <div class="hero-meta">
+    <span>March 2026</span>
+    <span>~12 minute read</span>
+    <span>Part 7 of 15</span>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- INTRODUCTION -->
+<section class="reveal">
+  <div class="section-label">§7 — Tensors</div>
+  <h2>The two-part recipe</h2>
+
+  <p>If you have read the previous parts, you know that a <strong>layout</strong> <code>L = (shape, stride)</code> is a pure function: give it a coordinate, get back a flat integer — the offset into a 1-D memory buffer. That's useful for reasoning, but it doesn't let you read or write actual data.</p>
+  <p>A <strong>tensor</strong> adds the missing piece: a handle that knows how to read memory <em>at any integer offset</em>. CuTe calls this handle an <strong>accessor</strong>.</p>
+  <div class="math-block">
+    T = e ∘ L<br>
+    T(c) = *(e + L(c))  =  e[ L(c) ]<br>
+    <span class="label">— Def. 2.19. A tensor evaluates its layout, offsets the accessor by the result, and dereferences.</span>
+  </div>
+  <p>Reading the formula left to right: layout <code>L</code> maps coordinate <code>c</code> to some integer <code>k</code>; accessor <code>e</code> jumps <code>k</code> positions forward; dereferencing <code>*</code> reads the value stored there. Two clean operations, composed.</p>
+</section>
+
+<!-- ═══════════════ § 2 ═══════════════ -->
+<section id="s2">
+  <h2 class="section-heading">Accessors: offset and dereference</h2>
+  <p>An accessor only needs to support two primitive operations — moving forward by an integer, and reading whatever it now points at:</p>
+  <div class="math-block">
+    e + d → e'    <span class="comment">// offset: move accessor forward by d</span><br>
+    *e   → v     <span class="comment">// dereference: read the value at current position</span><br>
+    e[d] → *(e+d) <span class="comment">// subscript: convenience sugar</span>
+  </div>
+  <p>Concrete types that satisfy this interface include raw pointers (<code>float*</code>), arrays, and iterators like <code>thrust::counting_iterator</code>. CuTe doesn't care which — as long as those two primitives exist, the tensor machinery works.</p>
+  <div class="callout">
+    <p class="callout-label">The implicit tensor trick</p>
+    <p>When you don't have real data but still want to explore a layout's structure, use a <strong>counting iterator</strong>: an accessor that stores a single integer <code>a</code>, and whose dereference simply returns <code>a</code> itself. Offsetting by <code>d</code> gives <code>a+d</code>, so <code>T(c) = a + L(c)</code>. In the Python library, <code>Tensor(L, offset=0)</code> creates exactly this — the offset is the starting <code>a</code>.</p>
+  </div>
+
+  <!-- Memory diagram -->
+  <div class="widget" id="mem-widget">
+    <p class="widget-title">Memory model: 4×8 column-major layout</p>
+    <p style="font-size:0.85rem;color:var(--ink2);margin-bottom:0.75rem">The flat array below is the 1-D buffer. Cells are coloured by <em>column</em> so you can see how a column-major matrix fans out in memory. Hover to inspect.</p>
+    <div class="mem-grid" id="mem-grid"></div>
+    <div class="info-bar" id="mem-info">Hover a cell to see its address and coordinate.</div>
+    <div class="legend">
+      <div class="legend-item"><div class="swatch" style="background:#E6F1FB"></div>col 0</div>
+      <div class="legend-item"><div class="swatch" style="background:#B5D4F4"></div>col 1–2</div>
+      <div class="legend-item"><div class="swatch" style="background:#85B7EB"></div>col 3–4</div>
+      <div class="legend-item"><div class="swatch" style="background:#378ADD"></div>col 5–6</div>
+      <div class="legend-item"><div class="swatch" style="background:#185FA5;color:#fff"></div>col 7</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ § 3 ═══════════════ -->
+<section id="s3">
+  <h2 class="section-heading">Interactive: evaluate T(i,j) yourself</h2>
+  <p>Below is the same <code>(4, 8) : (1, 4)</code> layout displayed as a 2-D grid. Click any cell to evaluate the tensor at that coordinate and trace the steps of Def. 2.19.</p>
+  <div class="widget">
+    <p class="widget-title">Tensor evaluator — Layout (4,8):(1,4), offset = 0</p>
+    <div style="overflow-x:auto">
+      <div id="tensor-grid" class="tensor-grid"></div>
+    </div>
+    <div class="figure-caption">rows = mode 0 (size 4, stride 1) · cols = mode 1 (size 8, stride 4)</div>
+    <div class="eval-result" id="eval-result">Click a cell above.</div>
+  </div>
+  <p>Notice: the layout formula for column-major is <code>L(i,j) = 1·i + 4·j</code>. Every column lives in <em>consecutive</em> memory addresses (stride-1 along rows). Moving one column right costs 4 addresses — that's the column stride.</p>
+</section>
+
+<!-- ═══════════════ § 4 ═══════════════ -->
+<section id="s4">
+  <h2 class="section-heading">Nonzero base pointers</h2>
+  <p>So far the counting-iterator accessor started at offset 0. What happens at offset 100?</p>
+  <div class="code-block">
+<span class="cm"># Same layout, pointer moved to address 100</span>
+T_offset = <span class="fn">Tensor</span>(L, offset=<span class="nu">100</span>)
+T_offset(<span class="nu">0</span>, <span class="nu">0</span>)  <span class="cm"># → 100 + L(0,0) = 100 + 0  = 100</span>
+T_offset(<span class="nu">2</span>, <span class="nu">3</span>)  <span class="cm"># → 100 + L(2,3) = 100 + 14 = 114</span>
+  </div>
+  <p>The layout geometry doesn't change at all — the coordinate-to-offset mapping is identical. All that shifts is where in the flat buffer you land. This is exactly how a <code>float*</code> pointer works: arithmetic on the pointer, dereference to read. CuTe tensors generalise this to any shape.</p>
+  <p>In GPU kernels this matters a lot. A warp computes a tile; each thread gets a <em>sub-tensor</em> whose base pointer is offset by that thread's tile start. The layout (tile shape and stride) is shared; only the offset differs per thread.</p>
+</section>
+
+<!-- ═══════════════ § 5 ═══════════════ -->
+<section id="s5">
+  <h2 class="section-heading">Slicing: partial evaluation</h2>
+  <p>A tensor can be <strong>fully</strong> or <strong>partially</strong> evaluated. Full evaluation gives a scalar. Partial evaluation — supplying only <em>some</em> coordinates and leaving the rest as wildcards (<code>_</code>) — gives a new, smaller tensor.</p>
+  <div class="math-block">
+    T(c' + c*) = (e + L(c')) ∘ L(c*)<br>
+    <span class="comment">         ↑ evaluated → absorbed into offset    ↑ unevaluated → becomes new sublayout</span><br>
+    <span class="label">Partial evaluation theorem. The known part of c is folded into the base accessor; the unknown part forms the new layout.</span>
+  </div>
+  <p>This is the mechanism behind every <code>T(_, j)</code> you write in CuTe. Fixing <code>j</code> yields an offset (<code>L(0, j)</code>) and a 1-D sublayout of size 4 — which is just the column.</p>
+  <h3 class="sub-heading">Simple example: column and row slices</h3>
+  <div class="code-block">
+L = <span class="fn">Layout</span>((<span class="nu">4</span>, <span class="nu">8</span>), (<span class="nu">1</span>, <span class="nu">4</span>))
+
+<span class="cm"># Fix j=3 → extract column 3</span>
+sub = L(<span class="kw">None</span>, <span class="nu">3</span>)   <span class="cm"># sublayout: (4,):(1,)   offset: L(0,3)=12</span>
+<span class="cm"># T'(i) = 12 + 1·i   values: 12,13,14,15</span>
+
+<span class="cm"># Fix i=2 → extract row 2</span>
+sub = L(<span class="nu">2</span>, <span class="kw">None</span>)   <span class="cm"># sublayout: (8,):(4,)   offset: L(2,0)=2</span>
+<span class="cm"># T'(j) = 2 + 4·j    values: 2,6,10,14,18,22,26,30</span>
+  </div>
+  <p>Notice the strides in the sublayouts: column slices have stride 1 (contiguous); row slices have stride 4 (every 4th element). The sublayout encodes exactly how the slice lives in flat memory — which is why further operations on the slice are still efficient.</p>
+</section>
+
+<!-- ═══════════════ § 6 ═══════════════ -->
+<section id="s6">
+  <h2 class="section-heading">Interactive: the Figure 5 slicer</h2>
+  <p>The notebook works through six slices of a hierarchically-shaped 6×12 tensor <code>A = ((3,2), ((2,3),2)) : ((4,1), ((2,15),100))</code>. That's the kind of shape CuTe uses to tile matrix operands for a GPU kernel. The interactive below lets you pick each slice and see which cells are selected, what the resulting offset is, and what the sublayout looks like.</p>
+  <div class="callout">
+    <p class="callout-label">Why the weird shape?</p>
+    <p>Mode 0 has shape <code>(3,2)</code> — a 6-row mode split into two sub-modes. Mode 1 has shape <code>((2,3),2)</code> — a 12-col mode with one sub-mode itself split. This hierarchy lets CuTe slice at <em>sub-mode boundaries</em> without the parent mode disappearing entirely.</p>
+  </div>
+
+  <div class="widget" id="slicer-widget">
+    <p class="widget-title">Figure 5 — Hierarchical slicing of A (6×12)</p>
+    <div class="slice-controls" id="slice-btns"></div>
+    <div style="overflow-x:auto">
+      <div id="slicer-grid" class="slicer-grid"></div>
+    </div>
+    <div class="figure-caption">6 rows × 12 cols · cell numbers are flat memory offsets via counting iterator</div>
+    <div class="slice-desc" id="slice-desc">Select a slice above to see which cells are selected.</div>
+  </div>
+  <p>The last two slices are impossible to express with NumPy/PyTorch range-slicing. Slice 5 selects 9 cells from one sub-mode of rows and one sub-mode of columns simultaneously. Slice 6 cross-cuts across all three modes. CuTe handles them uniformly because the sublayout algebra doesn't distinguish "whole mode" from "sub-mode" slices.</p>
+</section>
+
+<!-- ═══════════════ § 7 ═══════════════ -->
+<section id="s7">
+  <h2 class="section-heading">Why CuTe rejects range-slicing</h2>
+  <p>Libraries like NumPy support slices like <code>A[2:5, 1:4]</code>. CuTe deliberately doesn't, for three reasons:</p>
+  <div class="comparison-grid">
+    <div class="comp-card con">
+      <h4>Range slicing problems</h4>
+      <ul>
+        <li>Can't express sub-mode slices (slices 5 and 6 above are impossible)</li>
+        <li>Conflates static tile size with dynamic thread ID into one expression</li>
+        <li>Can produce slices that don't correspond to any valid CuTe layout</li>
+      </ul>
+    </div>
+    <div class="comp-card pro">
+      <h4>CuTe's alternative</h4>
+      <ul>
+        <li>Permute first (reorder modes) — uses static constants only</li>
+        <li>Then slice at mode boundary — applies dynamic thread index cleanly</li>
+        <li>Every slice result is always a valid layout by construction</li>
+      </ul>
+    </div>
+  </div>
+  <p>The canonical anti-pattern CuTe wants to avoid is:</p>
+  <div class="code-block">
+<span class="cm"># Bad: mixes TILE_SIZE (static) with thr_id (dynamic)</span>
+thr_data = my_data[thr_id*TILE_SIZE : (thr_id+<span class="nu">1</span>)*TILE_SIZE]
+  </div>
+  <p>The compiler can't see that <code>TILE_SIZE</code> is a compile-time constant here, because it's buried inside an index computation. CuTe's two-stage permute-then-slice makes the tile size visible as a layout parameter, letting the compiler unroll and vectorise.</p>
+</section>
+
+<!-- ═══════════════ § 8 ═══════════════ -->
+<section id="s8">
+  <h2 class="section-heading">Summary</h2>
+  <p>Four things to carry forward:</p>
+  <div class="callout">
+    <p class="callout-label">Key takeaways</p>
+    <p>
+      1. A <strong>tensor</strong> = layout + accessor. The accessor can be a raw pointer, array, or counting iterator.<br>
+      2. <strong>Evaluation</strong>: <code>T(c) = offset + L(c)</code> for a counting-iterator accessor.<br>
+      3. <strong>Slicing</strong>: fixing some coordinates folds their contribution into a new offset, leaving a sublayout for the rest.<br>
+      4. <strong>Range slicing is absent by design</strong> — CuTe prefers permute-then-slice so tile sizes stay static.
+    </p>
+  </div>
+  <p>The payoff comes in later chapters when CuTe uses this machinery to partition tensors among warps and threads with zero runtime overhead — the whole tiling strategy is encoded in layouts that the compiler can see at compile time.</p>
+</section>
+
+<section class="reveal" style="border:none; padding-top:40px; padding-bottom:40px; text-align:center;">
+  <p style="color:var(--ink3); font-size:11px; letter-spacing:0.08em; text-transform:uppercase;">
+    <em>Part 1:</em> Loops Are Just Layouts · <em>Part 2:</em> Tensors & Folding · <em>Part 3:</em> Tuples & HTuples · <em>Part 4:</em> Shape · <em>Part 5:</em> Stride · <em>Part 6:</em> Layout Applications · <strong>Part 7:</strong> Tensors & Accessors · <em>Upcoming:</em> Folding & Tensor Contractions
+  </p>
+</section>
+
+</div><!-- /content -->
+
+<!-- Footer -->
+<footer>
+  <p>Based on CuTe and CUTLASS documentation. Learn more at <a href="https://github.com/NVIDIA/cutlass" style="color:var(--green);">NVIDIA/CUTLASS</a> and <a href="https://github.com/NVIDIA/cutlass/blob/main/media/docs/cute/" style="color:var(--green);">CuTe Layouts</a>.</p>
+</footer>
+
+<script>
+(function(){
+  const rows=4,cols=8;
+  const colPalette=['#E6F1FB','#B5D4F4','#B5D4F4','#85B7EB','#85B7EB','#378ADD','#378ADD','#185FA5'];
+  const colTextPalette=['#042C53','#042C53','#042C53','#042C53','#042C53','#fff','#fff','#fff'];
+
+  function L(i,j){return 1*i+4*j;}
+
+  // === MEMORY GRID ===
+  const mgEl=document.getElementById('mem-grid');
+  const infoEl=document.getElementById('mem-info');
+  const totalCells=rows*cols;
+  for(let addr=0;addr<totalCells;addr++){
+    const j=Math.floor(addr/rows);
+    const i=addr%rows;
+    const cell=document.createElement('div');
+    cell.className='mem-cell';
+    cell.textContent=addr;
+    cell.style.background=colPalette[j];
+    cell.style.color=colTextPalette[j];
+    cell.addEventListener('mouseenter',()=>{
+      infoEl.innerHTML=`Address <span>${addr}</span> → coordinate <span>(${i},${j})</span> → T(${i},${j}) = 0 + L(${i},${j}) = 0 + ${L(i,j)} = <span>${L(i,j)}</span>`;
+      cell.classList.add('highlight');
+    });
+    cell.addEventListener('mouseleave',()=>{
+      infoEl.textContent='Hover a cell to see its address and coordinate.';
+      cell.classList.remove('highlight');
+    });
+    mgEl.appendChild(cell);
+  }
+
+  // === TENSOR GRID (clickable) ===
+  const tgEl=document.getElementById('tensor-grid');
+  const evalEl=document.getElementById('eval-result');
+  tgEl.style.gridTemplateColumns=`repeat(${cols},36px)`;
+  tgEl.style.gridTemplateRows=`repeat(${rows},36px)`;
+
+  const bgScale=(i,j)=>{
+    const v=L(i,j);
+    const t=v/(rows*cols-1);
+    const r=Math.round(230-t*150);
+    const g=Math.round(245-t*120);
+    const b=Math.round(251-t*80);
+    return `rgb(${r},${g},${b})`;
+  };
+
+  for(let i=0;i<rows;i++){
+    for(let j=0;j<cols;j++){
+      const v=L(i,j);
+      const cell=document.createElement('div');
+      cell.className='t-cell';
+      cell.textContent=v;
+      cell.style.background=bgScale(i,j);
+      cell.style.color=v>20?'#042C53':'#185FA5';
+      cell.addEventListener('click',()=>{
+        document.querySelectorAll('.t-cell').forEach(c=>c.classList.remove('sel'));
+        cell.classList.add('sel');
+        evalEl.innerHTML=`T(<span class="hi">${i}</span>,<span class="hi">${j}</span>)  =  offset + L(${i},${j})  =  0 + (1·${i} + 4·${j})  =  0 + <span class="hi">${v}</span>  =  <span class="hi">${v}</span>`;
+      });
+      tgEl.appendChild(cell);
+    }
+  }
+
+  // === SLICER ===
+  // A = ((3,2), ((2,3),2)) : ((4,1), ((2,15),100))
+  // Total rows=6, cols=12
+  // Flat offset formula: L(i0,i1, j0a,j0b,j1) = 4*i0 + 1*i1 + 2*j0a + 15*j0b + 100*j1
+  // But we treat it as 6x12 for display.
+  // Mode 0: shape (3,2) stride (4,1)  → row r = i0 + 3*i1, L_row(r) = 4*(r%3) + 1*floor(r/3)
+  // Mode 1: shape ((2,3),2) stride ((2,15),100) → col c = j00 + 2*j01 + 6*j1
+  //   L_col(c): j1=floor(c/6), rem=c%6, j01=floor(rem/2), j00=rem%2
+  //   L_col(c) = 2*j00 + 15*j01 + 100*j1
+  function Lcell(r,c){
+    const i0=r%3, i1=Math.floor(r/3);
+    const j1=Math.floor(c/6), rem=c%6, j01=Math.floor(rem/2), j00=rem%2;
+    return 4*i0 + 1*i1 + 2*j00 + 15*j01 + 100*j1;
+  }
+
+  const SLICES=[
+    {
+      label:'A(2, _)',
+      desc:'Fix row=2. Keep all 12 column coords.\n  offset = A(2,0) = L(2,0) = 4·2+1·0 = 8\n  sublayout = ((2,3),2) : ((2,15),100)  [12 elements]',
+      test:(r,c)=>r===2,
+      offsetCell:(r,c)=>r===2&&c===0,
+    },
+    {
+      label:'A(_, 5)',
+      desc:'Fix col=5. Keep all 6 row coords.\n  offset = A(0,5) = L_col(5) = 2·1+15·2+100·0 = 32\n  sublayout = (3,2) : (4,1)  [6 elements]',
+      test:(r,c)=>c===5,
+      offsetCell:(r,c)=>r===0&&c===5,
+    },
+    {
+      label:'A(2, ((0,_),_))',
+      desc:'Fix row=2, fix j00=0. Free: j01∈[0,3), j1∈[0,2).\n  offset = A(2,0) = 8\n  sublayout = (3,2) : (15,100)  [6 elements]',
+      test:(r,c)=>{const rem=c%6,j00=rem%2;return r===2&&j00===0;},
+      offsetCell:(r,c)=>r===2&&c===0,
+    },
+    {
+      label:'A((_,1),(_, 0))',
+      desc:'Fix i1=1 (rows 3–5), fix j1=0 (cols 0–5). Free: i0, j0.\n  offset = A(0+3, 0) = L_row(3) + L_col(0) = 1+0 = 1\n  sublayout = (3,(2,3)) : (4,(2,15))  [18 elements]',
+      test:(r,c)=>{const i1=Math.floor(r/3),j1=Math.floor(c/6);return i1===1&&j1===0;},
+      offsetCell:(r,c)=>{const i1=Math.floor(r/3),j1=Math.floor(c/6);return i1===1&&j1===0&&r%3===0&&c===0;},
+    },
+    {
+      label:'A((_,0),((0,_),1))',
+      desc:'Fix i1=0 (rows 0–2), fix j00=0, fix j1=1 (cols 6–11). Free: i0, j01.\n  offset = A(0,6) = 4·0+1·0+100·1 = 100\n  sublayout = (3,3) : (4,15)  [9 elements]',
+      test:(r,c)=>{const i1=Math.floor(r/3),j1=Math.floor(c/6),rem=c%6,j00=rem%2;return i1===0&&j1===1&&j00===0;},
+      offsetCell:(r,c)=>{const i1=Math.floor(r/3),j1=Math.floor(c/6),rem=c%6,j00=rem%2;return i1===0&&j1===1&&j00===0&&r%3===0&&c===6;},
+    },
+    {
+      label:'A((1,_),((_, 0),_))',
+      desc:'Fix i0=1 (every 3rd row starting at 1), fix j01=0 (even-indexed within each 6-col block). Free: i1, j00, j1.\n  offset = A(1+0, ((0,0),0)) = 4·1+1·0+0 = 4\n  sublayout = (2,2,2) : (1,2,100)  [8 elements]',
+      test:(r,c)=>{const i0=r%3,rem=c%6,j01=Math.floor(rem/2);return i0===1&&j01===0;},
+      offsetCell:(r,c)=>{const i0=r%3,rem=c%6,j01=Math.floor(rem/2),j00=rem%2;return i0===1&&j01===0&&Math.floor(r/3)===0&&j00===0&&Math.floor(c/6)===0;},
+    },
+  ];
+
+  const sgEl=document.getElementById('slicer-grid');
+  const SROWS=6,SCOLS=12;
+  sgEl.style.gridTemplateColumns=`repeat(${SCOLS},32px)`;
+  sgEl.style.gridTemplateRows=`repeat(${SROWS},32px)`;
+
+  const cells=[];
+  for(let r=0;r<SROWS;r++){
+    cells[r]=[];
+    for(let c=0;c<SCOLS;c++){
+      const cell=document.createElement('div');
+      cell.className='s-cell';
+      cell.textContent=Lcell(r,c);
+      cell.style.background='var(--surface3)';
+      cell.style.color='var(--ink2)';
+      sgEl.appendChild(cell);
+      cells[r][c]=cell;
+    }
+  }
+
+  let activeSlice=-1;
+  const btnContainer=document.getElementById('slice-btns');
+  const descEl=document.getElementById('slice-desc');
+
+  SLICES.forEach((sl,idx)=>{
+    const btn=document.createElement('button');
+    btn.className='slice-btn';
+    btn.textContent=sl.label;
+    btn.addEventListener('click',()=>{
+      if(activeSlice===idx){activeSlice=-1;resetGrid();descEl.textContent='Select a slice above.';document.querySelectorAll('.slice-btn').forEach(b=>b.classList.remove('active'));return;}
+      activeSlice=idx;
+      document.querySelectorAll('.slice-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      applySlice(sl);
+    });
+    btnContainer.appendChild(btn);
+  });
+
+  function resetGrid(){
+    for(let r=0;r<SROWS;r++)for(let c=0;c<SCOLS;c++){
+      cells[r][c].className='s-cell';
+      cells[r][c].style.background='var(--surface3)';
+      cells[r][c].style.color='var(--ink2)';
+    }
+  }
+
+  function applySlice(sl){
+    resetGrid();
+    let count=0;
+    for(let r=0;r<SROWS;r++)for(let c=0;c<SCOLS;c++){
+      if(sl.offsetCell&&sl.offsetCell(r,c)){
+        cells[r][c].className='s-cell offset-cell';
+        cells[r][c].style.background='';cells[r][c].style.color='';
+        count++;
+      } else if(sl.test(r,c)){
+        cells[r][c].className='s-cell active';
+        cells[r][c].style.background='';cells[r][c].style.color='';
+        count++;
+      } else {
+        cells[r][c].className='s-cell dimmed';
+        cells[r][c].style.background='var(--surface3)';
+        cells[r][c].style.color='var(--ink2)';
+      }
+    }
+    const lines=sl.desc.split('\n');
+    descEl.innerHTML=lines.map(l=>{
+      if(l.trim().startsWith('offset')){return `<span style="color:var(--accent3)">${l}</span>`;}
+      if(l.trim().startsWith('sub')){return `<span style="color:var(--accent2)">${l}</span>`;}
+      return l;
+    }).join('<br>');
+  }
+
+  const legend2=document.createElement('div');
+  legend2.className='legend';
+  legend2.innerHTML=`
+    <div class="legend-item"><div class="swatch" style="background:var(--accent2)"></div>selected elements</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--accent3)"></div>offset cell (basis)</div>
+    <div class="legend-item"><div class="swatch" style="background:var(--surface3);border:0.5px solid var(--border)"></div>not in slice</div>
+  `;
+  document.getElementById('slicer-widget').appendChild(legend2);
+})();
+</script>
+
+<!-- Theme toggle script -->
+<script>
+(function(){
+  const saved = localStorage.getItem('theme');
+  const theme = saved || 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+
+  const btn = document.getElementById('themeToggle');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+  }
+
+  // Reveal observer
+  const revealObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+})();
+</script>
+</body>
+</html>

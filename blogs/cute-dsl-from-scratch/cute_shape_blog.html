@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CuTe §2.2 — Shape</title>
+
+<!-- FONT STACK: Playfair Display (serif) + Azeret Mono (mono) to match main site -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Azeret+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --font-serif: 'Playfair Display', serif;
+  --font-mono: 'Azeret Mono', monospace;
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --paper: #f4f1eb;--paper2: #ede9e0;--paper3: #e0dbd0;
+  --ink: #1c1a17;--ink2: #3d3a35;--ink3: #7a7570;
+  --rule: #d9d4c8;--rule2: #c4bfb2;
+  --green: #2a5c45;--green-light: #e8f0ec;--green2: #d4eede;
+  --orange: #b85c2a;--orange-light: #f5ece6;
+  --blue: #2a4a6b;--blue2: #d4e4f7;
+  --accent: var(--orange);--accent2: var(--orange);
+  --mono-bg: var(--paper2);
+  --r: 6px;
+  --serif: var(--font-serif);
+  --display: var(--font-serif);
+  --mono: var(--font-mono);
+}
+[data-theme="dark"]{
+  --paper: #0f0d0c;--paper2: #161412;--paper3: #1e1c18;
+  --ink: #f4f1eb;--ink2: #d1ccc3;--ink3: #8a837b;
+  --rule: #24211e;--rule2: #332f2b;
+  --green: #6fb894;--green-light: #16221c;--green2: #1a3a2a;
+  --orange: #e69a6e;--orange-light: #261c14;
+  --blue: #6a94b8;--blue2: #1a2a3a;
+  --accent: var(--orange);--accent2: var(--orange);
+  --mono-bg: var(--paper2);
+  --r: 6px;
+  --serif: var(--font-serif);
+  --display: var(--font-serif);
+  --mono: var(--font-mono);
+}
+
+html{scroll-behavior:smooth}
+body{
+  font-family: var(--font-mono);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 300;
+  line-height: 1.7;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ── NAV ── */
+nav{
+  position:sticky;top:0;z-index:200;
+  background:var(--paper);
+  border-bottom:1px solid var(--rule);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 40px;height:52px;
+  transition:background-color .2s ease,border-color .2s ease;
+}
+.logo{
+  font-family:var(--font-serif);font-size:18px;
+  color:var(--ink);text-decoration:none;
+  letter-spacing:-.02em;transition:color .2s ease;
+}
+.nav-links{display:flex;gap:28px;list-style:none;margin:0}
+.nav-links a{
+  font-size:11px;color:var(--ink3);text-decoration:none;
+  letter-spacing:.06em;text-transform:uppercase;transition:color .15s;
+}
+.nav-links a:hover{color:var(--ink)}
+.theme-toggle{
+  background:transparent;border:1px solid var(--rule2);border-radius:2px;
+  padding:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--ink3);transition:all .15s ease;margin-left:12px;flex-shrink:0;
+}
+.theme-toggle:hover{border-color:var(--ink3);color:var(--ink);background:var(--paper2)}
+.theme-toggle .sun-icon{display:none}.theme-toggle .moon-icon{display:block}
+[data-theme="dark"] .theme-toggle .sun-icon{display:block}
+[data-theme="dark"] .theme-toggle .moon-icon{display:none}
+
+/* ── HERO ── */
+.hero{
+  padding:80px 40px 60px;max-width:1080px;margin:0 auto;
+  border-bottom:1px solid var(--rule);transition:border-color .2s ease;
+}
+.hero-label{
+  font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink3);margin-bottom:24px;display:flex;align-items:center;gap:10px;
+  transition:color .2s ease;
+}
+.hero-label::before{
+  content:'';display:inline-block;width:24px;height:1px;
+  background:var(--ink3);transition:background-color .2s ease;
+}
+.hero-title{
+  font-family:var(--font-serif);font-size:clamp(44px,5vw,72px);
+  line-height:1.1;letter-spacing:-.03em;color:var(--ink);
+  margin-bottom:20px;transition:color .2s ease;
+}
+.hero-title em{font-style:italic;color:var(--green);transition:color .2s ease}
+.hero-sub{
+  font-size:13px;color:var(--ink2);line-height:1.8;
+  max-width:600px;margin-bottom:20px;transition:color .2s ease;
+}
+.hero-meta{
+  display:flex;gap:24px;font-size:11px;color:var(--ink3);
+  letter-spacing:.04em;flex-wrap:wrap;transition:color .2s ease;
+}
+.hero-meta span::before{content:'// ';color:var(--rule2);margin-right:4px}
+
+/* ── CONTENT ── */
+.content{max-width:980px;margin:0 auto;padding:0 40px}
+
+section{
+  padding:72px 0;border-bottom:1px solid var(--rule);
+  transition:border-color .2s ease;
+}
+section:last-of-type{border-bottom:none}
+
+.section-label{
+  font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink3);margin-bottom:24px;display:flex;align-items:center;gap:10px;
+  transition:color .2s ease;
+}
+.section-label::after{
+  content:'';flex:1;height:1px;background:var(--rule);
+  transition:background-color .2s ease;
+}
+
+h2{
+  font-family:var(--font-serif);font-size:28px;letter-spacing:-.02em;
+  color:var(--ink);margin-bottom:28px;transition:color .2s ease;line-height:1.3;
+}
+h3{
+  font-family:var(--font-serif);font-size:18px;letter-spacing:-.01em;
+  color:var(--ink);margin:28px 0 16px;transition:color .2s ease;
+}
+
+p{margin-bottom:16px;color:var(--ink2);line-height:1.8}
+p:last-child{margin-bottom:0}
+strong{color:var(--ink);font-weight:500}
+em{color:var(--green);font-style:italic}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--rule);padding:28px 40px;text-align:center;
+  font-size:11px;color:var(--ink3);letter-spacing:.04em;
+  transition:border-color .2s ease,color .2s ease;
+}
+footer p{margin:0}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  nav{padding:0 20px}.nav-links{display:none}
+  .hero{padding:56px 20px 48px}.content{padding:0 20px}
+  section{padding:48px 0}footer{padding:20px}
+}
+
+/* ── REVEAL ANIMATIONS ── */
+.reveal{
+  opacity:0;transform:translateY(14px);
+  transition:opacity .45s ease,transform .45s ease;
+}
+.reveal.in{opacity:1;transform:translateY(0)}
+
+.meta{font-size:.85rem;color:var(--ink3);margin-bottom:3rem;font-family:var(--serif);font-style:italic}
+.meta span{color:var(--accent)}
+
+.lead{font-size:1.2rem;font-weight:300;color:var(--ink2);line-height:1.7;margin-bottom:2rem;border-left:3px solid var(--accent);padding-left:1.25rem}
+
+.def-box{background:var(--paper2);border:1px solid var(--paper3);border-left:3px solid var(--accent);padding:1rem 1.25rem;border-radius:0 var(--r) var(--r) 0;margin:1.5rem 0}
+.def-box .def-label{font-family:var(--mono);font-size:.72rem;font-weight:500;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem}
+.def-box p{margin:0;font-size:.95rem;color:var(--ink2)}
+
+.callout{background:var(--blue2);border:1px solid #b0c8e8;border-radius:var(--r);padding:1rem 1.25rem;margin:1.5rem 0}
+.callout p{margin:0;font-size:.93rem;color:var(--blue);line-height:1.6}
+.callout strong{color:var(--blue)}
+
+.math-display{overflow-x:auto;margin:1.5rem 0;padding:.5rem 0;text-align:center}
+
+/* ---- Interactive widgets ---- */
+.widget{background:var(--paper2);border:1px solid var(--paper3);border-radius:10px;padding:1.5rem;margin:2rem 0}
+.widget-title{font-family:var(--mono);font-size:.72rem;font-weight:500;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1rem}
+
+.controls{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;margin-top:1rem}
+.ctrl-group{display:flex;align-items:center;gap:.5rem}
+label{font-size:.82rem;color:var(--ink3);font-family:var(--mono);white-space:nowrap}
+input[type=range]{accent-color:var(--accent);height:4px;cursor:pointer}
+select{font-family:var(--mono);font-size:.8rem;background:var(--paper);border:1px solid var(--paper3);border-radius:4px;padding:.25rem .5rem;color:var(--ink);cursor:pointer}
+button.btn{font-family:var(--mono);font-size:.78rem;background:var(--paper);border:1px solid var(--paper3);border-radius:4px;padding:.3rem .75rem;cursor:pointer;color:var(--ink);transition:background .15s}
+button.btn:hover{background:var(--paper3)}
+button.btn.active{background:var(--accent);color:white;border-color:var(--accent)}
+.val-badge{font-family:var(--mono);font-size:.78rem;color:var(--ink2);background:var(--mono-bg);padding:.1em .4em;border-radius:3px;min-width:2rem;text-align:center}
+
+/* Grid explorer */
+#grid-canvas{width:100%;display:block}
+
+/* Coord map table */
+.cmap{display:grid;gap:2px;font-family:var(--mono);font-size:.78rem;margin:.5rem 0}
+.cmap-row{display:contents}
+.cmap-cell{padding:.2rem .4rem;border-radius:3px;text-align:center;transition:background .2s,color .2s}
+.cmap-head{color:var(--ink3);font-size:.7rem}
+
+/* Compatibility viz */
+#compat-svg{width:100%;display:block}
+
+/* Hierarchy stepper */
+.stepper-stages{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap}
+.stage-pill{font-family:var(--mono);font-size:.72rem;padding:.25rem .75rem;border-radius:20px;background:var(--paper3);color:var(--ink3);cursor:pointer;transition:all .2s;border:none}
+.stage-pill.active{background:var(--accent);color:white}
+.stage-content{min-height:180px}
+
+/* Out-of-bounds viz */
+.oob-row{display:flex;align-items:center;gap:.75rem;font-family:var(--mono);font-size:.8rem;padding:.25rem 0;border-bottom:1px solid var(--paper3)}
+.oob-row:last-child{border:none}
+.oob-i{width:1.8rem;text-align:right;color:var(--ink3)}
+.oob-arrow{color:var(--ink3)}
+.oob-crd{flex:1;color:var(--ink)}
+.oob-back{flex:1;color:var(--ink3)}
+.oob-tag{font-size:.7rem;padding:.1em .4em;border-radius:3px}
+.oob-in{background:var(--green2);color:var(--green)}
+.oob-out{background:#fce8e2;color:#8c2010}
+.oob-rt{background:var(--blue2);color:var(--blue)}
+
+/* Code blocks */
+pre{font-family:var(--mono);font-size:.82em;background:var(--mono-bg);border:1px solid var(--paper3);border-radius:var(--r);padding:1rem 1.25rem;overflow-x:auto;margin:1.25rem 0;line-height:1.65;color:var(--ink)}
+pre .c{color:var(--ink3)}
+pre .k{color:var(--accent)}
+pre .s{color:var(--green)}
+
+/* Highlight token */
+.hi{background:var(--accent2);color:white;border-radius:3px;padding:0 .2em}
+
+hr{border:none;border-top:1px solid var(--paper3);margin:3rem 0}
+
+/* TOC */
+.toc{border:1px solid var(--paper3);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:2.5rem;background:var(--paper2)}
+.toc-label{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:.5rem}
+.toc ul{list-style:none;font-size:.88rem}
+.toc li{padding:.2rem 0}
+.toc a{color:var(--ink2);border:none}
+.toc a:hover{color:var(--accent)}
+
+/* Tooltip */
+.tip-wrap{position:relative;display:inline}
+.tip-wrap .tip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);font-size:.75rem;font-family:var(--mono);padding:.3em .65em;border-radius:4px;white-space:nowrap;z-index:10;pointer-events:none}
+.tip-wrap:hover .tip{display:block}
+
+.section-num{font-family:var(--mono);font-size:.72rem;color:var(--accent);letter-spacing:.05em;margin-bottom:.25rem}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="https://bikrammajhi.github.io/" class="logo">Bikram Majhi</a>
+  <ul class="nav-links">
+    <li><a href="/#about">About</a></li>
+    <li><a href="/#ladder">GEMM</a></li>
+    <li><a href="/#results">Results</a></li>
+    <li><a href="/#projects">Projects</a></li>
+    <li><a href="/#writing">Writing</a></li>
+    <li><a href="/#journal">Journal</a></li>
+    <li><a href="/#contact">Contact</a></li>
+  </ul>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="5"></circle>
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+    </svg>
+    <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+  </button>
+</nav>
+
+<!-- HERO -->
+<div class="hero reveal">
+  <div class="hero-label">GPU Programming · CuTe DSL</div>
+  <h1 class="hero-title">CuTe DSL from scratch:<br><em>Shape</em></h1>
+  <p class="hero-sub">A shape is not just a size — it's a coordinate system. Understanding hierarchical shapes and the bijection between flat indices and nested coordinates.</p>
+  <div class="hero-meta">
+    <span>March 2026</span>
+    <span>~12 minute read</span>
+    <span>Part 4 of 15</span>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- INTRODUCTION -->
+<section class="reveal">
+  <div class="section-label">§4 — Foundation</div>
+  <h2>The core idea: shapes as coordinate systems</h2>
+
+  <p>CuTe is a C++ library for describing how tensors are laid out in memory on NVIDIA GPUs. Before any layout, stride, or tiling logic can be understood, there's one foundational idea to grasp: <strong>a shape is not just a size — it's a coordinate system.</strong></p>
+
+  <p>You already know that an array of 12 elements can be "reshaped" into a 3×4 matrix. That's just a different way of counting. CuTe makes this precise and extends it to arbitrary nesting.</p>
+
+<p>A shape like <code>(3, 4)</code> means: "there are 12 elements, and I want to index them with a pair (m, n) where 0≤m&lt;3 and 0≤n&lt;4." The mapping between the flat index <em>i</em> and the pair (m, n) is column-major — <em>m</em> varies fastest. Try it:</p>
+
+<div class="widget">
+  <div class="widget-title">Explorer — shape (M, N) ↔ flat index</div>
+  <div class="controls">
+    <div class="ctrl-group"><label>M =</label><input type="range" id="M" min="1" max="6" value="3" style="width:80px"><span class="val-badge" id="Mv">3</span></div>
+    <div class="ctrl-group"><label>N =</label><input type="range" id="N" min="1" max="6" value="4" style="width:80px"><span class="val-badge" id="Nv">4</span></div>
+    <div class="ctrl-group"><label>hover or click a cell</label></div>
+  </div>
+  <div style="margin-top:1rem;display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start">
+    <div>
+      <div style="font-family:var(--mono);font-size:.72rem;color:var(--ink3);margin-bottom:.4rem">Grid — columns are n, rows are m</div>
+      <canvas id="grid-canvas" height="200"></canvas>
+    </div>
+    <div>
+      <div style="font-family:var(--mono);font-size:.72rem;color:var(--ink3);margin-bottom:.4rem">Mapping table</div>
+      <div id="map-table" style="font-family:var(--mono);font-size:.78rem;max-height:220px;overflow-y:auto"></div>
+    </div>
+  </div>
+  <div id="cell-info" style="margin-top:.75rem;font-family:var(--mono);font-size:.82rem;color:var(--ink2);min-height:1.4rem"></div>
+</div>
+
+<p>Notice that when you hover over cell (m=1, n=2), the flat index <em>i</em> = 1 + 2·M. The formula is simply mixed-radix: <strong>m varies in the ones place, n in the M-place</strong>. This is the colexicographic order.</p>
+
+<div class="math-display">
+  \[i = m + n \cdot M \quad\Longleftrightarrow\quad m = i \bmod M,\quad n = \left\lfloor \frac{i}{M} \right\rfloor\]
+</div>
+
+<p>That's it. <code>idx2crd</code> is the right-arrow; <code>crd2idx</code> is the left-arrow. Both are defined by this single formula, extended to any number of modes.</p>
+
+<hr id="s2">
+<h2>Hierarchical shapes — shapes within shapes</h2>
+
+<p>Now the interesting part. Suppose your second dimension has size N·P = 8. You could write the shape as <code>(M, 8)</code>. Or you could make the nesting explicit: <code>(M, (N, P))</code> = <code>(M, (2, 4))</code>. These describe the <em>same</em> 16M elements, but with different coordinate vocabularies.</p>
+
+<p>Walk through what happens step by step:</p>
+
+<div class="widget">
+  <div class="widget-title">Stepper — hierarchical shape (3, (2, 4))</div>
+  <div class="stepper-stages" id="stepper-pills"></div>
+  <div class="stage-content" id="stepper-body"></div>
+</div>
+
+<p>The key payoff: because <strong>every mode is associated with a stride</strong> (§2.3), giving a mode hierarchical structure lets you describe far more complex memory layouts. A <code>(2, 4)</code> sub-mode can walk through memory in jumps of 1 and 3, for instance — that's a non-contiguous tile. The shape records the coordinate structure; the stride records the memory mapping.</p>
+
+<hr id="s3">
+<h2>Coordinate sets and compatibility</h2>
+
+<div class="def-box">
+  <div class="def-label">Definition 2.6 — Coordinate set</div>
+  <p>A coordinate set is \(\mathbb{Z}_N = \{0,\ldots,N{-}1\}\) or a Cartesian product of coordinate sets, \(\mathbb{Z}_N \times \mathbb{Z}_M\).</p>
+</div>
+
+<p>Every shape has a <strong>natural coordinate set</strong> — the set of tuples matching its structure — and an <strong>integral coordinate set</strong> — the flat integers 0 … |S|−1. But hierarchical shapes have <em>more</em> coordinate sets too, one for each shape that "coarsens" it.</p>
+
+<div class="def-box">
+  <div class="def-label">Definition 2.7 — Compatibility ⪯</div>
+  <p>Shape P <em>coarsens</em> shape S (written P ⪯ S) when they have the same size and either P is an integer equaling |S|, or they are tuples of the same rank with each P<sub>i</sub> ⪯ S<sub>i</sub>.</p>
+</div>
+
+<p>Intuitively: P is a "blurred" version of S that forgets some internal structure. Here's the lattice for size-30 shapes:</p>
+
+<div class="widget">
+  <div class="widget-title">Compatibility lattice — shapes of size 30</div>
+  <svg id="compat-svg" viewBox="0 0 680 300" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M2 1L8 5L2 9" fill="none" stroke="#7a756e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </marker>
+    </defs>
+    <!-- Bottom: 30 -->
+    <g id="cn30" class="compat-node" data-idx="0" cursor="pointer">
+      <rect x="295" y="230" width="90" height="36" rx="6" fill="#f2efe9" stroke="#c8c0b4" stroke-width="1"/>
+      <text x="340" y="252" text-anchor="middle" dominant-baseline="central" font-family="'JetBrains Mono',monospace" font-size="13" fill="#1a1814">30</text>
+    </g>
+    <!-- Mid: (2,15) and (6,5) and (3,10) and (5,6) -->
+    <g id="cn215" class="compat-node" data-idx="1" cursor="pointer">
+      <rect x="60" y="135" width="100" height="36" rx="6" fill="#f2efe9" stroke="#c8c0b4" stroke-width="1"/>
+      <text x="110" y="153" text-anchor="middle" dominant-baseline="central" font-family="'JetBrains Mono',monospace" font-size="13" fill="#1a1814">(2, 15)</text>
+    </g>
+    <g id="cn65" class="compat-node" data-idx="2" cursor="pointer">
+      <rect x="200" y="135" width="90" height="36" rx="6" fill="#f2efe9" stroke="#c8c0b4" stroke-width="1"/>
+      <text x="245" y="153" text-anchor="middle" dominant-baseline="central" font-family="'JetBrains Mono',monospace" font-size="13" fill="#1a1814">(6, 5)</text>
+    </g>
+    <g id="cn310" class="compat-node" data-idx="3" cursor="pointer">
+      <rect x="385" y="135" width="90" height="36" rx="6" fill="#f2efe9" stroke="#c8c0b4" stroke-width="1"/>
+      <text x="430" y="153" text-anchor="middle" dominant-baseline="central" font-family="'JetBrains Mono',monospace" font-size="13" fill="#1a1814">(3, 10)</text>
+    </g>
+    <g id="cn56" class="compat-node" data-idx="4" cursor="pointer">
+      <rect x="520" y="135" width="90" height="36" rx="6" fill="#f2efe9" stroke="#c8c0b4" stroke-width="1"/>
+      <text x="565" y="153" text-anchor="middle" dominant-baseline="central" font-family="'JetBrains Mono',monospace" font-size="13" fill="#1a1814">(5, 6)</text>
+    </g>
+    <!-- Top: refined -->
+    <g id="cn235" class="compat-node" data-idx="5" cursor="pointer">
+      <rect x="30" y="35" width="130" height="36" rx="6" fill="#f2efe9" stroke="#c8c0b4" stroke-width="1"/>
+      <text x="95" y="53" text-anchor="middle" dominant-baseline="central" font-family="'JetBrains Mono',monospace" font-size="12" fill="#1a1814">(2, (3, 5))</text>
+    </g>
+    <g id="cn325" class="compat-node" data-idx="6" cursor="pointer">
+      <rect x="185" y="35" width="130" height="36" rx="6" fill="#f2efe9" stroke="#c8c0b4" stroke-width="1"/>
+      <text x="250" y="53" text-anchor="middle" dominant-baseline="central" font-family="'JetBrains Mono',monospace" font-size="12" fill="#1a1814">((3,2), 5)</text>
+    </g>
+    <g id="cn352" class="compat-node" data-idx="7" cursor="pointer">
+      <rect x="340" y="35" width="130" height="36" rx="6" fill="#f2efe9" stroke="#c8c0b4" stroke-width="1"/>
+      <text x="405" y="53" text-anchor="middle" dominant-baseline="central" font-family="'JetBrains Mono',monospace" font-size="12" fill="#1a1814">(3, (5, 2))</text>
+    </g>
+    <g id="cn526" class="compat-node" data-idx="8" cursor="pointer">
+      <rect x="495" y="35" width="130" height="36" rx="6" fill="#f2efe9" stroke="#c8c0b4" stroke-width="1"/>
+      <text x="560" y="53" text-anchor="middle" dominant-baseline="central" font-family="'JetBrains Mono',monospace" font-size="12" fill="#1a1814">(5, (2, 3))</text>
+    </g>
+    <!-- Arrows: refined -> coarser (upward = refines downward = coarsens) -->
+    <!-- (2,(3,5)) -> (2,15) -->
+    <line x1="110" y1="135" x2="110" y2="75" stroke="#c8c0b4" stroke-width="1" marker-end="url(#arr)"/>
+    <!-- ((3,2),5) -> (6,5) -->
+    <line x1="245" y1="135" x2="250" y2="75" stroke="#c8c0b4" stroke-width="1" marker-end="url(#arr)"/>
+    <!-- (3,(5,2)) -> (3,10) -->
+    <line x1="430" y1="135" x2="405" y2="75" stroke="#c8c0b4" stroke-width="1" marker-end="url(#arr)"/>
+    <!-- (5,(2,3)) -> (5,6) -->
+    <line x1="565" y1="135" x2="560" y2="75" stroke="#c8c0b4" stroke-width="1" marker-end="url(#arr)"/>
+    <!-- mid -> 30 -->
+    <line x1="110" y1="171" x2="310" y2="232" stroke="#c8c0b4" stroke-width="1" marker-end="url(#arr)"/>
+    <line x1="245" y1="171" x2="325" y2="232" stroke="#c8c0b4" stroke-width="1" marker-end="url(#arr)"/>
+    <line x1="430" y1="171" x2="355" y2="232" stroke="#c8c0b4" stroke-width="1" marker-end="url(#arr)"/>
+    <line x1="565" y1="171" x2="370" y2="232" stroke="#c8c0b4" stroke-width="1" marker-end="url(#arr)"/>
+    <!-- labels -->
+    <text x="340" y="22" text-anchor="middle" font-family="'Source Serif 4',serif" font-size="11" fill="#7a756e" font-style="italic">most refined (natural)</text>
+    <text x="340" y="278" text-anchor="middle" font-family="'Source Serif 4',serif" font-size="11" fill="#7a756e" font-style="italic">most coarse (integral)</text>
+    <text x="340" y="292" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#7a756e">click any node to highlight its chain</text>
+  </svg>
+  <div id="compat-info" style="font-family:var(--mono);font-size:.8rem;color:var(--ink2);min-height:1.5rem;margin-top:.5rem"></div>
+</div>
+
+<p>Notice that <code>(2,(3,5))</code> and <code>((3,2),5)</code> both have size 30 — but they are <strong>not compatible with each other</strong>. They each refine different flat-2D shapes: (2,15) vs (6,5). They share only the root <code>30</code>. This matters: a layout algorithm written for shape (6,5) can't accept a (2,(3,5)) tensor without re-interpreting it.</p>
+
+<hr id="s4">
+<h2>All coordinates for a shape: 𝒵(S)</h2>
+
+<div class="def-box">
+  <div class="def-label">Definition 2.8 — Compatible coordinate sets 𝒵(S)</div>
+  <p>\(\mathcal{Z}(S) = \{\mathbb{Z}_{S'} \mid S' \preceq S\}\) — the coordinate sets of all shapes that coarsen S.</p>
+</div>
+
+<p>Every shape has at least two coordinate sets: the flat integers 0…|S|−1, and the natural tuple coordinate set. Hierarchical shapes have more. See it concretely:</p>
+
+<div class="widget">
+  <div class="widget-title">All coordinate sets for a shape</div>
+  <div class="controls" style="margin-bottom:1rem">
+    <div class="ctrl-group">
+      <label>Shape:</label>
+      <select id="shape-select">
+        <option value="4">4</option>
+        <option value="2,3">(2, 3)</option>
+        <option value="2,3,2" selected>((2,3), 2)</option>
+        <option value="2,3,5">(2, (3, 5))</option>
+      </select>
+    </div>
+  </div>
+  <div id="zs-display"></div>
+</div>
+
+<p>The crucial insight: <strong>any coordinate set in 𝒵(S) can be used to index a tensor of shape S</strong>. You can use flat integers, rank-1 pairs, or fully nested tuples — they all enumerate the same elements in the same colexicographic order.</p>
+
+<hr id="s5">
+<h2>idx2crd and crd2idx — the bijection formulas</h2>
+
+<p>The functions <code>idx2crd</code> and <code>crd2idx</code> are the workhorses. Let's see the formula in action and verify that it's exactly mixed-radix decomposition:</p>
+
+<div class="math-display">
+  \[\text{idx2crd}(i, S) = \left(i \bmod |S_0|,\ \left\lfloor\frac{i}{|S_0|}\right\rfloor \bmod |S_1|,\ \ldots\right) \quad (4)\]
+</div>
+<div class="math-display">
+  \[\text{crd2idx}((c_0, c_1, \ldots), S) = c_0 + c_1 \cdot |S_0| + c_2 \cdot |S_0||S_1| + \ldots \quad (5)\]
+</div>
+
+<p>If you've ever written a linear-index-to-subscript function in C, this is exactly what you did. Here it's generalized to recursive shapes:</p>
+
+<pre><span class="k">def</span> idx2crd(i, shape):
+    <span class="k">if</span> isinstance(shape, <span class="k">int</span>):
+        <span class="k">return</span> i % shape          <span class="c"># base case: scalar mode</span>
+    coords = []
+    <span class="k">for</span> s <span class="k">in</span> shape:
+        s_size = product(s)
+        coords.append(idx2crd(i % s_size, s))  <span class="c"># recurse into sub-mode</span>
+        i = i // s_size
+    <span class="k">return</span> tuple(coords)
+
+<span class="k">def</span> crd2idx(coord, shape):
+    <span class="k">if</span> isinstance(shape, <span class="k">int</span>):
+        <span class="k">return</span> coord
+    result, mult = 0, 1
+    <span class="k">for</span> c, s <span class="k">in</span> zip(coord, shape):
+        result += crd2idx(c, s) * mult
+        mult *= product(s)
+    <span class="k">return</span> result</pre>
+
+<p>Try it live. Pick any flat index and watch both the formula expansion and the round-trip:</p>
+
+<div class="widget">
+  <div class="widget-title">Live idx2crd / crd2idx — interactive calculator</div>
+  <div class="controls">
+    <div class="ctrl-group"><label>Shape:</label>
+      <select id="calc-shape">
+        <option value="2,3">(2, 3)</option>
+        <option value="2,3,2" selected>((2,3), 2)</option>
+        <option value="3,4">(3, 4)</option>
+        <option value="3,2,4">(3, (2, 4))</option>
+      </select>
+    </div>
+    <div class="ctrl-group"><label>i =</label>
+      <input type="range" id="calc-i" min="0" max="11" value="7" style="width:120px">
+      <span class="val-badge" id="calc-iv">7</span>
+    </div>
+  </div>
+  <div id="calc-display" style="margin-top:1rem;font-family:var(--mono);font-size:.84rem"></div>
+</div>
+
+<hr id="s6">
+<h2>Out-of-bounds coordinates</h2>
+
+<div class="def-box">
+  <div class="def-label">Definitions 2.12–2.14</div>
+  <p>An <em>admissible coordinate</em> is weakly congruent to the shape. An <em>out-of-bounds coordinate</em> is admissible but not in-bounds. A <em>congruent coordinate</em> has exactly the same profile as the shape.</p>
+</div>
+
+<p>Here's a subtle asymmetry: <code>idx2crd</code> is well-defined for <em>any</em> integer, even those ≥ |S|. But <code>crd2idx</code> on an out-of-bounds tuple can land back inside [0, |S|) — so the round-trip breaks. They're only inverses within the valid range.</p>
+
+<div class="widget">
+  <div class="widget-title">Out-of-bounds explorer — shape (2, 3)</div>
+  <div id="oob-display"></div>
+  <div style="margin-top:.75rem;font-family:var(--serif);font-size:.88rem;color:var(--ink3);font-style:italic">
+    Notice: i=6 lands at coord (0,0) — the same as i=0. So crd2idx((0,0)) = 0 ≠ 6. The round-trip breaks.
+    <br>Contrast: (0,3) is out-of-bounds for shape (2,3), yet crd2idx maps it to 6 which is in-range.
+  </div>
+</div>
+
+<hr>
+<h2>Putting it together</h2>
+
+<p>Here's what §2.2 has established:</p>
+
+<p>1. A shape is a hierarchical tuple of positive integers. It defines <strong>how many modes</strong> there are and <strong>how large</strong> each mode is.</p>
+<p>2. A shape defines multiple coordinate sets — flat integers, rank-k tuples, and nested tuples — all in bijection via colexicographic order.</p>
+<p>3. Two shapes are <strong>compatible</strong> (P ⪯ S) when P is a coarser view of the same total count. Compatibility is a partial order.</p>
+<p>4. <code>idx2crd</code> and <code>crd2idx</code> are inverses <em>only within bounds</em>. Out-of-bounds integers still produce valid coordinate tuples, but out-of-bounds tuples can collide under <code>crd2idx</code>.</p>
+
+<div class="callout">
+  <p><strong>Why does any of this matter for GPU programming?</strong> When you tile a matrix for a warp or thread block, you're folding a 2D shape into a hierarchical one: (M, N) → (BM, GM, BN, GN) where B = block size, G = grid size. CuTe lets you describe that folding with shapes and strides, then write <em>one</em> algorithm that works at any level. Strides (§5) and algorithms build directly on the coordinate machinery here.</p>
+</div>
+</section>
+
+<section class="reveal" style="border:none; padding-top:40px; padding-bottom:40px; text-align:center;">
+  <p style="color:var(--ink3); font-size:11px; letter-spacing:0.08em; text-transform:uppercase;">
+    <em>Part 1:</em> Loops Are Just Layouts · <em>Part 2:</em> Tensors & Folding · <em>Part 3:</em> Tuples & HTuples · <strong>Part 4:</strong> Shape · <em>Upcoming:</em> Stride & Inner Product
+  </p>
+</section>
+
+</div><!-- /content -->
+
+<!-- Footer -->
+<footer>
+  <p>Based on CuTe and CUTLASS documentation. Learn more at <a href="https://github.com/NVIDIA/cutlass" style="color:var(--green);">NVIDIA/CUTLASS</a> and <a href="https://github.com/NVIDIA/cutlass/blob/main/media/docs/cute/" style="color:var(--green);">CuTe Layouts</a>.</p>
+</footer>
+
+<script>
+// ========== UTILITY ==========
+function shapeSize(s) {
+  if (typeof s === 'number') return s;
+  return s.reduce((a, x) => a * shapeSize(x), 1);
+}
+function idx2crd(i, shape) {
+  if (typeof shape === 'number') return i % shape;
+  const coords = [];
+  for (const s of shape) {
+    const ss = shapeSize(s);
+    coords.push(idx2crd(i % ss, s));
+    i = Math.floor(i / ss);
+  }
+  return coords;
+}
+function crd2idx(coord, shape) {
+  if (typeof shape === 'number') return coord;
+  let result = 0, mult = 1;
+  for (let k = 0; k < coord.length; k++) {
+    result += crd2idx(coord[k], shape[k]) * mult;
+    mult *= shapeSize(shape[k]);
+  }
+  return result;
+}
+function fmtCrd(c) {
+  if (typeof c === 'number') return String(c);
+  return '(' + c.map(fmtCrd).join(', ') + ')';
+}
+function parseShapeStr(s) {
+  // parse comma-separated triplet: "2,3,2" -> ((2,3), 2)
+  const p = {'2,3': [2,3], '2,3,2': [[2,3],2], '3,4': [3,4], '3,2,4': [3,[2,4]],
+             '2,3,5': [2,[3,5]], '4': 4};
+  return p[s];
+}
+
+// ========== GRID EXPLORER ==========
+const gc = document.getElementById('grid-canvas');
+const gctx = gc.getContext('2d');
+let hoverCell = null;
+
+function drawGrid() {
+  const M = +document.getElementById('M').value;
+  const N = +document.getElementById('N').value;
+  document.getElementById('Mv').textContent = M;
+  document.getElementById('Nv').textContent = N;
+
+  const CW = Math.min(38, Math.floor((gc.offsetWidth || 320) / N));
+  const CH = Math.min(38, Math.floor(200 / M));
+  gc.width = CW * N + 1;
+  gc.height = CH * M + 1;
+
+  for (let n = 0; n < N; n++) {
+    for (let m = 0; m < M; m++) {
+      const i = crd2idx([m, n], [M, N]);
+      const isHov = hoverCell && hoverCell[0] === m && hoverCell[1] === n;
+      gctx.fillStyle = isHov ? '#b5450a' : (i % 2 === 0 ? '#f2efe9' : '#e8e3da');
+      gctx.fillRect(n * CW, m * CH, CW - 1, CH - 1);
+      gctx.fillStyle = isHov ? 'white' : '#4a4640';
+      gctx.font = `${Math.max(9, CW / 3)}px 'JetBrains Mono', monospace`;
+      gctx.textAlign = 'center';
+      gctx.textBaseline = 'middle';
+      gctx.fillText(i, n * CW + CW / 2, m * CH + CH / 2);
+    }
+  }
+
+  // Map table
+  const mt = document.getElementById('map-table');
+  let html = '<table style="border-collapse:collapse;font-size:.75rem">';
+  html += '<tr><th style="padding:2px 6px;color:var(--ink3);text-align:right">i</th><th style="padding:2px 6px;color:var(--ink3)">→</th><th style="padding:2px 6px;color:var(--ink3)">(m, n)</th></tr>';
+  for (let i = 0; i < M * N; i++) {
+    const [m, n] = idx2crd(i, [M, N]);
+    const isHov = hoverCell && hoverCell[0] === m && hoverCell[1] === n;
+    html += `<tr style="${isHov ? 'background:var(--accent2);color:white;border-radius:3px' : ''}">
+      <td style="padding:2px 6px;text-align:right;color:${isHov?'white':'var(--ink3)'}">${i}</td>
+      <td style="padding:2px 6px;color:${isHov?'white':'var(--ink3)'}">→</td>
+      <td style="padding:2px 6px;color:${isHov?'white':'var(--ink)'}">( ${m}, ${n} )</td>
+    </tr>`;
+  }
+  html += '</table>';
+  mt.innerHTML = html;
+}
+
+gc.addEventListener('mousemove', e => {
+  const M = +document.getElementById('M').value;
+  const N = +document.getElementById('N').value;
+  const CW = gc.width / N;
+  const CH = gc.height / M;
+  const rect = gc.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * (gc.width / rect.width);
+  const y = (e.clientY - rect.top) * (gc.height / rect.height);
+  const n = Math.floor(x / CW), m = Math.floor(y / CH);
+  if (m >= 0 && m < M && n >= 0 && n < N) {
+    hoverCell = [m, n];
+    const i = crd2idx([m, n], [M, N]);
+    document.getElementById('cell-info').textContent = `i = ${i}  ↔  (m, n) = (${m}, ${n})   [col-major: i = m + n×M = ${m} + ${n}×${M}]`;
+  } else { hoverCell = null; document.getElementById('cell-info').textContent = ''; }
+  drawGrid();
+});
+gc.addEventListener('mouseleave', () => { hoverCell = null; drawGrid(); });
+document.getElementById('M').addEventListener('input', drawGrid);
+document.getElementById('N').addEventListener('input', drawGrid);
+window.addEventListener('load', drawGrid);
+window.addEventListener('resize', drawGrid);
+
+// ========== STEPPER ==========
+const stages = [
+  {
+    label: '1. Flat',
+    html: `<p style="font-size:.9rem;color:var(--ink2);margin-bottom:.75rem">Start with 24 elements, shape <code>(3, 8)</code>. Flat index 0–23:</p>
+    <div id="step-grid-flat"></div>`
+  },
+  {
+    label: '2. Fold 2nd mode',
+    html: `<p style="font-size:.9rem;color:var(--ink2);margin-bottom:.75rem">Split the N=8 dimension into (2, 4). Shape becomes <code>(3, (2, 4))</code>. The index i still runs 0–23, but the 2nd coordinate is now a pair (n, p):</p>
+    <div id="step-grid-hier"></div>`
+  },
+  {
+    label: '3. Two views, same data',
+    html: `<p style="font-size:.9rem;color:var(--ink2);margin-bottom:.75rem">The <em>same</em> 24 elements, the <em>same</em> colexicographic order. Only the coordinate vocabulary changes. Click a cell in either grid to see both representations:</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <div><div style="font-family:var(--mono);font-size:.7rem;color:var(--ink3);margin-bottom:.3rem">Shape (3, 8) — 2D view</div><canvas id="step-2d" width="200" height="100"></canvas></div>
+      <div><div style="font-family:var(--mono);font-size:.7rem;color:var(--ink3);margin-bottom:.3rem">Shape (3,(2,4)) — 3D view (n axis)</div><canvas id="step-3d" width="200" height="100"></canvas></div>
+    </div>
+    <div id="step-compare" style="font-family:var(--mono);font-size:.8rem;margin-top:.5rem;color:var(--ink2);min-height:1.2rem"></div>`
+  }
+];
+
+const pills = document.getElementById('stepper-pills');
+const body = document.getElementById('stepper-body');
+let activeStage = 0;
+
+stages.forEach((s, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'stage-pill' + (i === 0 ? ' active' : '');
+  btn.textContent = s.label;
+  btn.onclick = () => {
+    activeStage = i;
+    document.querySelectorAll('.stage-pill').forEach((p, j) => p.classList.toggle('active', j === i));
+    body.innerHTML = s.html;
+    if (i === 0) drawFlatGrid();
+    if (i === 1) drawHierGrid();
+    if (i === 2) drawBothGrids();
+  };
+  pills.appendChild(btn);
+});
+
+function drawFlatGrid() {
+  const el = document.getElementById('step-grid-flat');
+  if (!el) return;
+  let html = '<div style="display:flex;flex-wrap:wrap;gap:2px;font-family:var(--mono);font-size:.75rem">';
+  for (let i = 0; i < 24; i++) {
+    html += `<div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:var(--paper3);border-radius:3px">${i}</div>`;
+  }
+  html += '</div>';
+  el.innerHTML = html;
+}
+function drawHierGrid() {
+  const el = document.getElementById('step-grid-hier');
+  if (!el) return;
+  // shape (3, (2, 4))
+  let html = '<div style="display:grid;grid-template-columns:repeat(8,1fr);gap:2px;font-family:var(--mono);font-size:.7rem;max-width:400px">';
+  // header
+  html += '<div style="color:var(--ink3);font-size:.65rem;text-align:center">m\\q</div>';
+  for (let q = 0; q < 8; q++) {
+    const n = q % 2, p = Math.floor(q / 2);
+    html += `<div style="color:var(--ink3);font-size:.65rem;text-align:center">(${n},${p})</div>`;
+  }
+  for (let m = 0; m < 3; m++) {
+    html += `<div style="color:var(--ink3);font-size:.65rem;text-align:center;display:flex;align-items:center;justify-content:center">${m}</div>`;
+    for (let q = 0; q < 8; q++) {
+      const i = m + q * 3;
+      const hue = Math.round(i * 360 / 24);
+      html += `<div style="height:26px;display:flex;align-items:center;justify-content:center;background:hsl(${hue},40%,88%);border-radius:2px;font-size:.7rem">${i}</div>`;
+    }
+  }
+  html += '</div>';
+  el.innerHTML = html;
+}
+function drawBothGrids() {
+  // 2D canvas
+  const c2 = document.getElementById('step-2d');
+  const c3 = document.getElementById('step-3d');
+  if (!c2 || !c3) return;
+  const CW = 22, CH = 22;
+  c2.width = 8 * CW + 1; c2.height = 3 * CH + 1;
+  c3.width = 8 * CW + 1; c3.height = 3 * CH + 1;
+  const ctx2 = c2.getContext('2d');
+  const ctx3 = c3.getContext('2d');
+
+  function paintCanvas(ctx, hov) {
+    for (let m = 0; m < 3; m++) {
+      for (let n = 0; n < 8; n++) {
+        const i = m + n * 3;
+        const isHov = hov !== null && hov === i;
+        ctx.fillStyle = isHov ? '#b5450a' : (i % 2 === 0 ? '#f2efe9' : '#e8e3da');
+        ctx.fillRect(n * CW, m * CH, CW - 1, CH - 1);
+        ctx.fillStyle = isHov ? 'white' : '#4a4640';
+        ctx.font = '9px JetBrains Mono,monospace';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(i, n * CW + CW / 2, m * CH + CH / 2);
+      }
+    }
+  }
+  let hovI = null;
+  paintCanvas(ctx2, null); paintCanvas(ctx3, null);
+  [c2, c3].forEach(cv => {
+    cv.addEventListener('mousemove', e => {
+      const r = cv.getBoundingClientRect();
+      const x = (e.clientX - r.left) * (cv.width / r.width);
+      const y = (e.clientY - r.top) * (cv.height / r.height);
+      const n = Math.floor(x / CW), m = Math.floor(y / CH);
+      if (m >= 0 && m < 3 && n >= 0 && n < 8) {
+        hovI = m + n * 3;
+        const q = n; const nv = q % 2, pv = Math.floor(q / 2);
+        document.getElementById('step-compare').textContent =
+          `i = ${hovI}  ↔  (m, n)=(${m},${n}) in shape(3,8)  ↔  (m,(n,p))=(${m},(${nv},${pv})) in shape(3,(2,4))`;
+      } else hovI = null;
+      paintCanvas(ctx2, hovI); paintCanvas(ctx3, hovI);
+    });
+    cv.addEventListener('mouseleave', () => { hovI = null; paintCanvas(ctx2, null); paintCanvas(ctx3, null); });
+  });
+}
+body.innerHTML = stages[0].html;
+setTimeout(drawFlatGrid, 50);
+
+// ========== COMPAT LATTICE ==========
+const chains = {
+  0: [0], 1:[1,0], 2:[2,0], 3:[3,0], 4:[4,0],
+  5:[5,1,0], 6:[6,2,0], 7:[7,3,0], 8:[8,4,0]
+};
+const nodeIds = ['cn30','cn215','cn65','cn310','cn56','cn235','cn325','cn352','cn526'];
+const nodeLabels = ['30','(2,15)','(6,5)','(3,10)','(5,6)','(2,(3,5))','((3,2),5)','(3,(5,2))','(5,(2,3))'];
+const infoMsgs = [
+  'Most coarse: any shape of size 30 coarsens 30.',
+  '(2,15) refines 30. A (2,(3,5)) also coarsens to this.',
+  '(6,5) refines 30. A ((3,2),5) also coarsens to this.',
+  '(3,10) refines 30.',
+  '(5,6) refines 30.',
+  '(2,(3,5)) — most refined along the left branch. Compatible with (2,15) and 30, but NOT with (6,5).',
+  '((3,2),5) — most refined along the center-left branch.',
+  '(3,(5,2)) — refines (3,10). The second mode is ordered differently than (3,(2,5)).',
+  '(5,(2,3)) — refines (5,6). Same size as others but different factorisation.'
+];
+
+document.querySelectorAll('.compat-node').forEach(g => {
+  const idx = +g.dataset.idx;
+  g.addEventListener('mouseenter', () => {
+    const chain = chains[idx] || [idx];
+    nodeIds.forEach((id, j) => {
+      const el = document.getElementById(id);
+      if (chain.includes(j)) {
+        el.querySelector('rect').setAttribute('fill', '#e87843');
+        el.querySelector('rect').setAttribute('stroke', '#b5450a');
+        el.querySelector('text').setAttribute('fill', 'white');
+      } else {
+        el.querySelector('rect').setAttribute('fill', '#f2efe9');
+        el.querySelector('rect').setAttribute('stroke', '#c8c0b4');
+        el.querySelector('text').setAttribute('fill', '#1a1814');
+      }
+    });
+    document.getElementById('compat-info').textContent = nodeLabels[idx] + ': ' + infoMsgs[idx];
+  });
+  g.addEventListener('mouseleave', () => {
+    nodeIds.forEach(id => {
+      const el = document.getElementById(id);
+      el.querySelector('rect').setAttribute('fill', '#f2efe9');
+      el.querySelector('rect').setAttribute('stroke', '#c8c0b4');
+      el.querySelector('text').setAttribute('fill', '#1a1814');
+    });
+    document.getElementById('compat-info').textContent = '';
+  });
+});
+
+// ========== Z(S) display ==========
+const shapeDefs = {
+  '4': { shape: 4, coordSets: [
+    { label: 'Z_4', coords: (s => Array.from({length:4},(_,i)=>i))(4) }
+  ]},
+  '2,3': { shape: [2,3], coordSets: [
+    { label: 'Z_6', coords: Array.from({length:6},(_,i)=>i) },
+    { label: 'Z_(2,3)', coords: Array.from({length:6},(_,i)=>idx2crd(i,[2,3])) }
+  ]},
+  '2,3,2': { shape: [[2,3],2], coordSets: [
+    { label: 'Z_12', coords: Array.from({length:12},(_,i)=>i) },
+    { label: 'Z_(6,2)', coords: Array.from({length:12},(_,i)=>idx2crd(i,[6,2])) },
+    { label: 'Z_((2,3),2)', coords: Array.from({length:12},(_,i)=>idx2crd(i,[[2,3],2])) }
+  ]},
+  '2,3,5': { shape: [2,[3,5]], coordSets: [
+    { label: 'Z_30', coords: Array.from({length:30},(_,i)=>i) },
+    { label: 'Z_(2,15)', coords: Array.from({length:30},(_,i)=>idx2crd(i,[2,15])) },
+    { label: 'Z_(2,(3,5))', coords: Array.from({length:30},(_,i)=>idx2crd(i,[2,[3,5]])) }
+  ]}
+};
+
+function renderZS() {
+  const key = document.getElementById('shape-select').value;
+  const def = shapeDefs[key];
+  const el = document.getElementById('zs-display');
+  let html = '';
+  def.coordSets.forEach((cs, si) => {
+    const limit = Math.min(cs.coords.length, key === '2,3,5' ? 10 : cs.coords.length);
+    html += `<div style="margin-bottom:1rem">`;
+    html += `<div style="font-family:var(--mono);font-size:.72rem;color:var(--accent);margin-bottom:.35rem">${cs.label}</div>`;
+    html += `<div style="display:flex;flex-wrap:wrap;gap:4px">`;
+    for (let i = 0; i < limit; i++) {
+      const c = cs.coords[i];
+      html += `<span style="font-family:var(--mono);font-size:.74rem;background:var(--mono-bg);padding:.15em .45em;border-radius:3px;color:var(--ink2)">${fmtCrd(c)}</span>`;
+    }
+    if (limit < cs.coords.length) html += `<span style="font-family:var(--mono);font-size:.74rem;color:var(--ink3)">… +${cs.coords.length - limit} more</span>`;
+    html += `</div></div>`;
+  });
+  el.innerHTML = html;
+}
+document.getElementById('shape-select').addEventListener('change', renderZS);
+renderZS();
+
+// ========== CALC ==========
+const calcShapes = {
+  '2,3': [2,3], '2,3,2': [[2,3],2], '3,4': [3,4], '3,2,4': [3,[2,4]]
+};
+const calcMaxes = { '2,3': 6, '2,3,2': 12, '3,4': 12, '3,2,4': 24 };
+
+function renderCalc() {
+  const sk = document.getElementById('calc-shape').value;
+  const shape = calcShapes[sk];
+  const maxI = calcMaxes[sk] - 1;
+  const slider = document.getElementById('calc-i');
+  slider.max = maxI;
+  if (+slider.value > maxI) slider.value = 0;
+  const i = +slider.value;
+  document.getElementById('calc-iv').textContent = i;
+
+  const crd = idx2crd(i, shape);
+  const back = crd2idx(crd, shape);
+
+  // Show formula expansion
+  let formulaHtml = `<div style="margin-bottom:.75rem">`;
+  formulaHtml += `<span style="color:var(--ink3)">idx2crd(</span><span style="color:var(--accent)">${i}</span><span style="color:var(--ink3)">, </span><span style="color:var(--blue)">${JSON.stringify(shape)}</span><span style="color:var(--ink3)">)</span>`;
+  formulaHtml += `<span style="color:var(--ink3)"> = </span><span style="color:var(--ink)">${fmtCrd(crd)}</span>`;
+  formulaHtml += `</div>`;
+
+  // Expansion steps for flat shapes
+  if (!Array.isArray(shape[0])) {
+    formulaHtml += `<div style="color:var(--ink3);margin-bottom:.4rem">Steps (colexicographic):</div>`;
+    let rem = i;
+    for (let k = 0; k < shape.length; k++) {
+      const sv = shape[k];
+      const ck = rem % sv;
+      formulaHtml += `<div style="margin-left:1rem;margin-bottom:.2rem">mode ${k}: <span style="color:var(--ink)">${i}</span> mod <span style="color:var(--blue)">${sv}</span>`;
+      if (k > 0) formulaHtml += ` (rem=${rem})`;
+      formulaHtml += ` = <span style="color:var(--accent)">${ck}</span></div>`;
+      rem = Math.floor(rem / sv);
+    }
+  }
+
+  formulaHtml += `<div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--paper3)">`;
+  formulaHtml += `<span style="color:var(--ink3)">crd2idx(</span><span style="color:var(--accent)">${fmtCrd(crd)}</span><span style="color:var(--ink3)">, </span><span style="color:var(--blue)">${JSON.stringify(shape)}</span><span style="color:var(--ink3)">)</span>`;
+  formulaHtml += ` = <span style="color:${back===i?'var(--green)':'var(--accent)'}">${back}</span>`;
+  formulaHtml += back === i ? ` <span style="color:var(--green);font-size:.75rem"> ✓ round-trips</span>` : '';
+  formulaHtml += `</div>`;
+
+  document.getElementById('calc-display').innerHTML = formulaHtml;
+}
+document.getElementById('calc-shape').addEventListener('change', renderCalc);
+document.getElementById('calc-i').addEventListener('input', renderCalc);
+renderCalc();
+
+// ========== OOB ==========
+function renderOOB() {
+  const shape = [2, 3];
+  let html = '';
+  for (let i = 0; i < 10; i++) {
+    const crd = idx2crd(i, shape);
+    const back = crd2idx(crd, shape);
+    const inBounds = i < shapeSize(shape);
+    const roundTrips = back === i;
+    html += `<div class="oob-row">
+      <span class="oob-i">i=${i}</span>
+      <span class="oob-arrow">→</span>
+      <span class="oob-crd">${fmtCrd(crd)}</span>
+      <span class="oob-arrow">→</span>
+      <span class="oob-back">${back}</span>
+      <span class="oob-tag ${inBounds ? 'oob-in' : 'oob-out'}">${inBounds ? 'in-bounds' : 'OUT-OF-BOUNDS'}</span>
+      ${roundTrips ? `<span class="oob-tag oob-rt">✓ round-trips</span>` : `<span style="font-size:.7rem;color:var(--ink3)">no round-trip</span>`}
+    </div>`;
+  }
+  document.getElementById('oob-display').innerHTML = html;
+}
+renderOOB();
+
+// ========== KATEX ==========
+renderMathInElement(document.body, {
+  delimiters: [
+    {left: '\\[', right: '\\]', display: true},
+    {left: '\\(', right: '\\)', display: false}
+  ],
+  throwOnError: false
+});
+
+// ========== REVEAL ANIMATIONS ==========
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+</script>
+
+<!-- Theme toggle script -->
+<script>
+(function(){
+  const saved = localStorage.getItem('theme');
+  const theme = saved || 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+
+  const btn = document.getElementById('themeToggle');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+  }
+})();
+</script>
+</body>
+</html>

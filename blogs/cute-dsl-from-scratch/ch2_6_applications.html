@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2.6 Applications — CUTE Layout Algebra</title>
+
+<!-- FONT STACK: Playfair Display (serif) + Azeret Mono (mono) to match main site -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Azeret+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font-serif: 'Playfair Display', serif;
+  --font-mono: 'Azeret Mono', monospace;
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --paper: #f4f1eb;
+  --paper2: #ede9e0;
+  --ink: #1c1a17;
+  --ink2: #3d3a35;
+  --ink3: #7a7570;
+  --rule: #d9d4c8;
+  --rule2: #c4bfb2;
+  --green: #2a5c45;
+  --green-light: #e8f0ec;
+  --orange: #b85c2a;
+  --orange-light: #f5ece6;
+  --blue: #2a4a6b;
+}
+
+[data-theme="dark"] {
+  --paper: #0f0d0c;
+  --paper2: #161412;
+  --ink: #f4f1eb;
+  --ink2: #d1ccc3;
+  --ink3: #8a837b;
+  --rule: #24211e;
+  --rule2: #332f2b;
+  --green: #6fb894;
+  --green-light: #16221c;
+  --orange: #e69a6e;
+  --orange-light: #261c14;
+  --blue: #6a94b8;
+}
+
+/* Alias old variable names for backward compatibility */
+:root {
+  --bg: var(--paper); --bg2: var(--paper2); --bg3: var(--paper2);
+  --border: var(--rule); --border2: var(--rule2);
+  --accent: var(--orange); --accent2: var(--orange);
+  --teal: var(--green); --amber: var(--orange); --gold: var(--orange);
+  --mono: var(--font-mono); --serif: var(--font-serif); --body: var(--font-mono);
+  --radius: 4px;
+}
+[data-theme="dark"] {
+  --bg: var(--paper); --bg2: var(--paper2); --bg3: var(--paper2);
+  --border: var(--rule); --border2: var(--rule2);
+  --accent: var(--orange); --accent2: var(--orange);
+  --teal: var(--green); --amber: var(--orange); --gold: var(--orange);
+  --mono: var(--font-mono); --serif: var(--font-serif); --body: var(--font-mono);
+  --radius: 4px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-mono);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12.5px;
+  line-height: 1.7;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 32px 120px;
+}
+
+/* ── HEADER ── */
+.site-header {
+  padding: 32px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 0.5px solid var(--border);
+  margin-bottom: 64px;
+}
+.site-name {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+.chapter-badge {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--bg3);
+  color: var(--ink2);
+  padding: 4px 10px;
+  border-radius: 2px;
+  letter-spacing: 0.04em;
+}
+
+/* ── HERO ── */
+.hero { margin-bottom: 56px; }
+.hero-kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.hero-title {
+  font-family: var(--serif);
+  font-size: clamp(36px, 6vw, 60px);
+  line-height: 1.08;
+  color: var(--ink);
+  margin-bottom: 20px;
+}
+.hero-subtitle {
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--ink2);
+  max-width: 580px;
+  font-style: italic;
+}
+.hero-rule {
+  width: 40px;
+  height: 2px;
+  background: var(--accent);
+  margin: 28px 0;
+}
+
+/* ── PROSE ── */
+h2 {
+  font-family: var(--serif);
+  font-size: 32px;
+  line-height: 1.2;
+  color: var(--ink);
+  margin: 56px 0 20px;
+  font-weight: 400;
+}
+h3 {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink2);
+  margin: 40px 0 12px;
+}
+p { margin-bottom: 20px; color: var(--ink2); }
+p strong { color: var(--ink); font-weight: 500; }
+a { color: var(--blue); text-decoration: none; border-bottom: 0.5px solid currentColor; }
+a:hover { opacity: 0.7; }
+
+/* ── CALLOUT ── */
+.callout {
+  border-left: 3px solid var(--accent);
+  background: var(--bg2);
+  padding: 16px 20px;
+  margin: 28px 0;
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+.callout p { margin: 0; color: var(--ink2); font-size: 16px; }
+.callout strong { color: var(--ink); }
+
+/* ── CODE ── */
+code {
+  font-family: var(--mono);
+  font-size: 0.82em;
+  background: var(--bg3);
+  color: var(--accent2);
+  padding: 1px 5px;
+  border-radius: 2px;
+}
+pre {
+  background: var(--bg2);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  overflow-x: auto;
+  margin: 24px 0;
+  position: relative;
+}
+pre code {
+  background: none;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.65;
+  padding: 0;
+}
+.code-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  background: var(--bg3);
+  padding: 3px 8px;
+  border-radius: 2px;
+  margin-bottom: 8px;
+  display: inline-block;
+}
+.kw { color: var(--blue); }
+.cm { color: var(--ink3); font-style: italic; }
+.st { color: var(--teal); }
+.nm { color: var(--amber); }
+.fn { color: var(--accent2); }
+
+/* ── STAT STRIP ── */
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 32px 0;
+}
+.stat-cell {
+  background: var(--bg2);
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+}
+.stat-num {
+  font-family: var(--serif);
+  font-size: 36px;
+  line-height: 1;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.stat-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+
+/* ── LAYOUT TABLE ── */
+.layout-table-wrap {
+  overflow-x: auto;
+  margin: 28px 0;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  font-family: var(--mono);
+}
+thead th {
+  text-align: left;
+  padding: 10px 14px;
+  background: var(--bg3);
+  color: var(--ink2);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+tbody td {
+  padding: 10px 14px;
+  border-bottom: 0.5px solid var(--border2);
+  color: var(--ink);
+  vertical-align: top;
+  font-size: 13px;
+  line-height: 1.5;
+}
+tbody tr:hover td { background: var(--bg2); }
+td:first-child { font-family: var(--body); font-size: 14px; color: var(--ink2); font-style: italic; }
+
+/* ── INTERACTIVE: COPY DEMO ── */
+.widget {
+  background: var(--bg2);
+  border: 0.5px solid var(--border);
+  border-radius: 6px;
+  padding: 24px;
+  margin: 32px 0;
+}
+.widget-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.widget-title::before {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+button {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  padding: 7px 14px;
+  border: 0.5px solid var(--border);
+  background: var(--bg);
+  color: var(--ink2);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+button:hover { background: var(--bg3); color: var(--ink); }
+button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* Memory grid */
+.mem-section { margin-bottom: 20px; }
+.mem-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 8px;
+}
+.mem-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.mem-cell {
+  width: 44px;
+  height: 38px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  border: 0.5px solid var(--border);
+  background: var(--bg);
+  transition: background 0.3s, border-color 0.3s;
+  position: relative;
+}
+.mem-cell .idx {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--ink3);
+  line-height: 1;
+  margin-bottom: 2px;
+}
+.mem-cell .val {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink);
+  font-weight: 500;
+}
+.mem-cell.active-src { background: rgba(37, 99, 168, 0.2); border-color: var(--blue); }
+.mem-cell.active-dst { background: rgba(13, 122, 110, 0.2); border-color: var(--teal); }
+.mem-cell.null { opacity: 0.3; }
+.arrow-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink3);
+}
+.explanation-box {
+  background: var(--bg);
+  border: 0.5px solid var(--border);
+  border-radius: 3px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--ink2);
+  margin-top: 16px;
+  line-height: 1.6;
+}
+.explanation-box code { font-size: 12px; }
+
+/* ── GEMM VISUALIZER ── */
+.gemm-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 20px 0;
+}
+@media (max-width: 600px) { .gemm-wrap { grid-template-columns: 1fr; } }
+.matrix-label {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink2);
+  margin-bottom: 8px;
+}
+.matrix-grid {
+  display: inline-grid;
+  gap: 2px;
+}
+.matrix-cell {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  border-radius: 2px;
+  border: 0.5px solid var(--border);
+  background: var(--bg);
+  transition: background 0.2s, border-color 0.2s;
+  color: var(--ink);
+}
+.matrix-cell.row-hl { background: rgba(37, 99, 168, 0.15); border-color: var(--blue); }
+.matrix-cell.col-hl { background: rgba(13, 122, 110, 0.15); border-color: var(--teal); }
+.matrix-cell.result { background: rgba(181, 122, 16, 0.2); border-color: var(--amber); }
+.gemm-formula {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink2);
+  margin: 12px 0;
+  line-height: 1.7;
+}
+.layout-chip {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--bg3);
+  border: 0.5px solid var(--border);
+  color: var(--accent2);
+  padding: 3px 8px;
+  border-radius: 2px;
+  margin: 2px;
+}
+
+/* ── GETT SECTION ── */
+.hier-demo {
+  margin: 24px 0;
+}
+.hier-grid-wrap {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.hier-block {
+  border: 0.5px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.hier-block-title {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  background: var(--bg3);
+  padding: 6px 10px;
+  border-bottom: 0.5px solid var(--border);
+}
+.hier-cells {
+  display: grid;
+  gap: 1px;
+  background: var(--border);
+  padding: 1px;
+}
+.hier-cell {
+  background: var(--bg);
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 6px 8px;
+  color: var(--ink2);
+  min-width: 56px;
+  text-align: center;
+  line-height: 1.3;
+}
+.hier-cell .offset { color: var(--ink3); font-size: 8px; display: block; }
+.hier-cell.m1 { background: rgba(37, 99, 168, 0.1); }
+.hier-cell.m2 { background: rgba(13, 122, 110, 0.1); }
+
+/* ── PROGRESS NAV ── */
+.toc {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  border-bottom: 0.5px solid var(--border);
+  padding: 8px 32px;
+  margin: 0 -32px 40px;
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  z-index: 10;
+}
+.toc-item {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+  border-bottom: none;
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+.toc-item:hover { color: var(--ink); border-bottom-color: var(--border); }
+.toc-item.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── FOOTNOTE STYLE ── */
+.pull-quote {
+  border-top: 2px solid var(--accent);
+  border-bottom: 0.5px solid var(--border);
+  padding: 20px 0;
+  margin: 40px 0;
+}
+.pull-quote p {
+  font-family: var(--serif);
+  font-size: 24px;
+  line-height: 1.4;
+  color: var(--ink);
+  font-style: italic;
+  margin: 0;
+}
+
+/* ── MATH DISPLAY ── */
+.math-block {
+  background: var(--bg2);
+  border-left: 3px solid var(--amber);
+  padding: 16px 20px;
+  margin: 24px 0;
+  border-radius: 0 3px 3px 0;
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--ink);
+  line-height: 1.9;
+}
+.math-comment {
+  color: var(--ink3);
+  font-style: italic;
+}
+
+/* Animation */
+@keyframes flash {
+  0%   { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+.flash { animation: flash 0.25s ease-out; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="https://bikrammajhi.github.io/" class="logo">Bikram Majhi</a>
+  <ul class="nav-links">
+    <li><a href="/#about">About</a></li>
+    <li><a href="/#ladder">GEMM</a></li>
+    <li><a href="/#results">Results</a></li>
+    <li><a href="/#projects">Projects</a></li>
+    <li><a href="/#writing">Writing</a></li>
+    <li><a href="/#journal">Journal</a></li>
+    <li><a href="/#contact">Contact</a></li>
+  </ul>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="5"></circle>
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+    </svg>
+    <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+  </button>
+</nav>
+
+<!-- HERO -->
+<div class="hero reveal">
+  <div class="hero-label">GPU Programming · CuTe DSL</div>
+  <h1 class="hero-title">CuTe DSL from scratch:<br>One Loop. <em>Every Layout.</em></h1>
+  <p class="hero-sub">How CUTE's layout algebra collapses 55,000 lines of hand-written GPU code into a single, universal copy loop — then does the same for matrix multiplication.</p>
+  <div class="hero-meta">
+    <span>March 2026</span>
+    <span>~15 minute read</span>
+    <span>Part 6 of 15</span>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- INTRODUCTION -->
+<section class="reveal">
+  <div class="section-label">§6 — Applications</div>
+  <h2>One loop, many meanings</h2>
+
+  <p>The CUTLASS v2 codebase ships nearly <strong>300 separately implemented layouts</strong>, spread across 87 files, running to about 55,000 lines of code. Each is hand-crafted, tested, and maintained in isolation. When a new hardware generation arrives, the whole process starts again.</p>
+
+  <div class="stat-strip" aria-label="Code complexity comparison">
+    <div class="stat-cell">
+      <div class="stat-num">55k</div>
+      <div class="stat-label">Lines — CUTLASS v2 layouts</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">3k</div>
+      <div class="stat-label">Lines — CUTE core algebra</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">300+</div>
+      <div class="stat-label">Layouts representable by CUTE</div>
+    </div>
+  </div>
+
+  <p>
+    CUTE achieves this with a compact layout representation paired with an algebra for composing and transforming it. The payoff: a single algorithm implementation works for <em>any</em> layout satisfying its preconditions. No special-casing.
+  </p>
+  <p>
+    In this section we ground that claim in two concrete algorithms: <strong>COPY</strong> (memory transfer) and <strong>GEMM</strong> (matrix multiplication). Both are written once; the layout object does all the specialization.
+  </p>
+
+  <div class="callout">
+    <p><strong>Assumed background.</strong> You're comfortable with C-style loops and basic linear algebra. You don't need GPU or HPC experience. We'll build intuition first—the formal layout notation appears once the pattern is already clear.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ COPY -->
+  <h2 id="copy">2.6.1 COPY — One Loop, Many Meanings</h2>
+
+  <p>
+    Start with a question: what's the difference between a memory copy, a gather, a scatter, a broadcast, and a transpose? If you've written GPU kernels by hand, each feels completely different. CUTE's answer is: the loop is identical. Only the layout changes.
+  </p>
+
+  <p>
+    Here's the entire algorithm:
+  </p>
+
+  <div class="code-label">Python (pseudocode)</div>
+  <pre><code><span class="kw">def</span> <span class="fn">copy</span>(src, src_layout, dst, dst_layout):
+    <span class="cm"># @pre size(src_layout) == size(dst_layout)</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">size</span>(dst_layout)):
+        dst[dst_layout(i)] = src[src_layout(i)]</code></pre>
+
+  <p>
+    That's it. One loop. The secret is that <code>layout(i)</code> maps a flat logical index <code>i</code> to a physical memory offset. Change the layout, and the same loop now means something completely different.
+  </p>
+
+  <div class="pull-quote">
+    <p>"Change the layout object, not the algorithm. The loop never changes."</p>
+  </div>
+
+  <h3>The layout function: shapes and strides</h3>
+  <p>
+    A layout is a pair <code>(shape, stride)</code>. For a 1-D case, <code>8:1</code> means 8 elements each separated by stride 1—contiguous memory. For multi-dimensional tensors, both shape and stride are tuples, and the layout function computes an <strong>inner product</strong> of the coordinate vector with the stride vector:
+  </p>
+
+  <div class="math-block">
+    layout(i) = coord · stride<br>
+    <span class="math-comment">where coord = idx2crd(i, shape)  &nbsp;— flatten index i into multi-dim coordinates</span><br><br>
+    Example: layout <span style="color:var(--accent2)">(8, 3) : (1, 8)</span><br>
+    &nbsp;&nbsp;Element at logical (2, 1): offset = 2·1 + 1·8 = <strong>10</strong><br>
+    &nbsp;&nbsp;Element at logical (5, 2): offset = 5·1 + 2·8 = <strong>21</strong>
+  </div>
+
+  <p>
+    With this machinery, every COPY variant is just a choice of stride:
+  </p>
+
+  <div class="layout-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Application</th>
+          <th>Source layout</th>
+          <th>Destination layout</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1-D arrays</td><td>8 : 1</td><td>8 : 1</td></tr>
+        <tr><td>N-D arrays</td><td>(8, 2, 3) : (1, 16, 32)</td><td>(8, 2, 3) : (1, 16, 32)</td></tr>
+        <tr><td>Gather</td><td>(2, 3, 2) : (42, 1, 128)</td><td>12 : 1</td></tr>
+        <tr><td>Scatter</td><td>12 : 1</td><td>(2, 3, 2) : (42, 1, 128)</td></tr>
+        <tr><td>Broadcast</td><td>7 : 0</td><td>7 : 1</td></tr>
+        <tr><td>Transpose</td><td>(8, 3) : (1, 8)</td><td>(8, 3) : (3, 1)</td></tr>
+        <tr><td>Tensor transpose</td><td>(8, (3, 5)) : (1, (57, 8))</td><td>(8, 15) : (1, 8)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Interactive — explore each COPY variant</h3>
+  <p>
+    Select a variant below. The top row shows the source memory array (addresses are offsets); the bottom row shows the destination. Colored cells are the ones touched by the loop at each logical index <code>i</code>.
+  </p>
+
+  <!-- INTERACTIVE COPY WIDGET -->
+  <div class="widget" aria-label="Interactive COPY variant explorer">
+    <div class="widget-title">Copy variant explorer</div>
+    <div class="btn-row" id="copy-btns"></div>
+
+    <div class="mem-section">
+      <div class="mem-label">Source memory</div>
+      <div class="mem-grid" id="src-grid"></div>
+    </div>
+    <div class="arrow-row">
+      <span id="copy-arrow-desc">↓ loop writes src[src_layout(i)] → dst[dst_layout(i)]</span>
+    </div>
+    <div class="mem-section">
+      <div class="mem-label">Destination memory</div>
+      <div class="mem-grid" id="dst-grid"></div>
+    </div>
+    <div class="explanation-box" id="copy-explanation"></div>
+  </div>
+
+  <h3>Why stride-zero means broadcast</h3>
+  <p>
+    The broadcast case is particularly elegant. A layout of <code>7 : 0</code> means: size 7, stride 0. Every logical index maps to the same physical offset—zero. So the source has exactly one physical element, and the loop reads it seven times, writing seven copies into the destination. No branching, no special case. Just a stride.
+  </p>
+  <p>
+    Similarly, a transpose is not a separate algorithm. It's the same loop with swapped strides: column-major source <code>(8,3):(1,8)</code> into row-major destination <code>(8,3):(3,1)</code>. Element <code>(i,j)</code> lives at offset <code>i + j·8</code> in the source and <code>i·3 + j</code> in the destination.
+  </p>
+
+  <div class="callout">
+    <p><strong>Static analysis opportunity.</strong> When layout shapes and strides are known at compile time, the compiler can unroll the loop and compute all offsets statically—no runtime cost at all. This is why CUTE is both expressive <em>and</em> fast. The layout algebra is a compile-time artifact.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ GEMM -->
+  <h2 id="gemm">2.6.2 GEMM — A Universal Matrix Multiply</h2>
+
+  <p>
+    The same philosophy extends to matrix multiplication. Here is CUTE's generic GEMM:
+  </p>
+
+  <div class="code-label">Python (pseudocode)</div>
+  <pre><code><span class="cm"># @pre M: size[0](A) == size[0](C)</span>
+<span class="cm"># @pre N: size[0](B) == size[1](C)</span>
+<span class="cm"># @pre K: size[1](A) == size[1](B)</span>
+<span class="kw">def</span> <span class="fn">gemm</span>(A, A_layout, B, B_layout, C, C_layout):
+    M = <span class="fn">size</span>(<span class="fn">mode</span>(A_layout, <span class="nm">0</span>))
+    N = <span class="fn">size</span>(<span class="fn">mode</span>(B_layout, <span class="nm">0</span>))
+    K = <span class="fn">size</span>(<span class="fn">mode</span>(A_layout, <span class="nm">1</span>))
+    <span class="kw">for</span> k <span class="kw">in</span> <span class="fn">range</span>(K):
+        <span class="kw">for</span> n <span class="kw">in</span> <span class="fn">range</span>(N):
+            <span class="kw">for</span> m <span class="kw">in</span> <span class="fn">range</span>(M):
+                C[C_layout(m, n)] += A[A_layout(m, k)] * B[B_layout(n, k)]</code></pre>
+
+  <p>
+    Three nested loops. The inner expression <code>A_layout(m, k)</code> maps the 2-D logical coordinate <code>(m, k)</code> to a flat physical offset using the stride inner product. Nothing else in the algorithm changes regardless of whether A is row-major, column-major, or some exotic tensor-contraction layout.
+  </p>
+
+  <h3>NT, TN, and BLIS GEMM from one function</h3>
+  <p>
+    The BLAS convention distinguishes NT (no-transpose A, transpose B), TN, NTT, and many others. In CUTE, each is just a different assignment of strides. Verified outputs from the reference implementation:
+  </p>
+
+  <div class="layout-table-wrap">
+    <table>
+      <thead>
+        <tr><th>Application</th><th>A layout</th><th>B layout</th><th>C layout</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>NT GEMM</td><td>(M,K) : (1, lda)</td><td>(N,K) : (1, ldb)</td><td>(M,N) : (1, ldc)</td></tr>
+        <tr><td>TN GEMM</td><td>(M,K) : (lda, 1)</td><td>(N,K) : (ldb, 1)</td><td>(M,N) : (1, ldc)</td></tr>
+        <tr><td>NTT GEMM</td><td>(N,K) : (1, ldb)</td><td>(M,K) : (1, lda)</td><td>(N,M) : (1, ldc)</td></tr>
+        <tr><td>BLIS GEMM</td><td>(M,K) : (dm, dk)</td><td>(N,K) : (dn, dk)</td><td>(M,N) : (dm, dn)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Interactive — GEMM layout visualizer</h3>
+  <p>
+    Click a cell in C to highlight the corresponding row of A and column of B that contribute to it. Use the variant selector to switch between NT and TN layouts and observe how the stride pattern changes.
+  </p>
+
+  <!-- INTERACTIVE GEMM WIDGET -->
+  <div class="widget" aria-label="Interactive GEMM visualizer">
+    <div class="widget-title">GEMM layout visualizer</div>
+    <div class="btn-row" id="gemm-btns"></div>
+
+    <div class="gemm-formula" id="gemm-formula-display"></div>
+
+    <div class="gemm-wrap">
+      <div>
+        <div class="matrix-label">A  <span id="a-layout-chip" class="layout-chip"></span></div>
+        <div class="matrix-grid" id="A-grid"></div>
+      </div>
+      <div>
+        <div class="matrix-label">B  <span id="b-layout-chip" class="layout-chip"></span></div>
+        <div class="matrix-grid" id="B-grid"></div>
+      </div>
+      <div>
+        <div class="matrix-label">C  <span id="c-layout-chip" class="layout-chip"></span></div>
+        <div class="matrix-grid" id="C-grid"></div>
+      </div>
+      <div id="gemm-desc" class="explanation-box" style="align-self:end;"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ GETT -->
+  <h2 id="gett">2.6.3 GETT and CONV — Hierarchical Shapes</h2>
+
+  <p>
+    So far, every layout has been flat—shape and stride are simple scalars or flat tuples. CUTE's real power comes from <strong>hierarchical layouts</strong>, where modes themselves have internal structure. This is what allows GEMM to subsume tensor contractions (GETT) and even convolutions (CONV).
+  </p>
+
+  <h3>What is a hierarchical layout?</h3>
+  <p>
+    Instead of a flat shape like <code>(6, 4)</code>, a hierarchical layout might write <code>((3, 2), 4)</code>—meaning the M-dimension is itself a product of two sub-modes with extents 3 and 2. The stride vector follows the same nesting: <code>((1, 3), 6)</code> says the first sub-mode has stride 1, the second has stride 3, and the K-dimension has stride 6.
+  </p>
+  <p>
+    Crucially, <code>size((3, 2)) == 6</code>—the GEMM preconditions still hold. The nested structure is invisible to the algorithm; only the layout's mapping function sees it.
+  </p>
+
+  <div class="code-label">Verified output from GETT demo (M=(3,2)=6, N=5, K=4)</div>
+  <pre><code>A: ((3, 2), 4) : ((1, 3), 6)
+B:    (5, 4) :      (1, 5)
+C: ((3, 2), 5) : ((1, 3), 6)
+
+GETT result matches reference — hierarchical layouts work seamlessly!</code></pre>
+
+  <h3>Visualizing the hierarchical M-mode</h3>
+  <p>
+    The grid below shows the A matrix in the GETT example. Each cell displays its logical coordinate in the <code>(m₁, m₂)</code> sub-mode and its physical memory offset. Blue cells belong to the first inner group <code>(m₂=0)</code>; green cells to the second <code>(m₂=1)</code>.
+  </p>
+
+  <!-- GETT VISUAL -->
+  <div class="hier-demo">
+    <div class="hier-grid-wrap" id="gett-hier-wrap"></div>
+    <div class="explanation-box" style="margin-top:16px;">
+      <strong>Layout A:</strong> <code>((3,2),4):((1,3),6)</code>. The M-mode is split into sub-modes of size 3 (stride 1) and size 2 (stride 3). The K-mode has stride 6. At coordinate (m₁=1, m₂=0, k=2): offset = 1·1 + 0·3 + 2·6 = <strong>13</strong>.
+    </div>
+  </div>
+
+  <h3>How GEMM becomes CONV</h3>
+  <p>
+    A convolution over a spatial input can be rewritten as a matrix multiply using the <strong>im2col</strong> transformation. In CUTE, im2col is not a preprocessing step that copies data—it's a layout. The transformation is expressed as a functional composition of CUTE layouts, and the GEMM algorithm runs directly on the logical im2col view without materializing it.
+  </p>
+
+  <div class="layout-table-wrap">
+    <table>
+      <thead>
+        <tr><th>Application</th><th>A layout</th><th>B layout</th><th>C layout</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>GETT (hierarchical M)</td>
+          <td>((M₁,M₂),K) : ((1,W),X)</td>
+          <td>(N,K) : (K,1)</td>
+          <td>((M₁,M₂),N) : ((1,Y),Z)</td>
+        </tr>
+        <tr>
+          <td>GETT (hierarchical K)</td>
+          <td>(M,(K₁,K₂)) : ((W,X),1)</td>
+          <td>(N,(K₁,K₂)) : ((Y,Z),1)</td>
+          <td>(M,N) : (1,M)</td>
+        </tr>
+        <tr>
+          <td>CONV (via im2col layout)</td>
+          <td>(K,(C,T,R,S)) : D_A</td>
+          <td>((N,Z,P,Q),(C,T,R,S)) : D_B</td>
+          <td>(K,(N,Z,P,Q)) : D_C</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout">
+    <p><strong>The key insight.</strong> CONV isn't a special algorithm. It's GEMM with a particular layout for B—one that encodes the im2col scatter pattern in its strides. The loops, the inner multiply-accumulate, and the layout machinery are shared. New hardware? New layout format? The algorithm is untouched.</p>
+  </div>
+
+  <h2>Why this matters</h2>
+  <p>
+    CUTLASS v3, v4, and CuTe DSL are all built on this foundation. When NVIDIA adds a new instruction that requires a novel data layout for operand tiles, the layout algebra accommodates it. The algorithm code—COPY, GEMM—is not rewritten. A new layout description is composed from existing primitives.
+  </p>
+  <p>
+    This is what CUTE means by <strong>decoupling algorithm logic from data layout</strong>. The preconditions (size, rank, shape) constrain which layouts are valid. But within those constraints, any layout works—column-major, row-major, tiled, hierarchical, im2col-transformed—without a line of algorithm code changing.
+  </p>
+
+  <div class="pull-quote">
+    <p>"300 layouts. One loop. The algebra does the rest."</p>
+  </div>
+</section>
+
+<section class="reveal" style="border:none; padding-top:40px; padding-bottom:40px; text-align:center;">
+  <p style="color:var(--ink3); font-size:11px; letter-spacing:0.08em; text-transform:uppercase;">
+    <em>Part 1:</em> Loops Are Just Layouts · <em>Part 2:</em> Tensors & Folding · <em>Part 3:</em> Tuples & HTuples · <em>Part 4:</em> Shape · <em>Part 5:</em> Stride · <strong>Part 6:</strong> Layout Applications · <em>Upcoming:</em> Tensors & Accessors
+  </p>
+</section>
+
+</div><!-- /content -->
+
+<!-- Footer -->
+<footer>
+  <p>Based on CuTe and CUTLASS documentation. Learn more at <a href="https://github.com/NVIDIA/cutlass" style="color:var(--green);">NVIDIA/CUTLASS</a> and <a href="https://github.com/NVIDIA/cutlass/blob/main/media/docs/cute/" style="color:var(--green);">CuTe Layouts</a>.</p>
+</footer>
+
+<script>
+/* ══════════════════════════════════════════════════════════════
+   LAYOUT MATH
+══════════════════════════════════════════════════════════════ */
+function flattenShape(s) {
+  if (!Array.isArray(s)) return [s];
+  return s.flatMap(flattenShape);
+}
+function flattenStride(s) {
+  if (!Array.isArray(s)) return [s];
+  return s.flatMap(flattenStride);
+}
+function sizeOf(shape) {
+  if (!Array.isArray(shape)) return shape;
+  return shape.reduce((p, s) => p * sizeOf(s), 1);
+}
+function idx2crd(i, shape) {
+  if (!Array.isArray(shape)) return i;
+  const coords = [];
+  let rem = i;
+  for (const s of shape) {
+    const sz = sizeOf(s);
+    coords.push(rem % sz);
+    rem = Math.floor(rem / sz);
+  }
+  return coords;
+}
+function applyLayout(i, shape, stride) {
+  const coords = idx2crd(i, shape);
+  const fs = flattenShape(shape);
+  const fst = flattenStride(stride);
+  let offset = 0;
+  for (let d = 0; d < fst.length; d++) {
+    const coordFlat = flattenShape(coords[d] !== undefined ? [coords[d]] : []);
+    offset += (coords[d] || 0) * fst[d];
+  }
+  // inner product of flat coordinates with flat strides
+  const fc = [];
+  function extractCoords(c, sh) {
+    if (!Array.isArray(sh)) { fc.push(c); return; }
+    const cs = idx2crd(c, sh);
+    for (let d = 0; d < sh.length; d++) extractCoords(cs[d], sh[d]);
+  }
+  extractCoords(i, shape);
+  const fstride = flattenStride(stride);
+  let off2 = 0;
+  for (let d = 0; d < fstride.length; d++) off2 += fc[d] * fstride[d];
+  return off2;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   COPY WIDGET
+══════════════════════════════════════════════════════════════ */
+const COPY_VARIANTS = [
+  {
+    name: '1D copy',
+    srcShape: 8, srcStride: 1,
+    dstShape: 8, dstStride: 1,
+    srcSize: 8, dstSize: 8,
+    desc: `Layout <code>8:1</code> → <code>8:1</code>. Both source and destination are contiguous. Logical index i maps to physical offset i in both arrays. This is the trivial case that BLAS <code>dcopy</code> implements.`,
+  },
+  {
+    name: 'Gather',
+    srcShape: [2,3,2], srcStride: [42,1,128],
+    dstShape: 12, dstStride: 1,
+    srcSize: 300, dstSize: 12,
+    desc: `Source layout <code>(2,3,2):(42,1,128)</code> reads from scattered offsets [0, 42, 1, 43, 2, 44, 128, 170, 129, 171, 130, 172]. Destination <code>12:1</code> writes contiguously. Gather collects non-contiguous data into a packed buffer.`,
+  },
+  {
+    name: 'Scatter',
+    srcShape: 12, srcStride: 1,
+    dstShape: [2,3,2], dstStride: [42,1,128],
+    srcSize: 12, dstSize: 300,
+    desc: `Exact reversal of Gather. Source <code>12:1</code> reads contiguously; destination <code>(2,3,2):(42,1,128)</code> writes to scattered offsets. Same algorithm, swapped layouts.`,
+  },
+  {
+    name: 'Broadcast',
+    srcShape: 7, srcStride: 0,
+    dstShape: 7, dstStride: 1,
+    srcSize: 1, dstSize: 7,
+    desc: `Source layout <code>7:0</code> — stride zero means every logical index maps to physical offset 0. The single source element is read 7 times. Destination <code>7:1</code> is contiguous. Broadcasting requires no branching — just a stride.`,
+  },
+  {
+    name: 'Transpose',
+    srcShape: [8,3], srcStride: [1,8],
+    dstShape: [8,3], dstStride: [3,1],
+    srcSize: 24, dstSize: 24,
+    desc: `Column-major <code>(8,3):(1,8)</code> → row-major <code>(8,3):(3,1)</code>. Element at logical (2,1) reads from src offset 2·1+1·8=10, writes to dst offset 2·3+1·1=7. Same value, different physical location.`,
+  },
+];
+
+let copyState = {
+  variant: 0,
+  playing: false,
+  step: 0,
+  timer: null,
+};
+
+function buildCopyVariant(vi) {
+  copyState.variant = vi;
+  copyState.step = 0;
+  if (copyState.timer) { clearInterval(copyState.timer); copyState.timer = null; }
+
+  const v = COPY_VARIANTS[vi];
+  const n = sizeOf(v.srcShape);
+
+  // Source data
+  const srcData = [];
+  for (let i = 0; i < v.srcSize; i++) srcData.push(i < 26 ? String.fromCharCode(65+i) : i);
+
+  // Compute src and dst offsets for all logical indices
+  const srcOffsets = [], dstOffsets = [];
+  for (let i = 0; i < n; i++) {
+    srcOffsets.push(applyLayout(i, v.srcShape, v.srcStride));
+    dstOffsets.push(applyLayout(i, v.dstShape, v.dstStride));
+  }
+
+  // Unique offsets touched
+  const srcTouched = new Set(srcOffsets);
+  const dstTouched = new Set(dstOffsets);
+
+  // Render source grid (show only touched + a few context cells, max 32)
+  const srcGrid = document.getElementById('src-grid');
+  srcGrid.innerHTML = '';
+  const showSrcCount = Math.min(v.srcSize, 32);
+  for (let j = 0; j < showSrcCount; j++) {
+    const cell = document.createElement('div');
+    cell.className = 'mem-cell' + (srcTouched.has(j) ? ' active-src' : ' null');
+    cell.id = `sc-${j}`;
+    cell.innerHTML = `<span class="idx">${j}</span><span class="val">${srcData[j] || '·'}</span>`;
+    srcGrid.appendChild(cell);
+  }
+
+  // Render dst grid
+  const dstGrid = document.getElementById('dst-grid');
+  dstGrid.innerHTML = '';
+  const dstData = new Array(v.dstSize).fill('·');
+  const showDstCount = Math.min(v.dstSize, 32);
+  for (let j = 0; j < showDstCount; j++) {
+    const cell = document.createElement('div');
+    cell.className = 'mem-cell' + (!dstTouched.has(j) ? ' null' : '');
+    cell.id = `dc-${j}`;
+    cell.innerHTML = `<span class="idx">${j}</span><span class="val">·</span>`;
+    dstGrid.appendChild(cell);
+  }
+
+  // Explanation
+  document.getElementById('copy-explanation').innerHTML = v.desc;
+
+  // Animate loop
+  let stepI = 0;
+  let prevSrc = -1, prevDst = -1;
+
+  function stepLoop() {
+    // Unhighlight previous
+    if (prevSrc >= 0) {
+      const c = document.getElementById(`sc-${prevSrc}`);
+      if (c) c.style.transform = '';
+    }
+    if (prevDst >= 0) {
+      const c = document.getElementById(`dc-${prevDst}`);
+      if (c) c.style.transform = '';
+    }
+
+    if (stepI >= n) { stepI = 0; }
+
+    const so = srcOffsets[stepI];
+    const dstr = dstOffsets[stepI];
+
+    // Highlight src
+    const sc = document.getElementById(`sc-${so}`);
+    if (sc) { sc.style.transform = 'scale(1.15)'; sc.style.transition = 'transform 0.15s'; }
+
+    // Write to dst
+    if (dstr < showDstCount) {
+      dstData[dstr] = srcData[so] || '·';
+      const dc = document.getElementById(`dc-${dstr}`);
+      if (dc) {
+        dc.querySelector('.val').textContent = srcData[so] || '·';
+        dc.style.transform = 'scale(1.15)';
+        dc.style.transition = 'transform 0.15s';
+        dc.classList.add('active-dst');
+      }
+    }
+
+    prevSrc = so;
+    prevDst = dstr;
+    stepI++;
+  }
+
+  copyState.timer = setInterval(stepLoop, 260);
+}
+
+// Build buttons
+const copyBtnRow = document.getElementById('copy-btns');
+COPY_VARIANTS.forEach((v, i) => {
+  const btn = document.createElement('button');
+  btn.textContent = v.name;
+  btn.className = i === 0 ? 'active' : '';
+  btn.onclick = () => {
+    document.querySelectorAll('#copy-btns button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    buildCopyVariant(i);
+  };
+  copyBtnRow.appendChild(btn);
+});
+
+buildCopyVariant(0);
+
+/* ══════════════════════════════════════════════════════════════
+   GEMM WIDGET
+══════════════════════════════════════════════════════════════ */
+const M=4, N=3, K=5;
+const GEMM_VARIANTS = [
+  {
+    name: 'NT GEMM',
+    aLabel: `(${M},${K}):(1,${M})`,
+    bLabel: `(${N},${K}):(1,${N})`,
+    cLabel: `(${M},${N}):(1,${M})`,
+    aStride: [1, M], bStride: [1, N], cStride: [1, M],
+    desc: `NT: A is column-major (leading dim = M = ${M}), B is column-major (leading dim = N = ${N}), C is column-major. Element A[m,k] is at offset m·1 + k·${M}. This is the classic BLAS DGEMM with no explicit transpositions.`,
+  },
+  {
+    name: 'TN GEMM',
+    aLabel: `(${M},${K}):(${K},1)`,
+    bLabel: `(${N},${K}):(${K},1)`,
+    cLabel: `(${M},${N}):(1,${M})`,
+    aStride: [K, 1], bStride: [K, 1], cStride: [1, M],
+    desc: `TN: A is row-major (leading dim = K = ${K}), B is row-major (leading dim = K = ${K}), C is column-major. Element A[m,k] is at offset m·${K} + k·1. Note that the same three loops compute the correct result.`,
+  },
+];
+
+let gemmState = { variant: 0, selM: -1, selN: -1 };
+
+function gemmOffset(m, k, stride) { return m * stride[0] + k * stride[1]; }
+
+function buildGemmGrid(vi) {
+  gemmState.variant = vi;
+  gemmState.selM = -1;
+  gemmState.selN = -1;
+  const v = GEMM_VARIANTS[vi];
+
+  document.getElementById('a-layout-chip').textContent = v.aLabel;
+  document.getElementById('b-layout-chip').textContent = v.bLabel;
+  document.getElementById('c-layout-chip').textContent = v.cLabel;
+  document.getElementById('gemm-formula-display').innerHTML =
+    `C[m,n] += A[m,k] · B[n,k]  for all k<br>` +
+    `A offset(m,k) = m·${v.aStride[0]} + k·${v.aStride[1]}<br>` +
+    `B offset(n,k) = n·${v.bStride[0]} + k·${v.bStride[1]}<br>` +
+    `C offset(m,n) = m·${v.cStride[0]} + n·${v.cStride[1]}`;
+
+  // A grid (M × K)
+  const ag = document.getElementById('A-grid');
+  ag.style.gridTemplateColumns = `repeat(${K}, 30px)`;
+  ag.innerHTML = '';
+  for (let m = 0; m < M; m++) {
+    for (let k = 0; k < K; k++) {
+      const cell = document.createElement('div');
+      cell.className = 'matrix-cell';
+      cell.id = `ag-${m}-${k}`;
+      cell.textContent = gemmOffset(m, k, v.aStride);
+      ag.appendChild(cell);
+    }
+  }
+
+  // B grid (N × K)
+  const bg = document.getElementById('B-grid');
+  bg.style.gridTemplateColumns = `repeat(${K}, 30px)`;
+  bg.innerHTML = '';
+  for (let n = 0; n < N; n++) {
+    for (let k = 0; k < K; k++) {
+      const cell = document.createElement('div');
+      cell.className = 'matrix-cell';
+      cell.id = `bg-${n}-${k}`;
+      cell.textContent = gemmOffset(n, k, v.bStride);
+      bg.appendChild(cell);
+    }
+  }
+
+  // C grid (M × N) — clickable
+  const cg = document.getElementById('C-grid');
+  cg.style.gridTemplateColumns = `repeat(${N}, 30px)`;
+  cg.innerHTML = '';
+  for (let m = 0; m < M; m++) {
+    for (let n = 0; n < N; n++) {
+      const cell = document.createElement('div');
+      cell.className = 'matrix-cell';
+      cell.id = `cg-${m}-${n}`;
+      cell.textContent = gemmOffset(m, n, v.cStride);
+      cell.style.cursor = 'pointer';
+      cell.title = `Click to highlight row ${m} of A and col ${n} of B`;
+      const cm = m, cn = n;
+      cell.onclick = () => selectGemmCell(cm, cn);
+      cg.appendChild(cell);
+    }
+  }
+
+  document.getElementById('gemm-desc').innerHTML = v.desc;
+}
+
+function selectGemmCell(m, n) {
+  const v = GEMM_VARIANTS[gemmState.variant];
+  // clear all
+  document.querySelectorAll('.matrix-cell').forEach(c => {
+    c.classList.remove('row-hl', 'col-hl', 'result');
+  });
+
+  // Highlight row m of A
+  for (let k = 0; k < K; k++) {
+    const c = document.getElementById(`ag-${m}-${k}`);
+    if (c) c.classList.add('row-hl');
+  }
+  // Highlight row n of B
+  for (let k = 0; k < K; k++) {
+    const c = document.getElementById(`bg-${n}-${k}`);
+    if (c) c.classList.add('col-hl');
+  }
+  // Highlight C[m,n]
+  const cc = document.getElementById(`cg-${m}-${n}`);
+  if (cc) cc.classList.add('result');
+
+  document.getElementById('gemm-desc').innerHTML =
+    `<strong>C[${m},${n}]</strong> (offset ${gemmOffset(m, n, v.cStride)}) accumulates over K=${K}:<br>` +
+    `&Sigma;(k=0..${K-1}) A[${m},k] · B[${n},k]<br>` +
+    `A offsets: [${Array.from({length:K},(_,k)=>gemmOffset(m,k,v.aStride)).join(', ')}]<br>` +
+    `B offsets: [${Array.from({length:K},(_,k)=>gemmOffset(n,k,v.bStride)).join(', ')}]`;
+}
+
+// Build GEMM buttons
+const gemmBtnRow = document.getElementById('gemm-btns');
+GEMM_VARIANTS.forEach((v, i) => {
+  const btn = document.createElement('button');
+  btn.textContent = v.name;
+  btn.className = i === 0 ? 'active' : '';
+  btn.onclick = () => {
+    document.querySelectorAll('#gemm-btns button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    buildGemmGrid(i);
+  };
+  gemmBtnRow.appendChild(btn);
+});
+
+buildGemmGrid(0);
+
+/* ══════════════════════════════════════════════════════════════
+   GETT HIERARCHICAL LAYOUT VISUALIZATION
+══════════════════════════════════════════════════════════════ */
+const M1=3, M2=2, K_g=4, N_g=5;
+const A_gett_shape = [[M1, M2], K_g];
+const A_gett_stride = [[1, M1], M1*M2];
+
+function gettOffset(m1, m2, k) {
+  return m1*1 + m2*M1 + k*M1*M2;
+}
+
+function buildGettViz() {
+  const wrap = document.getElementById('gett-hier-wrap');
+  wrap.innerHTML = '';
+
+  // For each k, show a column-block labeled "k=0, k=1, ..."
+  for (let k = 0; k < K_g; k++) {
+    const block = document.createElement('div');
+    block.className = 'hier-block';
+    block.innerHTML = `<div class="hier-block-title">k = ${k}</div>`;
+
+    const cells = document.createElement('div');
+    cells.className = 'hier-cells';
+    cells.style.gridTemplateColumns = `repeat(${M2}, 1fr)`;
+
+    for (let m2 = 0; m2 < M2; m2++) {
+      for (let m1 = 0; m1 < M1; m1++) {
+        const off = gettOffset(m1, m2, k);
+        const cell = document.createElement('div');
+        cell.className = `hier-cell ${m2 === 0 ? 'm1' : 'm2'}`;
+        cell.innerHTML = `(${m1},${m2})<span class="offset">→${off}</span>`;
+        cells.appendChild(cell);
+      }
+    }
+    block.appendChild(cells);
+    wrap.appendChild(block);
+  }
+}
+
+buildGettViz();
+
+/* ══════════════════════════════════════════════════════════════
+   TOC active section tracking
+══════════════════════════════════════════════════════════════ */
+const tocItems = document.querySelectorAll('.toc-item');
+const sections = ['intro','copy','gemm','gett'].map(id => document.getElementById(id));
+
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      tocItems.forEach(ti => ti.classList.remove('active'));
+      const active = document.querySelector(`.toc-item[href="#${e.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { threshold: 0.3 });
+sections.forEach(s => { if (s) obs.observe(s); });
+</script>
+
+<!-- Theme toggle script -->
+<script>
+(function(){
+  const saved = localStorage.getItem('theme');
+  const theme = saved || 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+
+  const btn = document.getElementById('themeToggle');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+  }
+
+  // Reveal observer
+  const revealObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+})();
+</script>
+</body>
+</html>
