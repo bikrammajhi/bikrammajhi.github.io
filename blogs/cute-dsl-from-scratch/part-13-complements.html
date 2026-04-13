@@ -448,7 +448,7 @@ tile       = tiled_data[<span class="kw">None</span>, blk_id]           <span cl
       <div id="tile-grid-wrap" style="overflow-x:auto;"></div>
     </div>
     <div>
-      <div class="mlabel">Physical memory strip (first 80 offsets)</div>
+      <div class="mlabel">Physical memory strip (first 160 offsets)</div>
       <div id="tile-mem-strip" style="margin-bottom:12px;"></div>
       <div class="expbox" id="tile-exp"></div>
     </div>
@@ -769,7 +769,7 @@ renderDiv(0);
   }
   gridWrap.appendChild(tileGrid);
 
-  const MEM_SHOW = 80;
+  const MEM_SHOW = 160;
   const memStrip = document.getElementById('tile-mem-strip');
   memStrip.style.display = 'flex';
   memStrip.style.flexWrap = 'wrap';
