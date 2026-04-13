@@ -698,10 +698,6 @@ button.btn.active { background: var(--gold-dim); color: var(--bg); border-color:
   The previous chapters established what a CuTe layout <em>is</em>: a function mapping multi-dimensional coordinates to memory offsets. Chapter 3 asks the next question — what can you <strong>do</strong> with layouts algebraically? The answer starts here, with the simplest operation of all: <strong>concatenation</strong>. And it turns out that concatenation isn't just a way to join layouts — it's the structural skeleton that makes every more complex operation possible.
 </div>
 
-<!-- ─────────── §0 WHY ALGEBRA ──────────────────────────────────── -->
-<hr id="s0">
-<h2>Why layout algebra matters</h2>
-
 <p>Traditional tensor libraries — NumPy, PyTorch, BLAS — describe memory layouts as flat arrays of shapes and strides. You get one shape tuple and one stride tuple, period. CuTe layouts can be <em>hierarchical</em>: each mode can itself be a layout. That extra structure is what makes it possible to write a single generic tiling kernel that works for column-major, row-major, padded, and hardware-specific non-contiguous formats all at once.</p>
 
 <p>But representational power alone isn't enough. You need to be able to <strong>compute</strong> with layouts: split them, merge them, permute them, compose them. The core set of operations that makes this possible are called <em>layout homomorphisms</em> — functions that take layouts and produce layouts while preserving well-defined functional properties.</p>
@@ -709,9 +705,12 @@ button.btn.active { background: var(--gold-dim); color: var(--bg); border-color:
 <div class="callout">
   <p><strong>Section roadmap:</strong> Chapter 3 defines coalesce (§3.2), composition (§3.3), complement (§3.4), and tiling operations (§3.5–3.7). All of them build on the foundation in §3.1: that a layout is a <em>sum</em> of its sublayouts, and that every operation can be applied to the whole layout <em>or</em> to individual modes independently.</p>
 </div>
+</section>
 
 <!-- ─────────── §1 ADDITIVE STRUCTURE ──────────────────────────── -->
-<hr id="s1">
+<section class="reveal">
+  <div class="section-label">§2 — Additive Structure</div>
+  <h2>A layout is a sum of its modes</h2>
 <h2>A layout is a sum of its modes</h2>
 
 <p>Here's the key equation. For a layout <code>L = (S₀, S₁, …, Sₙ) : (D₀, D₁, …, Dₙ)</code>, its evaluation at any multi-coordinate is simply the <strong>sum</strong> of each sublayout evaluated at the corresponding component:</p>
@@ -794,9 +793,11 @@ button.btn.active { background: var(--gold-dim); color: var(--bg); border-color:
 </div>
 
 <!-- ─────────── §2 STEPPER ───────────────────────────────────────── -->
-<hr id="s2">
-<h2>The additive decomposition, interactively</h2>
+</section>
 
+<section class="reveal">
+  <div class="section-label">§3 — Interactive</div>
+  <h2>The additive decomposition, interactively</h2>
 <p>Let's walk through the geometry step by step. Think of a 2D layout as a grid where <em>every cell's memory address is the sum of a row contribution and a column contribution</em>. Row position c₀ contributes <code>L₀(c₀) = c₀ × D₀</code>; column position c₁ contributes <code>L₁(c₁) = c₁ × D₁</code>. The layout is just those two independent rulers laid on top of each other.</p>
 
 <div class="widget" data-label="Stepper · geometry of L = (4, 8) : (2, 8)">
@@ -809,9 +810,11 @@ button.btn.active { background: var(--gold-dim); color: var(--bg); border-color:
 <p>The step-by-step makes the independence vivid: changing c₀ shifts the offset by D₀ = 2, regardless of c₁. Changing c₁ shifts it by D₁ = 8, regardless of c₀. The modes never interfere with each other.</p>
 
 <!-- ─────────── §3 BUILDING BY CONCAT ───────────────────────────── -->
-<hr id="s3">
-<h2>Building layouts by concatenation</h2>
+</section>
 
+<section class="reveal">
+  <div class="section-label">§4 — Concatenation</div>
+  <h2>Building layouts by concatenation</h2>
 <p>Concatenation works in both directions. You can <em>decompose</em> a layout into its modes (as above), or you can <em>compose</em> two separate layouts into one by concatenating them:</p>
 
 <pre><span class="n">A</span>  = Layout(<span class="s">4</span>, <span class="s">3</span>)   <span class="c"># 4:3</span>
@@ -858,9 +861,11 @@ button.btn.active { background: var(--gold-dim); color: var(--bg); border-color:
 </div>
 
 <!-- ─────────── §4 HIERARCHICAL ─────────────────────────────────── -->
-<hr id="s4">
-<h2>Hierarchical layouts: nesting goes arbitrarily deep</h2>
+</section>
 
+<section class="reveal">
+  <div class="section-label">§5 — Hierarchical Layouts</div>
+  <h2>Hierarchical layouts: nesting goes arbitrarily deep</h2>
 <p>The concatenation property isn't limited to flat layouts. A sublayout can itself be a rank-2 layout, which can have its own sublayouts, and so on. The evaluation formula still holds — it just applies recursively:</p>
 
 <div class="math-display">
@@ -889,9 +894,11 @@ button.btn.active { background: var(--gold-dim); color: var(--bg); border-color:
 </div>
 
 <!-- ─────────── §5 ADMISSIBILITY ────────────────────────────────── -->
-<hr id="s5">
-<h2>Admissibility: what can and cannot be concatenated</h2>
+</section>
 
+<section class="reveal">
+  <div class="section-label">§6 — Admissibility</div>
+  <h2>Admissibility: what can and cannot be concatenated</h2>
 <p>Not all layouts can be concatenated. The functional property (11) requires that the codomains of all sublayouts live in the same <em>integer semimodule</em>. In practice, this almost always means: all sublayouts must use ordinary integer strides.</p>
 
 <div class="warn-box">
@@ -928,9 +935,11 @@ button.btn.active { background: var(--gold-dim); color: var(--bg); border-color:
 </div>
 
 <!-- ─────────── §6 BY-MODE COMBINATOR ──────────────────────────── -->
-<hr id="s6">
-<h2>By-mode operations — the ★ combinator</h2>
+</section>
 
+<section class="reveal">
+  <div class="section-label">§7 — By-Mode Operations</div>
+  <h2>By-mode operations — the ★ combinator</h2>
 <p>Because every sublayout of a layout is itself a layout, every algebraic operation that works on a layout can also be applied to a single mode. The paper calls this the <strong>by-mode combinator</strong>, written with the notation:</p>
 
 <div class="math-display">
@@ -968,9 +977,11 @@ button.btn.active { background: var(--gold-dim); color: var(--bg); border-color:
 </div>
 
 <!-- ─────────── §7 COALESCE BY MODE ────────────────────────────── -->
-<hr id="s7">
-<h2>Coalesce as a by-mode operation</h2>
+</section>
 
+<section class="reveal">
+  <div class="section-label">§8 — Coalesce</div>
+  <h2>Coalesce as a by-mode operation</h2>
 <p>The paper shows a concrete distinction between global and by-mode coalesce. Global coalesce may merge modes across the rank boundary; by-mode coalesce treats each mode as an isolated unit and never merges across them.</p>
 
 <p>Consider <code>A = (2, (1, 6)) : (1, (6, 2))</code>:</p>
@@ -1710,7 +1721,7 @@ renderMathInElement(document.body, {
 </div><!-- /content -->
 
 <footer>
-  <p>Based on CuTe and CUTLASS documentation. Learn more at <a href="https://github.com/NVIDIA/cutlass" style="color:var(--green);">NVIDIA/CUTLASS</a> and <a href="https://github.com/NVIDIA/cutlass/blob/main/media/docs/cute/" style="color:var(--green);">CuTe Layouts</a>.</p>
+  <p>© 2026 Bikram Majhi · <a href="https://bikrammajhi.github.io/" style="color:var(--green);text-decoration:none">Back to main</a></p>
 </footer>
 
 <script>
