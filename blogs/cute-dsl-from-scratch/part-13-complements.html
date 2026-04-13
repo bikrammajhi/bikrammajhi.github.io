@@ -204,7 +204,6 @@ button.on { background: var(--accent); color: #fff; border-color: var(--accent);
 </style>
 </head>
 <body>
-<div class="page">
 
 <!-- NAV -->
 <nav>
@@ -248,9 +247,12 @@ button.on { background: var(--accent); color: #fff; border-color: var(--accent);
 </div>
 
 <div class="callout"><p><strong>Assumed background.</strong> You're comfortable reading a layout as <code>shape:stride</code>, and you know how <code>layout(i)</code> computes a physical offset via the inner product of coordinates and strides. No GPU background needed — the complement is a pure indexing concept.</p></div>
+</section>
 
 <!-- ═══════════════════ COMPLEMENT ═══════════════════ -->
-<h2 id="complement">3.5 What the complement must satisfy</h2>
+<section class="reveal">
+  <div class="section-label">§13 — Complement</div>
+  <h2 id="complement">What the complement must satisfy</h2>
 
 <p>Given a layout <em>L</em> mapping into a codomain <em>D</em>, its complement <em>L*</em> must satisfy three conditions.</p>
 
@@ -289,9 +291,12 @@ L = (4,8):(1,8)      =>  L* = 2 : 4    <span class="cm"># gaps! complement fills
   <div class="memstrip" id="cmp-strip"></div>
   <div class="expbox" id="cmp-exp"></div>
 </div>
+</section>
 
 <!-- ═══════════════════ LOGICAL PRODUCT ═══════════════════ -->
-<h2 id="product">3.5.1 Logical product — tiling a tile</h2>
+<section class="reveal">
+  <div class="section-label">§13 — Logical Product</div>
+  <h2 id="product">Logical product — tiling a tile</h2>
 
 <p>Here's the problem: you have a <em>tile</em> layout <em>A</em> (say, a row-major 3×4 block), and you want to repeat it across a 2×5 <em>grid</em>. You want 10 independent copies of the tile, each shifted to a non-overlapping region of memory. How far apart should consecutive copies start?</p>
 
@@ -352,9 +357,12 @@ L = (4,8):(1,8)      =>  L* = 2 : 4    <span class="cm"># gaps! complement fills
     </div>
   </div>
 </div>
+</section>
 
 <!-- ═══════════════════ LOGICAL DIVIDE ═══════════════════ -->
-<h2 id="divide">3.5.2 Logical divide — splitting a layout</h2>
+<section class="reveal">
+  <div class="section-label">§13 — Logical Divide</div>
+  <h2 id="divide">Logical divide — splitting a layout</h2>
 
 <p>Logical product builds up. Logical divide tears down. Given a layout <em>A</em> and a <em>tiler</em> <em>B</em>, divide splits <em>A</em> into two pieces: the elements pointed to by <em>B</em>, and those left over.</p>
 
@@ -405,9 +413,12 @@ logical_divide((6,2,2):(2,1,20), 8:3) = ((2,2,2),3):((6,1,20),2)
   <div class="divrow" id="div-row"></div>
   <div class="expbox" id="div-exp"></div>
 </div>
+</section>
 
 <!-- ═══════════════════ TILING PATTERN ═══════════════════ -->
-<h2 id="tiling">Putting it together — the tiling pattern</h2>
+<section class="reveal">
+  <div class="section-label">§13 — Tiling Pattern</div>
+  <h2 id="tiling">Putting it together — the tiling pattern</h2>
 
 <p>In real GPU code, the canonical use of <code>zipped_divide</code> is to tile a data layout into a grid of work blocks, then hand each block to a processing element (a thread block, a warp, a stream multiprocessor). The pattern is always the same:</p>
 
@@ -446,13 +457,16 @@ tile       = tiled_data[<span class="kw">None</span>, blk_id]           <span cl
 </div>
 
 <div class="pull"><p>"The tile shape is the same for every block. Only the offset changes. That's the whole point."</p></div>
+</section>
 
-<h2>Why the complement is the linchpin</h2>
+<section class="reveal">
+  <div class="section-label">§13 — Summary</div>
+  <h2>Why the complement is the linchpin</h2>
+
 <p>Everything above traces back to a single idea: given what a layout visits, find what it skips. The complement operation answers this canonically — no branching on shape, no special cases for power-of-two strides, no separate handling for hierarchical modes. The three conditions (span the codomain, stay disjoint, stay ordered) uniquely determine the answer.</p>
 <p>Logical product uses the complement to space out tile copies. Logical divide uses it to complete the tiler into a surjection over the source. The tiling pattern is logical divide in disguise. Thread–value partitioning in Section 3.3 was logical divide applied to thread layouts. The im2col layout that lets GEMM implement CONV? Another composition built on the same algebra.</p>
 <p>One operation. Every tiling pattern in CUTLASS v3/v4 derives from it.</p>
-
-</div><!-- /content -->
+</section>
 
 <section class="reveal" style="border:none; padding-top:40px; padding-bottom:40px; text-align:center;">
   <p style="color:var(--ink3); font-size:11px; letter-spacing:0.08em; text-transform:uppercase;">
