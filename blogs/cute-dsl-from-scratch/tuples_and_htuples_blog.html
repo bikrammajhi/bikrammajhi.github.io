@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CuTe DSL from scratch: Tuples &amp; <em>HTuples</em></title>
+
+<!-- FONT STACK: Playfair Display (serif) + Azeret Mono (mono) to match main site -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Azeret+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<!-- MathJax for mathematical notation -->
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font-serif: 'Playfair Display', serif;
+  --font-mono: 'Azeret Mono', monospace;
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --paper: #f4f1eb;
+  --paper2: #ede9e0;
+  --ink: #1c1a17;
+  --ink2: #3d3a35;
+  --ink3: #7a7570;
+  --rule: #d9d4c8;
+  --rule2: #c4bfb2;
+  --green: #2a5c45;
+  --green-light: #e8f0ec;
+  --orange: #b85c2a;
+  --orange-light: #f5ece6;
+  --blue: #2a4a6b;
+}
+
+[data-theme="dark"] {
+  --paper: #0f0d0c;
+  --paper2: #161412;
+  --ink: #f4f1eb;
+  --ink2: #d1ccc3;
+  --ink3: #8a837b;
+  --rule: #24211e;
+  --rule2: #332f2b;
+  --green: #6fb894;
+  --green-light: #16221c;
+  --orange: #e69a6e;
+  --orange-light: #261c14;
+  --blue: #6a94b8;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-mono);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12.5px;
+  line-height: 1.7;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ── NAV ── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 52px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.logo {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+  transition: color 0.2s ease;
+}
+
+.nav-links {
+  display: flex;
+  gap: 28px;
+  list-style: none;
+  margin: 0;
+}
+
+.nav-links a {
+  font-size: 11px;
+  color: var(--ink3);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: color 0.15s;
+}
+
+.nav-links a:hover { color: var(--ink); }
+
+.theme-toggle {
+  background: transparent;
+  border: 1px solid var(--rule2);
+  border-radius: 2px;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink3);
+  transition: all 0.15s ease;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  border-color: var(--ink3);
+  color: var(--ink);
+  background: var(--paper2);
+}
+
+.theme-toggle .sun-icon { display: none; }
+.theme-toggle .moon-icon { display: block; }
+
+[data-theme="dark"] .theme-toggle .sun-icon { display: block; }
+[data-theme="dark"] .theme-toggle .moon-icon { display: none; }
+
+/* ── HERO / HEADER ── */
+.hero {
+  padding: 80px 40px 60px;
+  max-width: 1080px;
+  margin: 0 auto;
+  border-bottom: 1px solid var(--rule);
+  transition: border-color 0.2s ease;
+}
+
+.hero-label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: color 0.2s ease;
+}
+
+.hero-label::before {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  height: 1px;
+  background: var(--ink3);
+  transition: background-color 0.2s ease;
+}
+
+.hero-title {
+  font-family: var(--font-serif);
+  font-size: clamp(44px, 5vw, 72px);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  margin-bottom: 20px;
+  transition: color 0.2s ease;
+}
+
+.hero-title em {
+  font-style: italic;
+  color: var(--green);
+  transition: color 0.2s ease;
+}
+
+.hero-sub {
+  font-size: 13px;
+  color: var(--ink2);
+  line-height: 1.8;
+  max-width: 600px;
+  margin-bottom: 20px;
+  transition: color 0.2s ease;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 24px;
+  font-size: 11px;
+  color: var(--ink3);
+  letter-spacing: 0.04em;
+  flex-wrap: wrap;
+  transition: color 0.2s ease;
+}
+
+.hero-meta span::before { content: '// '; color: var(--rule2); margin-right: 4px; }
+
+/* ── CONTENT LAYOUT ── */
+.content {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+section {
+  padding: 72px 0;
+  border-bottom: 1px solid var(--rule);
+  transition: border-color 0.2s ease;
+}
+
+section:last-of-type { border-bottom: none; }
+
+.section-label {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: color 0.2s ease;
+}
+
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+  transition: background-color 0.2s ease;
+}
+
+h2 {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 28px;
+  transition: color 0.2s ease;
+  line-height: 1.3;
+}
+
+h3 {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 28px 0 16px;
+  transition: color 0.2s ease;
+}
+
+p {
+  margin-bottom: 16px;
+  color: var(--ink2);
+  line-height: 1.8;
+}
+
+p:last-child { margin-bottom: 0; }
+
+strong { color: var(--ink); font-weight: 500; }
+em { color: var(--green); font-style: italic; }
+
+/* ── CODE BLOCKS ── */
+.code-block {
+  background: var(--paper2);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 16px 20px;
+  margin: 24px 0;
+  overflow-x: auto;
+  position: relative;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.code-block::before {
+  content: attr(data-lang);
+  position: absolute;
+  top: 8px; right: 12px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--ink3);
+  text-transform: uppercase;
+  opacity: 0.6;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.code-block code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--ink);
+  white-space: pre;
+  transition: color 0.2s ease;
+}
+
+/* ── INLINE CODE ── */
+code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: var(--paper2);
+  padding: 2px 6px;
+  border-radius: 2px;
+  color: var(--green);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ── MATH DISPLAY ── */
+.math {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--paper2);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 13px 22px;
+  margin: 24px 0;
+  color: var(--ink);
+  text-align: center;
+  letter-spacing: 0.03em;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* ── CALLOUT BOXES ── */
+.callout {
+  border-left: 2px solid var(--green);
+  background: var(--green-light);
+  padding: 18px 20px;
+  margin: 28px 0;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.callout.orange { border-color: var(--orange); background: var(--orange-light); }
+.callout.blue { border-color: var(--blue); background: rgba(42, 74, 107, 0.1); }
+
+.callout p { margin: 0; font-size: 12px; color: var(--ink2); }
+
+.callout-title {
+  font-family: var(--font-serif);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  color: var(--green);
+}
+
+.callout.orange .callout-title { color: var(--orange); }
+.callout.blue .callout-title { color: var(--blue); }
+
+/* ── DEFINITION BOXES ── */
+.definition {
+  border-left: 2px solid var(--blue);
+  background: rgba(42, 74, 107, 0.06);
+  padding: 18px 20px;
+  margin: 28px 0;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.definition p { margin: 0; font-size: 12px; color: var(--ink2); }
+
+.definition-title {
+  font-family: var(--font-serif);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  color: var(--blue);
+}
+
+/* ── EXAMPLE BOXES ── */
+.example {
+  border-left: 2px solid var(--green);
+  background: var(--green-light);
+  padding: 18px 20px;
+  margin: 28px 0;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.example p { margin: 0; font-size: 12px; color: var(--ink2); }
+
+.example-title {
+  font-family: var(--font-serif);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  color: var(--green);
+}
+
+/* ── COMPARISON TABLE ── */
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0;
+  font-size: 12px;
+}
+
+.comparison-table thead {
+  background: var(--paper2);
+  border-bottom: 2px solid var(--rule);
+}
+
+.comparison-table th {
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 500;
+  font-family: var(--font-mono);
+  color: var(--ink2);
+  font-size: 11px;
+}
+
+.comparison-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink2);
+}
+
+.comparison-table tr:last-child td { border-bottom: none; }
+
+.comparison-table .mono {
+  font-family: var(--font-mono);
+  color: var(--ink);
+  background: var(--paper2);
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-size: 11px;
+}
+
+/* ── INTERACTIVE VISUALIZATION ── */
+.viz-section {
+  background: var(--paper2);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 24px;
+  margin: 28px 0;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.viz-title {
+  font-family: var(--font-serif);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 18px;
+}
+
+.tuple-explorer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tuple-input {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-group label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink3);
+}
+
+.input-group input {
+  font-family: var(--font-mono);
+  padding: 6px 8px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12px;
+  min-width: 120px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input-group input:focus {
+  border-color: var(--green);
+}
+
+.tuple-display {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 12px 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink);
+  line-height: 1.6;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.tuple-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.stat-card {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 12px;
+  text-align: center;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.stat-value {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--green);
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink3);
+}
+
+/* Congruence Tester */
+.congruence-tester {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 16px;
+  align-items: center;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.congruence-input {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.congruence-input label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink3);
+}
+
+.congruence-input input {
+  font-family: var(--font-mono);
+  padding: 6px 8px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  color: var(--ink);
+  font-size: 12px;
+  background: var(--paper2);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.congruence-input input:focus { border-color: var(--green); }
+
+.congruence-symbol {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--ink3);
+  text-align: center;
+}
+
+.congruence-result {
+  text-align: center;
+  padding: 14px;
+  border-radius: 3px;
+  border: 1px solid var(--rule);
+  background: var(--paper2);
+  margin-top: 16px;
+  grid-column: 1 / -1;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.result-status {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.result-status.congruent { color: var(--green); }
+.result-status.incongruent { color: var(--orange); }
+
+.result-explanation {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink2);
+}
+
+/* ── LISTS ── */
+ul, ol {
+  margin: 16px 0;
+  padding-left: 24px;
+  color: var(--ink2);
+  line-height: 2;
+}
+
+li { margin: 4px 0; }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--rule);
+  padding: 28px 40px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--ink3);
+  letter-spacing: 0.04em;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+footer p { margin: 0; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .hero { padding: 56px 20px 48px; }
+  .content { padding: 0 20px; }
+  section { padding: 48px 0; }
+
+  .congruence-tester { grid-template-columns: 1fr; }
+  .congruence-symbol { display: none; }
+
+  footer { padding: 20px; }
+}
+
+/* ── REVEAL ANIMATIONS ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.reveal.in { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="https://bikrammajhi.github.io/" class="logo">Bikram Majhi</a>
+  <ul class="nav-links">
+    <li><a href="/#about">About</a></li>
+    <li><a href="/#ladder">GEMM</a></li>
+    <li><a href="/#results">Results</a></li>
+    <li><a href="/#projects">Projects</a></li>
+    <li><a href="/#writing">Writing</a></li>
+    <li><a href="/#journal">Journal</a></li>
+    <li><a href="/#contact">Contact</a></li>
+  </ul>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="5"></circle>
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+    </svg>
+    <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+  </button>
+</nav>
+
+<!-- HERO -->
+<div class="hero reveal">
+  <div class="hero-label">GPU Programming · CuTe DSL</div>
+  <h1 class="hero-title">CuTe DSL from scratch:<br>Tuples &amp; <em>HTuples</em></h1>
+  <p class="hero-sub">The data structures that make memory layouts algebraic. Hierarchical tuples let you compose, compare, and reason about tiled GPU kernels without writing index arithmetic.</p>
+  <div class="hero-meta">
+    <span>March 2026</span>
+    <span>~15 minute read</span>
+    <span>Part 0 of 15</span>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- §1 MOTIVATION -->
+<section class="reveal">
+  <div class="section-label">§0 — Prelude</div>
+  <h2>Why hierarchical data structures matter</h2>
+
+  <p>GPU programming is fundamentally about managing <em>memory layouts</em>. When you write a CUDA kernel, you're expressing how threads access memory, how warps coalesce, and how blocks synchronize. Each of these concepts maps to a <strong>shape</strong> (how many elements) and a <strong>stride</strong> (how they're spaced in memory).</p>
+
+  <p>But memory layouts aren't always flat 2D matrices. When you tile a matrix for register blocking, you get a hierarchy: blocks within blocks within blocks. When you compose warp layouts with thread layouts, you nest structures. A single flat representation can't capture this naturally — but a <em>hierarchical</em> one can.</p>
+
+  <p>This is where <strong>Tuples</strong> and <strong>HTuples</strong> come in. They're not exotic mathematics — they're a clean way to express nested structures that arise naturally in GPU optimization.</p>
+
+  <div class="example">
+    <div class="example-title">Real Example: Tiled GEMM</div>
+    <p>Imagine a 128×128 GEMM tiled into 32×32 blocks, each block tiled into 8×8 tiles. The memory layout has <em>three levels of hierarchy</em>. A flat representation needs you to manually compute strides. A hierarchical tuple captures it directly: <code>((128/32, 128/32), (32/8, 32/8))</code> with matching strides.</p>
+  </div>
+</section>
+
+<!-- §2 TUPLES -->
+<section class="reveal">
+  <div class="section-label">§1 — Tuples</div>
+  <h2>Tuples: the foundation</h2>
+
+  <div class="definition">
+    <div class="definition-title">Definition 2.1: Tuple</div>
+    <p>A <span class="math-inline">\(\text{Tuple}(T)\)</span> is a finite, ordered list of elements selected from a set <span class="math-inline">\(T\)</span>. For a tuple <span class="math-inline">\(X = (X_0, X_1, \ldots, X_{n-1}) \in \text{Tuple}(T)\)</span>, we define two operations:</p>
+    <p style="margin-top: 12px;"><strong>Rank:</strong> <span class="math-inline">\(\text{rank}(X) = n\)</span> — the tuple length.</p>
+    <p><strong>Access:</strong> <span class="math-inline">\(X_i\)</span> — the <span class="math-inline">\(i\)</span>-th element for <span class="math-inline">\(0 \leq i &lt; \text{rank}(X)\)</span>.</p>
+  </div>
+
+  <p>In code, a tuple is just a list or array. <code>[4, 8]</code> is a tuple of rank 2. <code>[3, -8, 7]</code> is a tuple of rank 3. Simple.</p>
+
+  <p>The key insight: <strong>every loop nest has a canonical tuple representation</strong>. If you have a 2D loop with bounds 4 and 8, that's the tuple <code>(4, 8)</code>. The stride is another tuple: if you increment the first loop by 1 and the second by 4, that's <code>(1, 4)</code>.</p>
+
+  <!-- Interactive Tuple Explorer -->
+  <div class="viz-section">
+    <div class="viz-title">Interactive: Explore Tuple Properties</div>
+    <div class="tuple-explorer">
+      <div class="tuple-input">
+        <div class="input-group">
+          <label>Tuple elements (comma-separated)</label>
+          <input type="text" id="tupleInput" value="4, 8, 3" placeholder="e.g., 4, 8, 3">
+        </div>
+      </div>
+
+      <div class="tuple-stats">
+        <div class="stat-card">
+          <div class="stat-value" id="rankValue">3</div>
+          <div class="stat-label">Rank</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="productValue">96</div>
+          <div class="stat-label">Product (size)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="depthValue">1</div>
+          <div class="stat-label">Depth (flat)</div>
+        </div>
+      </div>
+
+      <div class="tuple-display" id="tupleDisplay">(4, 8, 3)</div>
+    </div>
+  </div>
+
+  <p>Try entering different tuples above: <code>16, 32</code> (a rank-2 flat layout), <code>128</code> (a rank-0 scalar), or <code>3, 8, 7</code> (a rank-3 layout).</p>
+</section>
+
+<!-- §3 HTUPLES -->
+<section class="reveal">
+  <div class="section-label">§2 — HTuples</div>
+  <h2>HTuples: adding hierarchy</h2>
+
+  <div class="definition">
+    <div class="definition-title">Definition 2.2: HTuple (Hierarchical Tuple)</div>
+    <p>An <span class="math-inline">\(\text{HTuple}(T)\)</span> is <em>either</em> an element of set <span class="math-inline">\(T\)</span> <em>or</em> a <span class="math-inline">\(\text{Tuple}(\text{HTuple}(T))\)</span>. For <span class="math-inline">\(X \in \text{HTuple}(T)\)</span>, we define three operations:</p>
+    <p style="margin-top: 12px;"><strong>Rank:</strong> tuple length if <span class="math-inline">\(X\)</span> is a tuple, else 1.</p>
+    <p><strong>Access:</strong> <span class="math-inline">\(X_i\)</span> — the <span class="math-inline">\(i\)</span>-th element for <span class="math-inline">\(0 \leq i &lt; \text{rank}(X)\)</span>.</p>
+    <p><strong>Depth:</strong> <span class="math-inline">\(1 + \max(\text{depth}(X_0), \text{depth}(X_1), \ldots)\)</span> if tuple, else 0.</p>
+  </div>
+
+  <p>The subtle part: an HTuple can <em>nest itself</em>. You can have a tuple of tuples. This is where hierarchy emerges.</p>
+
+  <p>Examples of HTuples of integers:</p>
+
+  <ul>
+    <li><code>31</code> — a scalar (rank 0, depth 0)</li>
+    <li><code>(16, 32)</code> — a flat 2D layout (rank 2, depth 1)</li>
+    <li><code>(3, -8, 7)</code> — a flat 3D layout (rank 3, depth 1)</li>
+    <li><code>(2, (4, 1))</code> — hierarchical: 2 top level, then a nested pair (rank 2, depth 2)</li>
+    <li><code>((4, 6), (3, (2, 2), 8))</code> — deeply nested (rank 2, depth 3)</li>
+  </ul>
+
+  <div class="callout">
+    <div class="callout-title">Why This Matters</div>
+    <p>A hierarchical tuple <code>(2, (4, 1))</code> naturally represents a tiled layout: 2 tiles, each with internal structure (4, 1). No manual stride calculation. The nesting structure <em>is</em> the hierarchy.</p>
+  </div>
+
+  <!-- Interactive HTuple Explorer -->
+  <div class="viz-section">
+    <div class="viz-title">Interactive: HTuple Explorer</div>
+    <div class="tuple-explorer">
+      <div class="tuple-input">
+        <div class="input-group">
+          <label>HTuple (use parens for nesting, e.g., (2, (4, 1)))</label>
+          <input type="text" id="htupleInput" value="(2, (4, 1))" placeholder="e.g., (2, (4, 1))">
+        </div>
+      </div>
+
+      <div class="tuple-stats">
+        <div class="stat-card">
+          <div class="stat-value" id="hrankValue">2</div>
+          <div class="stat-label">Rank</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="hproductValue">8</div>
+          <div class="stat-label">Product (size)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="hdepthValue">2</div>
+          <div class="stat-label">Depth</div>
+        </div>
+      </div>
+
+      <div class="tuple-display" id="htupleDisplay">(2, (4, 1))</div>
+
+      <div style="background: var(--paper); border: 1px solid var(--rule); border-radius: 2px; padding: 14px 16px; font-family: var(--font-mono); font-size: 11px; color: var(--ink2); line-height: 1.6;">
+        <strong>Interpretation:</strong><br>
+        <span id="htupleInterpretation">2 outer tiles, each with (4,1) internal structure = 2×4×1 = 8 elements</span>
+      </div>
+    </div>
+  </div>
+
+  <p>Notice how the <strong>depth</strong> captures nesting: a flat tuple has depth 1, a tuple of tuples has depth 2, and so on.</p>
+</section>
+
+<!-- §4 CONGRUENCE -->
+<section class="reveal">
+  <div class="section-label">§3 — Congruence</div>
+  <h2>Congruence: comparing structures</h2>
+
+  <div class="definition">
+    <div class="definition-title">Definition 2.3: Congruence (~)</div>
+    <p>Congruence is an equivalence relation on HTuples. For <span class="math-inline">\(P, S \in \text{HTuple}\)</span>:</p>
+    <p style="margin-top: 12px;"><span class="math-inline">\(P \sim S\)</span> iff both are scalars, <em>or</em> both are tuples with equal rank and all corresponding elements are congruent.</p>
+  </div>
+
+  <p>Congruence asks: <strong>do two HTuples have the same shape?</strong> Not the same values — the same <em>structure</em>.</p>
+
+  <p><code>(4, 8)</code> and <code>(5, 7)</code> are congruent (both rank-2, depth-1). But <code>(4, 8)</code> and <code>(4, (2, 4))</code> are <em>not</em> congruent (one is rank-2 depth-1, the other is rank-2 depth-2).</p>
+
+  <!-- Interactive Congruence Tester -->
+  <div class="viz-section">
+    <div class="viz-title">Interactive: Congruence Tester</div>
+    <div class="congruence-tester">
+      <div class="congruence-input">
+        <label>HTuple P</label>
+        <input type="text" id="congP" value="(4, (2, 4))" placeholder="e.g., (4, 8)">
+      </div>
+      <div class="congruence-symbol">~?</div>
+      <div class="congruence-input">
+        <label>HTuple S</label>
+        <input type="text" id="congS" value="(7, (3, 2))" placeholder="e.g., (5, 7)">
+      </div>
+    </div>
+    <div class="congruence-result" style="margin-top: 16px;">
+      <div class="result-status congruent" id="congResult">✓ Congruent</div>
+      <div class="result-explanation" id="congExplanation">Both have structure (a, (b, c))</div>
+    </div>
+  </div>
+
+  <p>Try different pairs: <code>(4, 8)</code> vs <code>(5, 7)</code>, or <code>16</code> vs <code>(2, (4, 1))</code>.</p>
+
+  <h3>Weak Congruence (≲)</h3>
+
+  <div class="definition">
+    <div class="definition-title">Definition 2.4: Weak Congruence (≲)</div>
+    <p>Weak congruence is a partial order. For <span class="math-inline">\(P, S \in \text{HTuple}\)</span>:</p>
+    <p style="margin-top: 12px;"><span class="math-inline">\(P \lesssim S\)</span> iff <span class="math-inline">\(P\)</span> is a scalar, <em>or</em> both are tuples with equal rank and all <span class="math-inline">\(P_i \lesssim S_i\)</span>.</p>
+  </div>
+
+  <p>Weak congruence asks: <strong>does P coarsen the profile of S?</strong> A scalar coarsens anything. A tuple coarsens another if their shapes align and elements are weakly congruent.</p>
+
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th>Relation</th>
+        <th>Meaning</th>
+        <th>Example</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>30 ≲ (a, b)</code></td>
+        <td>Scalar coarsens any tuple</td>
+        <td><code>30 ≲ (4, 8)</code> ✓</td>
+      </tr>
+      <tr>
+        <td><code>(a, b) ≲ (c, (d, e))</code></td>
+        <td>Tuple coarsens if same rank</td>
+        <td><code>(1, 2) ≲ (3, (4, 5))</code> ✓</td>
+      </tr>
+      <tr>
+        <td><code>(a, b) ≲ (c, d, e)</code></td>
+        <td>Different ranks don't align</td>
+        <td><code>(1, 2) ≲ (3, 4, 5)</code> ✗</td>
+      </tr>
+      <tr>
+        <td><code>(a, (b, c)) ≲ (d, e)</code></td>
+        <td>Different nesting levels</td>
+        <td><code>(1, (2, 3)) ≲ (4, 5)</code> ✗</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- §5 APPLICATIONS -->
+<section class="reveal">
+  <div class="section-label">§4 — Applications</div>
+  <h2>Why this matters for GPU programming</h2>
+
+  <p>You might be wondering: <em>so what?</em> We have all these definitions. How does it help me write faster kernels?</p>
+
+  <p>The answer: <strong>HTuples encode the entire structure of memory access patterns.</strong></p>
+
+  <h3>Memory layouts as HTuples</h3>
+
+  <p>In GPU programming, a "layout" is a mapping from logical coordinates to memory addresses. If you tile a matrix into blocks, then blocks into sub-blocks, you get a hierarchy. An HTuple naturally represents this.</p>
+
+  <p>Consider a 128×128 matrix tiled into 32×32 blocks:</p>
+
+  <div class="code-block" data-lang="python">
+<code><span class="hl-cm"># Flat representation (hard to reason about)</span>
+shape = (128, 128)
+stride = (1, 128)
+
+<span class="hl-cm"># Hierarchical representation (clear structure)</span>
+shape = ((4, 32), (4, 32))    <span class="hl-cm"># 4×4 blocks of 32×32</span>
+stride = ((32*128, 1), (32*128, 128))  <span class="hl-cm"># block stride × element stride</span></code>
+  </div>
+
+  <p>The hierarchical version <em>mirrors the algorithm</em>. You iterate over blocks, then within blocks. The nesting structure in the HTuple matches your loop nesting.</p>
+
+  <h3>Composition of layouts</h3>
+
+  <p>When you compose two layouts (a common operation), HTuples make it algebraic:</p>
+
+  <div class="example">
+    <div class="example-title">Composing Warp and Thread Layouts</div>
+    <p>A block has 256 threads arranged in 32-thread warps. Each thread reads 4 elements. The composed layout is:</p>
+    <p style="font-family: var(--font-mono); margin-top: 12px;"><code>block_layout ∘ (warp_layout ∘ thread_layout)</code></p>
+    <p>With HTuples, this composition is just tuple algebra — no index arithmetic.</p>
+  </div>
+
+  <h3>Code generation and optimization</h3>
+
+  <p>Libraries like NVIDIA CUTLASS and CuTe use HTuples to represent memory layouts. Because the structure is explicit, the compiler can:</p>
+
+  <ul>
+    <li>Automatically unroll nested loops</li>
+    <li>Reason about coalescing without manual index computation</li>
+    <li>Compose layouts algebraically instead of recomputing strides</li>
+    <li>Generate optimized code for arbitrary hierarchy levels</li>
+  </ul>
+
+  <div class="callout orange">
+    <div class="callout-title">The Payoff</div>
+    <p>Instead of hand-writing index arithmetic for each tiling strategy, you write layout objects. The optimizer uses congruence and weak congruence to reason about compatibility and generate efficient code.</p>
+  </div>
+</section>
+
+<!-- §6 KEY TAKEAWAYS -->
+<section class="reveal">
+  <div class="section-label">§5 — Summary</div>
+  <h2>Key takeaways</h2>
+
+  <p><strong>1. Tuples are ordered lists.</strong> A flat memory layout is just a tuple of loop bounds and a congruent tuple of strides.</p>
+
+  <p><strong>2. HTuples nest themselves.</strong> Hierarchical layouts (tiles within tiles) are naturally represented as nested tuples.</p>
+
+  <p><strong>3. Congruence (~) compares shape.</strong> Two HTuples are congruent if they have the same nesting structure, regardless of values.</p>
+
+  <p><strong>4. Weak congruence (≲) is a partial order.</strong> It captures when one structure can be coarsened into another.</p>
+
+  <p><strong>5. GPU kernels are all about layouts.</strong> Understanding HTuples gives you a principled way to reason about memory access, tiling, and composition — the core of GPU optimization.</p>
+
+  <div class="callout blue">
+    <div class="callout-title">What's Next</div>
+    <p>In the next section, we'll see how these abstract definitions power real CUDA kernels. You'll learn how to compose layouts, iterate over hierarchical structures, and write <span class="math-inline">\(O(1)\)</span>-space indexing code.</p>
+  </div>
+</section>
+
+</div><!-- /content -->
+
+<!-- Footer -->
+<footer>
+  <p>Based on CuTe and CUTLASS documentation. Learn more at <a href="https://github.com/NVIDIA/cutlass" style="color:var(--green);">NVIDIA/CUTLASS</a> and <a href="https://github.com/NVIDIA/cutlass/blob/main/media/docs/cute/" style="color:var(--green);">CuTe Layouts</a>.</p>
+</footer>
+
+<!-- Theme toggle script -->
+<script>
+(function(){
+  const saved = localStorage.getItem('theme');
+  const theme = saved || 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+
+  // Theme toggle button
+  const btn = document.getElementById('themeToggle');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+  }
+})();
+</script>
+
+<!-- Scripts -->
+<script>
+// ────────────────────────────────────────────────────────────────────
+// TUPLE EXPLORER
+// ────────────────────────────────────────────────────────────────────
+
+function parseTuple(str) {
+  str = str.trim();
+  if (!str) return null;
+  const parts = str.split(',').map(s => s.trim());
+  const nums = parts.map(p => {
+    const n = parseInt(p);
+    return isNaN(n) ? null : Math.abs(n);
+  });
+  if (nums.includes(null)) return null;
+  return nums.length === 1 ? nums[0] : nums;
+}
+
+function getRank(val) {
+  if (typeof val === 'number') return 0;
+  if (Array.isArray(val)) return val.length;
+  return 0;
+}
+
+function getProduct(val) {
+  if (typeof val === 'number') return val;
+  if (Array.isArray(val)) {
+    return val.reduce((a, b) => a * getProduct(b), 1);
+  }
+  return 1;
+}
+
+function getDepth(val) {
+  if (typeof val === 'number') return 0;
+  if (Array.isArray(val)) {
+    if (val.length === 0) return 1;
+    return 1 + Math.max(...val.map(getDepth));
+  }
+  return 0;
+}
+
+function updateTuple() {
+  const str = document.getElementById('tupleInput').value;
+  const parsed = parseTuple(str);
+  if (parsed === null) {
+    document.getElementById('tupleDisplay').textContent = 'Invalid input';
+    document.getElementById('rankValue').textContent = '?';
+    document.getElementById('productValue').textContent = '?';
+    document.getElementById('depthValue').textContent = '?';
+    return;
+  }
+  document.getElementById('rankValue').textContent = getRank(parsed);
+  document.getElementById('productValue').textContent = getProduct(parsed);
+  document.getElementById('depthValue').textContent = getDepth(parsed);
+  document.getElementById('tupleDisplay').textContent = JSON.stringify(parsed).replace(/"/g, '');
+}
+
+document.getElementById('tupleInput').addEventListener('input', updateTuple);
+updateTuple();
+
+// ────────────────────────────────────────────────────────────────────
+// HTUPLE PARSER (NESTED)
+// ────────────────────────────────────────────────────────────────────
+
+function parseHTuple(str) {
+  str = str.trim();
+  if (!str) return null;
+  try {
+    function parseNested(s) {
+      s = s.trim();
+      if (!s.includes('(')) {
+        const n = parseInt(s);
+        return isNaN(n) ? null : Math.abs(n);
+      }
+      if (s.startsWith('(') && s.endsWith(')')) s = s.slice(1, -1);
+      const parts = [];
+      let current = '';
+      let depth = 0;
+      for (let char of s) {
+        if (char === '(') depth++;
+        if (char === ')') depth--;
+        if (char === ',' && depth === 0) {
+          parts.push(parseNested(current));
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      if (current) parts.push(parseNested(current));
+      return parts.some(p => p === null) ? null : parts;
+    }
+    return parseNested(str);
+  } catch (e) {
+    return null;
+  }
+}
+
+function formatHTuple(val) {
+  if (typeof val === 'number') return val.toString();
+  if (Array.isArray(val)) {
+    return '(' + val.map(formatHTuple).join(', ') + ')';
+  }
+  return '';
+}
+
+function interpretHTuple(val) {
+  if (typeof val === 'number') return val + ' elements';
+  if (Array.isArray(val)) {
+    const product = getProduct(val);
+    return formatHTuple(val) + ' = ' + product + ' total elements';
+  }
+  return '';
+}
+
+function updateHTuple() {
+  const str = document.getElementById('htupleInput').value;
+  const parsed = parseHTuple(str);
+  if (parsed === null) {
+    document.getElementById('htupleDisplay').textContent = 'Invalid input';
+    document.getElementById('hrankValue').textContent = '?';
+    document.getElementById('hproductValue').textContent = '?';
+    document.getElementById('hdepthValue').textContent = '?';
+    document.getElementById('htupleInterpretation').textContent = 'Please use valid HTuple syntax, e.g., (2, (4, 1))';
+    return;
+  }
+  document.getElementById('hrankValue').textContent = getRank(parsed);
+  document.getElementById('hproductValue').textContent = getProduct(parsed);
+  document.getElementById('hdepthValue').textContent = getDepth(parsed);
+  document.getElementById('htupleDisplay').textContent = formatHTuple(parsed);
+  document.getElementById('htupleInterpretation').textContent = interpretHTuple(parsed);
+}
+
+document.getElementById('htupleInput').addEventListener('input', updateHTuple);
+updateHTuple();
+
+// ────────────────────────────────────────────────────────────────────
+// CONGRUENCE TESTER
+// ────────────────────────────────────────────────────────────────────
+
+function areCongruent(p, s) {
+  if (typeof p === 'number' && typeof s === 'number') return true;
+  if (Array.isArray(p) && Array.isArray(s)) {
+    if (p.length !== s.length) return false;
+    return p.every((pi, i) => areCongruent(pi, s[i]));
+  }
+  return false;
+}
+
+function updateCongruence() {
+  const p = parseHTuple(document.getElementById('congP').value);
+  const s = parseHTuple(document.getElementById('congS').value);
+  if (p === null || s === null) {
+    document.getElementById('congResult').textContent = '? Invalid input';
+    document.getElementById('congResult').className = 'result-status';
+    document.getElementById('congExplanation').textContent = 'Please enter valid HTuples';
+    return;
+  }
+  const cong = areCongruent(p, s);
+  document.getElementById('congResult').textContent = cong ? '✓ Congruent' : '✗ Not congruent';
+  document.getElementById('congResult').className = 'result-status ' + (cong ? 'congruent' : 'incongruent');
+  const pDepth = getDepth(p);
+  const sDepth = getDepth(s);
+  document.getElementById('congExplanation').textContent = cong
+    ? 'Both have the same hierarchical structure (depth ' + pDepth + ')'
+    : 'Different structures: ' + formatHTuple(p) + ' has depth ' + pDepth + ', ' + formatHTuple(s) + ' has depth ' + sDepth;
+}
+
+document.getElementById('congP').addEventListener('input', updateCongruence);
+document.getElementById('congS').addEventListener('input', updateCongruence);
+updateCongruence();
+
+// ────────────────────────────────────────────────────────────────────
+// REVEAL ANIMATIONS
+// ────────────────────────────────────────────────────────────────────
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+// Smooth scrolling for nav links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    const href = this.getAttribute('href');
+    if (href === '#') return;
+    e.preventDefault();
+    const target = document.querySelector(href);
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+</script>
+
+<!-- Render math after page load -->
+<script>
+window.addEventListener('load', () => {
+  MathJax.typesetPromise && MathJax.typesetPromise().catch(err => console.log(err));
+});
+</script>
+</body>
+</html>
