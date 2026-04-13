@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CuTe DSL from scratch: Composition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Azeret+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font-serif: 'Playfair Display', serif;
+  --font-mono: 'Azeret Mono', monospace;
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --paper: #f4f1eb;
+  --paper2: #ede9e0;
+  --ink: #1c1a17;
+  --ink2: #3d3a35;
+  --ink3: #7a7570;
+  --rule: #d9d4c8;
+  --rule2: #c4bfb2;
+  --green: #2a5c45;
+  --green-light: #e8f0ec;
+  --orange: #b85c2a;
+  --orange-light: #f5ece6;
+  --blue: #2a4a6b;
+}
+
+[data-theme="dark"] {
+  --paper: #0f0d0c;
+  --paper2: #161412;
+  --ink: #f4f1eb;
+  --ink2: #d1ccc3;
+  --ink3: #8a837b;
+  --rule: #24211e;
+  --rule2: #332f2b;
+  --green: #6fb894;
+  --green-light: #16221c;
+  --orange: #e69a6e;
+  --orange-light: #261c14;
+  --blue: #6a94b8;
+}
+
+/* Alias old variable names */
+:root {
+  --bg: var(--paper);
+  --bg-card: var(--paper2);
+  --bg-deep: var(--paper);
+  --rule: var(--rule);
+  --ink: var(--ink);
+  --ink-2: var(--ink2);
+  --ink-3: var(--ink3);
+  --red: var(--orange);
+  --red-pale: var(--orange-light);
+  --teal: var(--green);
+  --teal-pale: var(--green-light);
+  --gold: var(--orange);
+  --gold-pale: var(--orange-light);
+  --blue: var(--blue);
+  --blue-pale: rgba(42,74,107,0.1);
+  --serif: var(--font-serif);
+  --sans: var(--font-sans);
+  --mono: var(--font-mono);
+}
+
+[data-theme="dark"] {
+  --bg: var(--paper);
+  --bg-card: var(--paper2);
+  --bg-deep: var(--paper);
+  --rule: var(--rule);
+  --ink: var(--ink);
+  --ink-2: var(--ink2);
+  --ink-3: var(--ink3);
+  --red: var(--orange);
+  --red-pale: var(--orange-light);
+  --teal: var(--green);
+  --teal-pale: var(--green-light);
+  --gold: var(--orange);
+  --gold-pale: var(--orange-light);
+  --blue: var(--blue);
+  --blue-pale: rgba(42,74,107,0.1);
+  --serif: var(--font-serif);
+  --sans: var(--font-sans);
+  --mono: var(--font-mono);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-mono);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12.5px;
+  line-height: 1.7;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:200;background:var(--paper);border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:52px;transition:background-color .2s ease,border-color .2s ease}
+.logo{font-family:var(--font-serif);font-size:18px;color:var(--ink);text-decoration:none;letter-spacing:-.02em;transition:color .2s ease}
+.nav-links{display:flex;gap:28px;list-style:none;margin:0}
+.nav-links a{font-size:11px;color:var(--ink3);text-decoration:none;letter-spacing:.06em;text-transform:uppercase;transition:color .15s}
+.nav-links a:hover{color:var(--ink)}
+.theme-toggle{background:transparent;border:1px solid var(--rule2);border-radius:2px;padding:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink3);transition:all .15s ease;margin-left:12px;flex-shrink:0}
+.theme-toggle:hover{border-color:var(--ink3);color:var(--ink);background:var(--paper2)}
+.theme-toggle .sun-icon{display:none}.theme-toggle .moon-icon{display:block}
+[data-theme="dark"] .theme-toggle .sun-icon{display:block}
+[data-theme="dark"] .theme-toggle .moon-icon{display:none}
+
+/* ── HERO ── */
+.hero{padding:80px 40px 60px;max-width:1080px;margin:0 auto;border-bottom:1px solid var(--rule);transition:border-color .2s ease}
+.hero-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:24px;display:flex;align-items:center;gap:10px;transition:color .2s ease}
+.hero-label::before{content:'';display:inline-block;width:24px;height:1px;background:var(--ink3);transition:background-color .2s ease}
+.hero-title{font-family:var(--font-serif);font-size:clamp(44px,5vw,72px);line-height:1.1;letter-spacing:-.03em;color:var(--ink);margin-bottom:20px;transition:color .2s ease}
+.hero-title em{font-style:italic;color:var(--green);transition:color .2s ease}
+.hero-sub{font-size:13px;color:var(--ink2);line-height:1.8;max-width:600px;margin-bottom:20px;transition:color .2s ease}
+.hero-meta{display:flex;gap:24px;font-size:11px;color:var(--ink3);letter-spacing:.04em;flex-wrap:wrap;transition:color .2s ease}
+.hero-meta span::before{content:'// ';color:var(--rule2);margin-right:4px}
+
+/* ── CONTENT LAYOUT ── */
+.content{max-width:980px;margin:0 auto;padding:0 40px}
+section{padding:72px 0;border-bottom:1px solid var(--rule);transition:border-color .2s ease}
+section:last-of-type{border-bottom:none}
+.section-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:24px;display:flex;align-items:center;gap:10px;transition:color .2s ease}
+.section-label::after{content:'';flex:1;height:1px;background:var(--rule);transition:background-color .2s ease}
+h2{font-family:var(--font-serif);font-size:28px;letter-spacing:-.02em;color:var(--ink);margin-bottom:28px;transition:color .2s ease;line-height:1.3}
+h3{font-family:var(--font-serif);font-size:18px;letter-spacing:-.01em;color:var(--ink);margin:28px 0 16px;transition:color .2s ease}
+p{margin-bottom:16px;color:var(--ink2);line-height:1.8}
+p:last-child{margin-bottom:0}
+strong{color:var(--ink);font-weight:500}
+em{color:var(--green);font-style:italic}
+
+/* ── Footer ── */
+footer{border-top:1px solid var(--rule);padding:28px 40px;text-align:center;font-size:11px;color:var(--ink3);letter-spacing:.04em;transition:border-color .2s ease,color .2s ease}
+footer p{margin:0}
+
+/* ── Responsive ── */
+@media(max-width:768px){nav{padding:0 20px}.nav-links{display:none}.hero{padding:56px 20px 48px}.content{padding:0 20px}section{padding:48px 0}footer{padding:20px}}
+
+/* ── Reveal animations ── */
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .45s ease,transform .45s ease}
+.reveal.in{opacity:1;transform:translateY(0)}
+
+/* ─── Masthead ─── */
+.masthead {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 3.5rem 2rem 2.5rem;
+  border-bottom: 2px solid var(--ink);
+}
+.series-tag {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 0.9rem;
+}
+.masthead h1 {
+  font-family: var(--serif);
+  font-size: clamp(1.9rem, 5vw, 3.1rem);
+  font-weight: 700;
+  line-height: 1.18;
+  margin-bottom: 1rem;
+}
+.masthead .lead {
+  font-style: italic;
+  font-size: 1.08rem;
+  color: var(--ink-2);
+  max-width: 640px;
+  margin-bottom: 1.4rem;
+}
+.meta-row {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--ink-3);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+/* ─── Content ─── */
+.content {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 2rem 2rem 6rem;
+}
+
+/* ─── Typography ─── */
+h2 {
+  font-family: var(--serif);
+  font-size: 1.65rem;
+  font-weight: 700;
+  margin: 3.5rem 0 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+}
+h3 {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 1.15rem;
+  color: var(--red);
+  margin: 2.5rem 0 0.6rem;
+}
+p { margin-bottom: 1.1rem; }
+ul, ol { margin: 0.5rem 0 1.1rem 1.6rem; line-height: 2; }
+strong { font-weight: 700; }
+em { font-style: italic; }
+
+code, .mono {
+  font-family: var(--mono);
+  font-size: 0.83em;
+  background: var(--bg-card);
+  border: 1px solid var(--rule);
+  padding: 0.1em 0.38em;
+  border-radius: 3px;
+  color: var(--ink-2);
+}
+
+.math {
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  letter-spacing: -0.01em;
+}
+
+/* Math display block */
+.math-block {
+  overflow-x: auto;
+  text-align: center;
+  padding: 1.2rem 0;
+  margin: 1.2rem 0;
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  background: var(--bg-card);
+  border-left: 3px solid var(--rule);
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  line-height: 2;
+}
+
+/* ─── Callouts ─── */
+.callout {
+  border-left: 3px solid var(--red);
+  background: var(--red-pale);
+  padding: 0.9rem 1.2rem;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+}
+.callout.teal { border-color: var(--teal); background: var(--teal-pale); }
+.callout.gold  { border-color: var(--gold); background: var(--gold-pale); }
+.callout.blue  { border-color: var(--blue); background: var(--blue-pale); }
+.callout-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+/* ─── Definition box ─── */
+.defbox {
+  border: 1.5px solid var(--ink);
+  padding: 1.1rem 1.4rem;
+  margin: 2rem 0;
+  position: relative;
+}
+.defbox::before {
+  content: attr(data-lbl);
+  position: absolute;
+  top: -0.72em;
+  left: 1rem;
+  background: var(--bg);
+  padding: 0 0.45rem;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+}
+
+/* ─── Demo shells ─── */
+.demo {
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--ink);
+  background: var(--bg-card);
+  padding: 1.4rem;
+  margin: 2rem 0;
+}
+.demo-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--red);
+  margin-bottom: 0.9rem;
+}
+.demo-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  margin-bottom: 0.9rem;
+}
+
+/* ─── Buttons ─── */
+.btn {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.8rem;
+  border: 1.5px solid var(--ink);
+  background: transparent;
+  cursor: pointer;
+  color: var(--ink);
+  transition: all 0.13s;
+  white-space: nowrap;
+}
+.btn:hover, .btn.on { background: var(--ink); color: var(--bg); }
+.btn-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+label.ctrl {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+select {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  padding: 0.28rem 0.55rem;
+  border: 1.5px solid var(--ink);
+  background: var(--bg);
+  color: var(--ink);
+  cursor: pointer;
+}
+input[type=range] {
+  -webkit-appearance: none;
+  width: 140px;
+  height: 3px;
+  background: var(--rule);
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 13px;
+  height: 13px;
+  background: var(--ink);
+  border-radius: 50%;
+}
+
+/* ─── Trace / output panel ─── */
+.trace {
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  line-height: 1.85;
+  padding: 0.85rem 1rem;
+  white-space: pre-wrap;
+  min-height: 2rem;
+}
+.t-dim   { color: var(--ink-3); }
+.t-val   { color: var(--red); font-weight: 500; }
+.t-key   { color: var(--teal); }
+.t-gold  { color: var(--gold); font-weight: 500; }
+.t-blue  { color: var(--blue); }
+.t-ok    { color: var(--teal); font-weight: 600; }
+.t-bad   { color: var(--red);  font-weight: 600; }
+
+/* ─── Canvas ─── */
+canvas { display: block; max-width: 100%; margin: 0 auto; }
+
+/* ─── Pipeline diagram ─── */
+.pipe {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 1rem 0;
+  font-family: var(--mono);
+  font-size: 0.8rem;
+}
+.pipe-box {
+  border: 1.5px solid var(--rule);
+  padding: 0.45rem 0.9rem;
+  text-align: center;
+  min-width: 80px;
+  transition: all 0.25s;
+  background: var(--bg);
+}
+.pipe-box.hi { border-color: var(--red); background: var(--red-pale); transform: translateY(-2px); box-shadow: 0 3px 0 var(--red); }
+.pipe-box .sub { font-size: 0.6rem; color: var(--ink-3); display: block; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.1rem; }
+.pipe-arrow { color: var(--ink-3); font-size: 1.1rem; flex-shrink: 0; }
+
+/* ─── Table ─── */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.85rem;
+  font-family: var(--mono);
+  margin: 1rem 0;
+}
+th {
+  border-bottom: 2px solid var(--ink);
+  padding: 0.4rem 0.8rem;
+  text-align: left;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+td {
+  border-bottom: 1px solid var(--rule);
+  padding: 0.45rem 0.8rem;
+  vertical-align: top;
+}
+tr:hover td { background: var(--bg-deep); }
+
+/* ─── Footer ─── */
+.foot {
+  border-top: 1px solid var(--rule);
+  margin-top: 4rem;
+  padding-top: 1.4rem;
+  font-size: 0.82rem;
+  color: var(--ink-3);
+  font-family: var(--sans);
+}
+
+/* ─── TOC ─── */
+.toc {
+  float: right;
+  margin: 0 0 1.5rem 2rem;
+  padding: 1rem 1.2rem;
+  background: var(--bg-card);
+  border: 1px solid var(--rule);
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  min-width: 195px;
+  max-width: 240px;
+}
+.toc h4 {
+  font-family: var(--mono);
+  font-size: 0.63rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  margin-bottom: 0.55rem;
+}
+.toc ol { padding-left: 1.1rem; line-height: 1.95; color: var(--ink-2); }
+.toc a { color: inherit; text-decoration: none; }
+.toc a:hover { color: var(--red); }
+@media (max-width: 640px) {
+  .toc { float: none; max-width: 100%; margin: 0 0 1.5rem; }
+  body { font-size: 16px; }
+  h2 { font-size: 1.35rem; }
+}
+
+/* ─── Grid cell anim ─── */
+@keyframes cellPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+.popped { animation: cellPop 0.28s ease; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="https://bikrammajhi.github.io/" class="logo">Bikram Majhi</a>
+  <ul class="nav-links">
+    <li><a href="/#about">About</a></li>
+    <li><a href="/#ladder">GEMM</a></li>
+    <li><a href="/#results">Results</a></li>
+    <li><a href="/#projects">Projects</a></li>
+    <li><a href="/#writing">Writing</a></li>
+    <li><a href="/#journal">Journal</a></li>
+    <li><a href="/#contact">Contact</a></li>
+  </ul>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="5"></circle>
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+    </svg>
+    <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+  </button>
+</nav>
+
+<!-- HERO -->
+<div class="hero reveal">
+  <div class="hero-label">GPU Programming · CuTe DSL</div>
+  <h1 class="hero-title">CuTe DSL from scratch:<br>Plugging One Layout Into <em>Another</em></h1>
+  <p class="hero-sub">What does it mean to use the output of one memory-access pattern as the input to another? Surprisingly, this single idea — layout composition — powers tiling, partitioning, reshaping, and the entire thread-value abstraction of CUTLASS.</p>
+  <div class="hero-meta">
+    <span>April 2026</span>
+    <span>~18 minute read</span>
+    <span>Part 11 of 15</span>
+  </div>
+</div>
+
+<div class="content">
+
+<main>
+
+<nav class="toc">
+  <h4>Contents</h4>
+  <ol>
+    <li><a href="#s-intuition">Function composition, visually</a></li>
+    <li><a href="#s-def">Definition</a></li>
+    <li><a href="#s-properties">Properties: identity &amp; associativity</a></li>
+    <li><a href="#s-eval">How composition is computed</a></li>
+    <li><a href="#s-divisibility">Divisibility &amp; when it fails</a></li>
+    <li><a href="#s-appere">Apparent violations &amp; coalescing</a></li>
+    <li><a href="#s-tv">Application: thread-value partitioning</a></li>
+    <li><a href="#s-tiler">By-mode composition &amp; tilers</a></li>
+  </ol>
+</nav>
+
+<!-- ══════════════ §1 INTUITION ══════════════ -->
+<h2 id="s-intuition">Function composition, visually</h2>
+
+<p>You already know function composition from calculus: <em>g ∘ f</em> means "apply <em>f</em> first, then feed the output to <em>g</em>." CuTe layouts are just functions from coordinates to memory offsets — so composing them means chaining two address computations together.</p>
+
+<p>Here's the simplest possible picture. Layout <strong>B</strong> produces an offset. Layout <strong>A</strong> takes that offset as its <em>input coordinate</em>. The composition <strong>R = A ∘ B</strong> collapses the two steps into one:</p>
+
+<div class="pipe" id="pipe-intro">
+  <div class="pipe-box" id="p-input"><span class="sub">Input</span>coord <em>c</em></div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-box" id="p-b"><span class="sub">B</span>B(c)</div>
+  <div class="pipe-arrow">→</div>
+  <div class="pipe-box" id="p-a"><span class="sub">A</span>A(B(c))</div>
+  <div class="pipe-arrow">=</div>
+  <div class="pipe-box" id="p-r" style="border-color:var(--teal);background:var(--teal-pale)"><span class="sub">R = A∘B</span>R(c)</div>
+</div>
+
+<div class="demo">
+  <div class="demo-label">▸ Concrete example — drag c to explore</div>
+  <div class="demo-row">
+    <label class="ctrl">c =</label>
+    <input type="range" id="intro-slider" min="0" max="5" value="2">
+    <span id="intro-cval" style="font-family:var(--mono);font-size:0.88rem;min-width:1.2rem">2</span>
+    <span style="font-family:var(--mono);font-size:0.75rem;color:var(--ink-3);margin-left:0.5rem">A = (4,8):(1,4) &nbsp;&nbsp; B = 6:2</span>
+  </div>
+  <div class="pipe" id="pipe-live" style="justify-content:flex-start;gap:0.3rem;flex-wrap:wrap"></div>
+  <div class="trace" id="intro-trace" style="margin-top:0.7rem"></div>
+</div>
+
+<p>Notice the result in the example: <code>R = 6:2</code> — the same as B. That's because A here is the identity layout <code>(4,8):(1,4)</code>, which maps every coordinate to itself (it's column-major with strides 1 and 4 over a 4×6 grid = exactly the integers 0–23 in order). We'll come back to that shortly.</p>
+
+<!-- ══════════════ §2 DEFINITION ══════════════ -->
+<h2 id="s-def">The definition</h2>
+
+<div class="defbox" data-lbl="Definition (Group Composition)">
+  Given layouts A and B, the composition <strong>R = A ∘ B</strong> satisfies:<br><br>
+  <strong>Functional correctness:</strong> &nbsp; R(c) = A(B(c)) &nbsp; for all c ∈ 𝒵(B)<br>
+  <strong>Domain compatibility:</strong> &nbsp; B ≼ R &nbsp; (B's shape determines R's shape)<br>
+  <strong>Codomain compatibility:</strong> &nbsp; image(B) ⊆ 𝒵(A) &nbsp; (B's outputs must be valid A inputs)
+</div>
+
+<p>The word <em>group</em> here hints at the algebraic structure: under the right conditions (we'll see them), composition is associative and has identity elements. This is not an accident — it's the foundation of CUTLASS's ability to chain together tiling, partitioning, and data layout transformations without losing track of what indices mean.</p>
+
+<p>B determines the <em>shape</em> of R (how you index into it), while A determines the <em>strides</em> of R (what memory offset each index produces). Think of it as: B tells you <em>which elements</em> you're selecting; A tells you <em>where they live in memory</em>.</p>
+
+<!-- ══════════════ §3 PROPERTIES ══════════════ -->
+<h2 id="s-properties">Properties: identity and associativity</h2>
+
+<h3>Identity layouts</h3>
+
+<p>An <strong>identity layout</strong> I<sub>N</sub> is any layout that maps every integer <em>i ∈ ℤ<sub>N</sub></em> to itself: I<sub>N</sub>(i) = i. There are many layouts that do this — they all count the same N elements in the same order, just with different groupings:</p>
+
+<div class="math-block">
+24 : 1 &nbsp;&nbsp;≡&nbsp;&nbsp; (4, 6) : (1, 4) &nbsp;&nbsp;≡&nbsp;&nbsp; (3, (4, 2)) : (1, (3, 12))
+</div>
+
+<p>All three are I<sub>24</sub>. You can verify: they all produce offsets {0, 1, 2, …, 23} in order. The grouping (rank, depth) is different but the function is identical.</p>
+
+<div class="callout teal">
+  <span class="callout-label">Key fact</span>
+  Identity layouts are left- and right-identities under composition:<br>
+  &nbsp;&nbsp; I<sub>D</sub> ∘ B = B &nbsp;&nbsp; (left identity — I absorbs at the output)<br>
+  &nbsp;&nbsp; A ∘ I<sub>S</sub> = A &nbsp;&nbsp; (right identity — I passes through at the input)
+</div>
+
+<div class="demo">
+  <div class="demo-label">▸ Identity layouts I₂₄ — all produce i → i</div>
+  <div class="demo-row">
+    <div class="btn-row" id="id-btns"></div>
+  </div>
+  <canvas id="id-canvas" width="540" height="60"></canvas>
+  <div class="trace" id="id-trace" style="margin-top:0.6rem"></div>
+</div>
+
+<h3>Associativity — and when it breaks</h3>
+
+<p>When the image conditions are satisfied (B's outputs land inside A's domain, etc.), composition is associative: A ∘ (B ∘ C) = (A ∘ B) ∘ C. This is what lets you chain multiple layout operations without worrying about order-of-evaluation.</p>
+
+<p>But the conditions can be violated. Here's the paper's example:</p>
+
+<div class="math-block">
+A = (5,3):(1,7) &nbsp;&nbsp; B = 4:1 &nbsp;&nbsp; C = 2:5
+
+A ∘ (B ∘ C)  =  A ∘ (2:5)  =  2:7
+(A ∘ B) ∘ C  =  (4:1) ∘ C  =  2:5
+
+These are different!
+</div>
+
+<p>Why? C = 2:5 has image {0, 5}. B = 4:1 has domain ℤ<sub>4</sub> = {0,1,2,3}. The value 5 falls outside B's domain, so the image condition fails. When you evaluate <em>left-to-right</em> vs <em>right-to-left</em>, you're using A to handle the out-of-domain lookup differently.</p>
+
+<div class="demo">
+  <div class="demo-label">▸ Associativity explorer — pick A, B, C and see if it holds</div>
+  <div class="demo-row">
+    <label class="ctrl">Preset:</label>
+    <select id="assoc-preset" onchange="updateAssoc()">
+      <option value="good">Good: A=(4,3):(2,8), B=6:2, C=3:1</option>
+      <option value="bad">Bad: A=(5,3):(1,7), B=4:1, C=2:5</option>
+    </select>
+  </div>
+  <div class="trace" id="assoc-trace"></div>
+</div>
+
+<!-- ══════════════ §4 EVALUATION ══════════════ -->
+<h2 id="s-eval">How composition is actually computed</h2>
+
+<p>Knowing R = A ∘ B satisfies R(c) = A(B(c)) is the <em>definition</em>. But to get a closed-form layout expression for R — a new (shape, stride) pair — we need a construction.</p>
+
+<h3>The rank-1 case is trivial</h3>
+
+<p>If A has rank 1, say A = S₀:D₀, then:</p>
+
+<div class="math-block">
+A ∘ (s:d)  =  s : (D₀ · d)
+</div>
+
+<p>Just multiply the strides. No divisibility checks. The intuition: B picks every <em>d</em>-th element of A's domain, and A maps each element to offset D₀ × (its position). Composing: B's <em>d</em>-step in coordinates becomes D₀·d in offsets.</p>
+
+<div class="demo">
+  <div class="demo-label">▸ Rank-1 composition — it's just stride multiplication</div>
+  <div class="demo-row">
+    <label class="ctrl">A stride D₀:</label>
+    <input type="range" id="r1-D" min="1" max="15" value="11" style="width:110px">
+    <span id="r1-Dv" style="font-family:var(--mono);font-size:0.82rem;min-width:2rem">11</span>
+    <label class="ctrl" style="margin-left:0.8rem">B size s:</label>
+    <input type="range" id="r1-s" min="2" max="8" value="3" style="width:90px">
+    <span id="r1-sv" style="font-family:var(--mono);font-size:0.82rem;min-width:1.5rem">3</span>
+    <label class="ctrl" style="margin-left:0.8rem">B stride d:</label>
+    <input type="range" id="r1-d" min="1" max="8" value="4" style="width:90px">
+    <span id="r1-dv" style="font-family:var(--mono);font-size:0.82rem;min-width:1.5rem">4</span>
+  </div>
+  <div class="trace" id="r1-trace"></div>
+</div>
+
+<h3>Higher-rank A: "divide out then keep"</h3>
+
+<p>When A has multiple modes, the key insight from the paper is a two-step mental model:</p>
+
+<ol>
+  <li><strong>Divide out:</strong> skip past the first <em>d</em> elements of A by spreading stride <em>d</em> across the modes of A.</li>
+  <li><strong>Keep:</strong> take only the first <em>s</em> elements of what remains.</li>
+</ol>
+
+<p>Concretely, for A = (4,6,8,10):(2,3,5,7) and B = 6:12:</p>
+
+<div class="math-block">
+A ∘ 6:12  =  "skip 12 into A, then keep 6"
+
+A has prefix-products S̄ = [1, 4, 24, 192, ...]
+d = 12 lands between S̄₁=4 and S̄₂=24:
+  → the "12-step" straddles mode 1 and starts into mode 2
+
+Result: (2,3):(9,5)  — verified below
+</div>
+
+<div class="demo">
+  <div class="demo-label">▸ The "divide-out, keep" intuition — interactive trace</div>
+  <div class="demo-row">
+    <label class="ctrl">Preset:</label>
+    <select id="keep-preset" onchange="updateKeep()">
+      <option value="a">A=(4,6,8,10):(2,3,5,7) ∘ B=6:12</option>
+      <option value="b">A=(4,6):(1,4) ∘ B=6:4</option>
+      <option value="c">A=(4,8):(1,4) ∘ B=6:2</option>
+      <option value="d">A=(4,3):(2,8) ∘ B=6:2</option>
+    </select>
+  </div>
+  <div class="trace" id="keep-trace"></div>
+  <canvas id="keep-canvas" width="540" height="90" style="margin-top:0.9rem"></canvas>
+</div>
+
+<!-- ══════════════ §5 DIVISIBILITY ══════════════ -->
+<h2 id="s-divisibility">Divisibility: when composition is well-defined</h2>
+
+<p>The base-case formula involves dividing shapes and multiplying strides by factors δ<sub>r</sub>. For this to produce integer results, two divisibility conditions must hold at each mode <em>r</em>:</p>
+
+<div class="defbox" data-lbl="Divisibility Conditions">
+  Let S̄<sub>r</sub> = ∏<sub>k&lt;r</sub> S<sub>k</sub> (exclusive prefix-product of A's shape), and d = B's stride.<br><br>
+  <strong>Stride condition:</strong> &nbsp; S̄<sub>r</sub> | d &nbsp; or &nbsp; d | S̄<sub>r</sub> &nbsp; (one must divide the other)<br>
+  <strong>Shape condition:</strong> &nbsp; ⌈S̄<sub>r</sub> / d⌉ &nbsp; divides s &nbsp; (B's size must be compatible)
+</div>
+
+<p>When these fail, no layout expression exists for the composition. It's not a bug — it means you're asking for "every 3rd element of a 4-column-major layout," which genuinely can't be expressed as a strided layout.</p>
+
+<div class="demo">
+  <div class="demo-label">▸ Divisibility checker — which compositions are valid?</div>
+  <div class="demo-row">
+    <label class="ctrl">A:</label>
+    <select id="div-A" onchange="updateDiv()">
+      <option value="4,6,8;2,3,5">A = (4,6,8):(2,3,5)</option>
+      <option value="4,6,8,10;2,3,5,7">A = (4,6,8,10):(2,3,5,7)</option>
+      <option value="4,8;1,4">A = (4,8):(1,4)</option>
+    </select>
+    <label class="ctrl" style="margin-left:0.8rem">B size s:</label>
+    <input type="range" id="div-s" min="1" max="10" value="6" style="width:90px" oninput="updateDiv()">
+    <span id="div-sv" style="font-family:var(--mono);font-size:0.82rem;min-width:1.5rem">6</span>
+    <label class="ctrl" style="margin-left:0.8rem">B stride d:</label>
+    <input type="range" id="div-d" min="1" max="14" value="3" style="width:90px" oninput="updateDiv()">
+    <span id="div-dv" style="font-family:var(--mono);font-size:0.82rem;min-width:1.5rem">3</span>
+  </div>
+  <div class="trace" id="div-trace"></div>
+</div>
+
+<!-- ══════════════ §6 APPARENT VIOLATIONS ══════════════ -->
+<h2 id="s-appere">Apparent violations: coalescing saves the day</h2>
+
+<p>Some compositions look like they violate divisibility but actually don't — because A can first be <em>coalesced</em> into a simpler form.</p>
+
+<p>Example: A = (4,2,8):(3,12,97) and B = 3:3. Naively, S̄₁ = 4 and d = 3 don't divide each other — violation! But wait:</p>
+
+<div class="math-block">
+coalesce((4,2,8):(3,12,97))  =  (8,8):(3,97)
+
+Now S̄₁ = 8, d = 3: 3 | 8? No. 8 | 3? No. Still stuck!
+
+But (s-1)·d = 2·3 = 6 &lt; 8, so only the first mode is needed.
+Truncate to  8:3,  then compose:  8:3 ∘ 3:3 = 3:9  ✓
+</div>
+
+<p>The two cases where coalescing doesn't rescue you:</p>
+<ul>
+  <li><strong>Can't truncate:</strong> A = (4,2,8):(3,12,97) ∘ 4:3. Here (s-1)·d = 9 ≥ 8, so we need more than one mode, but they don't satisfy divisibility.</li>
+  <li><strong>Can't coalesce:</strong> A = (4,2,8):(3,15,97) ∘ 3:3. The strides 3 and 15 aren't multiples of 3 in the right way, so modes can't be merged.</li>
+</ul>
+
+<div class="demo">
+  <div class="demo-label">▸ Coalescing explorer — before and after</div>
+  <div class="demo-row">
+    <div class="btn-row" id="coal-btns">
+      <button class="btn on" onclick="showCoal(0)">Apparent violation (resolvable)</button>
+      <button class="btn" onclick="showCoal(1)">Can't truncate</button>
+      <button class="btn" onclick="showCoal(2)">Can't coalesce</button>
+    </div>
+  </div>
+  <div class="trace" id="coal-trace"></div>
+</div>
+
+<!-- ══════════════ §7 THREAD-VALUE ══════════════ -->
+<h2 id="s-tv">Application: thread-value partitioning</h2>
+
+<p>This is where everything comes together. On a GPU, 32 threads cooperate to read/write a matrix tile. Which thread owns which element? That's a <em>partitioning pattern</em>, and in CuTe it's expressed as a layout: the <strong>Thread-Value layout (TV layout)</strong>.</p>
+
+<p>For the Ampere tensor core operating on an 8×8 matrix, the TV layout is:</p>
+
+<div class="math-block">
+ThrValLayoutC = ((4,8), 2) : ((16,1), 8)
+
+Domain:   (32 threads, 2 values per thread)
+Codomain: ℤ₆₄  (the 64 elements of an 8×8 matrix)
+</div>
+
+<p>To read "what data does thread <em>t</em>, value <em>v</em> see in memory," you <strong>compose the data layout with the TV layout</strong>: R = DataLayout ∘ TVLayout. The result R maps (thread_id, value_id) directly to memory offsets.</p>
+
+<div class="callout gold">
+  <span class="callout-label">The pattern, in code</span>
+  <code style="font-size:0.78rem;background:none;border:none;padding:0;display:block;line-height:2">
+smem_data = Tensor(accessor, MyLayout8x8)   <span style="color:var(--ink-3)">// Coord → Offset</span><br>
+tv_layout = Layout(((4,8),2), ((16,1),8))   <span style="color:var(--ink-3)">// (Thr,Val) → Coord</span><br>
+smem_tv   = compose(smem_data, tv_layout)   <span style="color:var(--ink-3)">// (Thr,Val) → Offset</span><br>
+smem_v    = smem_tv[thr_id, :]              <span style="color:var(--ink-3)">// Slice: Val → Offset (this thread)</span>
+  </code>
+</div>
+
+<div class="demo">
+  <div class="demo-label">▸ 8×8 TV Partitioning — hover a cell to see who owns it</div>
+  <div class="demo-row">
+    <label class="ctrl">Data layout:</label>
+    <div class="btn-row" id="tv-btns"></div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:1.2rem;align-items:flex-start">
+    <div>
+      <div style="font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-3);margin-bottom:0.3rem">8×8 Matrix — colored by thread</div>
+      <canvas id="tv-canvas" width="320" height="320" style="cursor:crosshair"></canvas>
+    </div>
+    <div style="flex:1;min-width:220px">
+      <div style="font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-3);margin-bottom:0.3rem">Result layout R = DataLayout ∘ TV</div>
+      <div class="trace" id="tv-result" style="min-height:4rem"></div>
+      <div style="font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-3);margin:0.7rem 0 0.3rem">Hover info</div>
+      <div class="trace" id="tv-hover" style="min-height:3rem">Hover a cell in the matrix to inspect ownership.</div>
+      <div style="font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-3);margin:0.7rem 0 0.3rem">Thread ownership (click thread id)</div>
+      <div id="tv-thread-btns" class="btn-row" style="flex-wrap:wrap;gap:0.3rem;max-height:6rem;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
+
+<p>Notice how the composed result <code>R = ((4,8),2) : (...)</code> has exactly the same domain shape as the TV layout (32 threads × 2 values) — the TV layout entirely determines the <em>how you index</em>, while the data layout changes <em>where each element lives</em>. Different data layouts produce different stride patterns in R, but the thread-value structure is always preserved.</p>
+
+<!-- ══════════════ §8 TILERS ══════════════ -->
+<h2 id="s-tiler">By-mode composition and tilers</h2>
+
+<p>Group composition applies to the entire domain of B at once. But often you want to apply different compositions to different <em>modes</em> independently — e.g., "select these rows and those columns" separately.</p>
+
+<p>A <strong>Tiler</strong> is a tuple of individual layouts or integers, one per mode:</p>
+
+<div class="defbox" data-lbl="Definition 3.1 (Tiler)">
+  A Tiler is an HTuple(Tile), where each Tile is either:<br>
+  &nbsp;&nbsp; • A Layout S:D (controls how that mode is reindexed), or<br>
+  &nbsp;&nbsp; • An Integer S (treated as S:1 — just a size limit)<br><br>
+  When composed with L = (M,N):(X,Y), a tiler (T₀,T₁) applies independently:<br>
+  &nbsp;&nbsp; L ∘ (T₀, T₁)  =  (M:X ∘ T₀,  N:Y ∘ T₁)
+</div>
+
+<p>This is also why shapes like <code>(4, 8)</code> work as tilers in CUTLASS — they're implicitly <code>(4:1, 8:1)</code>, selecting the first 4 rows and first 8 columns of whatever they're applied to.</p>
+
+<div class="demo">
+  <div class="demo-label">▸ Tiler gallery — apply different tilers to an 8×16 layout</div>
+  <div class="demo-row">
+    <label class="ctrl">Base layout:</label>
+    <div class="btn-row">
+      <button class="btn on" id="tiler-base-col" onclick="setTilerBase('col')">8×16 col-major</button>
+      <button class="btn" id="tiler-base-row" onclick="setTilerBase('row')">8×16 row-major</button>
+    </div>
+  </div>
+  <div class="demo-row">
+    <label class="ctrl">Tiler:</label>
+    <div class="btn-row" id="tiler-btns"></div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:1.2rem;align-items:flex-start">
+    <div>
+      <div style="font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-3);margin-bottom:0.3rem">Base matrix (8 rows × 16 cols)</div>
+      <canvas id="tiler-base-canvas" width="400" height="200"></canvas>
+    </div>
+    <div>
+      <div style="font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-3);margin-bottom:0.3rem">After tiler (selected elements highlighted)</div>
+      <canvas id="tiler-result-canvas" width="400" height="200"></canvas>
+    </div>
+  </div>
+  <div class="trace" id="tiler-trace" style="margin-top:0.7rem"></div>
+</div>
+
+<p>The tiler system is what lets CUTLASS write a single kernel that works over any data layout: the tiler encodes the hardware's access pattern (e.g., which rows/columns a warp accesses), and composing it with the actual data layout produces a new layout that speaks the language of memory — without any if-statements or special cases.</p>
+
+<hr style="border:none;border-top:3px double var(--rule);margin:3rem 0">
+
+<p><strong>What comes next.</strong> Composition is the workhorse operation, but CuTe needs two more for a complete tiling algebra: <em>complement</em> (finding the layout that covers what this layout <em>doesn't</em>) and <em>logical divide</em> (splitting a layout into a grid-of-tiles layout). Both are defined in terms of composition, so everything you've learned here carries forward directly.</p>
+
+<div class="foot">
+  Source: <em>CuTe DSL Notebook, Chapter 3.3 — Composition</em>. Interactive implementations by Pi Majhi. Formal definitions follow Thakkar et al. (2023) and the CUTLASS 3.x source.
+</div>
+</main>
+
+<script>
+// ═══════════════════════════════════════════
+// Core layout arithmetic
+// ═══════════════════════════════════════════
+function flattenArr(a) {
+  if (!Array.isArray(a)) return [a];
+  return a.flatMap(x => flattenArr(x));
+}
+function shapeSize(s) {
+  if (!Array.isArray(s)) return s;
+  return s.reduce((a,b)=>a*shapeSize(b),1);
+}
+function idx2crd(idx, shape) {
+  if (!Array.isArray(shape)) return idx % shape;
+  let result=[], rem=idx;
+  for (let i=0;i<shape.length;i++){
+    let sz=shapeSize(shape[i]);
+    result.push(idx2crd(rem%sz, shape[i]));
+    rem=Math.floor(rem/sz);
+  }
+  return result;
+}
+function dot(d,e){ return d.reduce((s,v,i)=>s+v*e[i],0); }
+function evalLayout(idx, shape, stride){
+  const e=flattenArr(idx2crd(idx,shape));
+  const d=flattenArr(stride);
+  return dot(d,e);
+}
+function allOffsets(shape,stride){
+  const n=shapeSize(shape);
+  return Array.from({length:n},(_,i)=>evalLayout(i,shape,stride));
+}
+
+// Compose rank-1 A with rank-1 B: (S0:D0) ∘ (s:d) = s:(D0*d)
+function composeRank1A(D0, s, d){ return {shape:s, stride:D0*d}; }
+
+// ═══════════════════════════════════════════
+// §1 Intro pipeline
+// ═══════════════════════════════════════════
+const A_intro = {shape:[4,8], stride:[1,4]};
+const B_intro = {shape:6, stride:2};
+
+function updateIntro(){
+  const c=parseInt(document.getElementById('intro-slider').value);
+  document.getElementById('intro-cval').textContent=c;
+  const Bc=evalLayout(c,B_intro.shape,B_intro.stride);
+  const Rc=evalLayout(Bc,A_intro.shape,A_intro.stride);
+  const pipe=document.getElementById('pipe-live');
+  pipe.innerHTML=`
+    <div class="pipe-box"><span class="sub">Input c</span><strong>${c}</strong></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-box hi"><span class="sub">B = 6:2</span>B(${c}) = <strong>${Bc}</strong></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-box hi"><span class="sub">A = (4,8):(1,4)</span>A(${Bc}) = <strong>${Rc}</strong></div>
+    <div class="pipe-arrow">=</div>
+    <div class="pipe-box" style="border-color:var(--teal);background:var(--teal-pale)"><span class="sub">R = A∘B = 6:2</span>R(${c}) = <strong>${Rc}</strong></div>`;
+  document.getElementById('intro-trace').innerHTML=
+    `<span class="t-dim">c = </span><span class="t-val">${c}</span>
+<span class="t-dim">B(c) = </span><span class="t-val">${Bc}</span>  <span class="t-dim">(stride 2: every other element of A's domain)</span>
+<span class="t-dim">A(B(c)) = A(</span><span class="t-val">${Bc}</span><span class="t-dim">) = </span><span class="t-val">${Rc}</span>  <span class="t-dim">(A is identity I₂₄ here, so A(k)=k)</span>
+<span class="t-dim">R(c) = </span><span class="t-key">${Rc}</span>  <span class="t-dim">✓</span>`;
+}
+document.getElementById('intro-slider').addEventListener('input', updateIntro);
+updateIntro();
+
+// ═══════════════════════════════════════════
+// §3 Identity layouts
+// ═══════════════════════════════════════════
+const ID_LAYOUTS=[
+  {lbl:'24:1',          shape:24,          stride:1},
+  {lbl:'(4,6):(1,4)',   shape:[4,6],       stride:[1,4]},
+  {lbl:'(3,(4,2)):(1,(3,12))', shape:[3,[4,2]], stride:[1,[3,12]]},
+];
+let activeID=0;
+function drawIdCanvas(idx){
+  const canvas=document.getElementById('id-canvas');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const L=ID_LAYOUTS[idx];
+  const offsets=allOffsets(L.shape,L.stride);
+  const n=offsets.length; // 24
+  const cw=Math.floor((W-20)/n), cy=H/2;
+  const r=Math.min(cw*0.4,14);
+  offsets.forEach((v,i)=>{
+    const x=10+i*cw+cw/2;
+    ctx.beginPath(); ctx.arc(x,cy,r,0,2*Math.PI);
+    const ok=(v===i);
+    ctx.fillStyle=ok?'var(--teal)':'var(--red)';
+    ctx.fill();
+    ctx.fillStyle='white';
+    ctx.font=`${r>10?10:8}px Fira Code, monospace`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(v,x,cy);
+  });
+  document.getElementById('id-trace').innerHTML=
+    `<span class="t-dim">Layout: </span><span class="t-val">${L.lbl}</span>
+<span class="t-dim">Offsets: </span>${offsets.join(', ')}
+<span class="t-dim">Is identity? </span><span class="${offsets.every((v,i)=>v===i)?'t-ok':'t-bad'}">${offsets.every((v,i)=>v===i)?'YES ✓':'NO ✗'}</span>`;
+}
+(function initId(){
+  const btns=document.getElementById('id-btns');
+  ID_LAYOUTS.forEach((L,i)=>{
+    const b=document.createElement('button');
+    b.className='btn'+(i===0?' on':'');
+    b.textContent=L.lbl;
+    b.onclick=()=>{
+      activeID=i;
+      btns.querySelectorAll('.btn').forEach((x,j)=>x.classList.toggle('on',j===i));
+      drawIdCanvas(i);
+    };
+    btns.appendChild(b);
+  });
+  drawIdCanvas(0);
+})();
+
+// ═══════════════════════════════════════════
+// §3 Associativity
+// ═══════════════════════════════════════════
+const ASSOC_PRESETS={
+  good:{A:{shape:[4,3],stride:[2,8]}, B:{shape:6,stride:2}, C:{shape:3,stride:1}},
+  bad: {A:{shape:[5,3],stride:[1,7]}, B:{shape:4,stride:1}, C:{shape:2,stride:5}},
+};
+function simpleCompose(A,B){
+  // Just verify R(c)=A(B(c)) and return offsets
+  const n=shapeSize(B.shape);
+  const offA=allOffsets(A.shape,A.stride);
+  const offB=allOffsets(B.shape,B.stride);
+  return offB.map(b=>offA[b]!==undefined?offA[b]:A.stride*(A.shape<=b?NaN:b));
+}
+function composeLayouts(A,B){
+  // naive: compute image
+  const n=shapeSize(B.shape);
+  const res=[];
+  for(let c=0;c<n;c++){
+    const bc=evalLayout(c,B.shape,B.stride);
+    const abc=evalLayout(bc,A.shape,A.stride);
+    res.push(abc);
+  }
+  return res;
+}
+function updateAssoc(){
+  const key=document.getElementById('assoc-preset').value;
+  const {A,B,C}=ASSOC_PRESETS[key];
+  const nC=shapeSize(C.shape);
+  const lhsBC=Array.from({length:nC},(_,c)=>evalLayout(evalLayout(c,C.shape,C.stride),B.shape,B.stride));
+  const lhs=lhsBC.map(bc=>evalLayout(bc,A.shape,A.stride));
+  const nB=shapeSize(B.shape);
+  const AB=Array.from({length:nB},(_,c)=>evalLayout(evalLayout(c,B.shape,B.stride),A.shape,A.stride));
+  const rhs=Array.from({length:nC},(_,c)=>AB[evalLayout(c,C.shape,C.stride)]);
+  const assoc=lhs.every((v,i)=>v===rhs[i]);
+  // image condition check
+  const imgC=new Set(Array.from({length:nC},(_,c)=>evalLayout(c,C.shape,C.stride)));
+  const domB=new Set(Array.from({length:nB},(_,c)=>c));
+  const condOk=[...imgC].every(v=>domB.has(v));
+  document.getElementById('assoc-trace').innerHTML=
+    `<span class="t-dim">A = </span><span class="t-val">${JSON.stringify(A.shape).replace(/\[/g,'(').replace(/\]/g,')')}: ${JSON.stringify(A.stride).replace(/\[/g,'(').replace(/\]/g,')')}</span>
+<span class="t-dim">B = </span><span class="t-val">${B.shape}:${B.stride}</span>
+<span class="t-dim">C = </span><span class="t-val">${C.shape}:${C.stride}</span>
+
+<span class="t-dim">image(C) ⊆ domain(B)?  </span><span class="${condOk?'t-ok':'t-bad'}">${condOk?'YES — associativity guaranteed':'NO  — associativity may fail'}</span>
+
+<span class="t-dim">A ∘ (B ∘ C) = </span>[${lhs.join(', ')}]
+<span class="t-dim">(A ∘ B) ∘ C = </span>[${rhs.join(', ')}]
+
+<span class="t-dim">A ∘ (B ∘ C) = (A ∘ B) ∘ C ?  </span><span class="${assoc?'t-ok':'t-bad'}">${assoc?'YES ✓  (associativity holds)':'NO  ✗  (results differ!)'}</span>`;
+}
+updateAssoc();
+
+// ═══════════════════════════════════════════
+// §4 Rank-1 composition
+// ═══════════════════════════════════════════
+function updateR1(){
+  const D=parseInt(document.getElementById('r1-D').value);
+  const s=parseInt(document.getElementById('r1-s').value);
+  const d=parseInt(document.getElementById('r1-d').value);
+  document.getElementById('r1-Dv').textContent=D;
+  document.getElementById('r1-sv').textContent=s;
+  document.getElementById('r1-dv').textContent=d;
+  const Rstride=D*d;
+  const verify=Array.from({length:s},(_,c)=>{
+    const Bc=d*c;
+    return [c, Bc, D*Bc];
+  });
+  const all_ok=verify.every(([c,Bc,ABc])=>ABc===Rstride*c);
+  document.getElementById('r1-trace').innerHTML=
+    `<span class="t-dim">A = 7:</span><span class="t-val">${D}</span><span class="t-dim">   (rank-1, size irrelevant)</span>
+<span class="t-dim">B = </span><span class="t-val">${s}</span><span class="t-dim">:</span><span class="t-val">${d}</span>
+
+<span class="t-dim">R = A ∘ B = </span><span class="t-val">${s}</span><span class="t-dim">:</span><span class="t-key">${Rstride}</span>
+<span class="t-dim">  (formula: s:(D₀·d) = ${s}:(${D}·${d}) = ${s}:${Rstride})</span>
+
+<span class="t-dim">Verification:</span>
+${verify.map(([c,Bc,ABc])=>`<span class="t-dim">  c=${c}: B(${c})=${Bc}, A(${Bc})=${ABc}, R(${c})=${Rstride*c}  <span class="${ABc===Rstride*c?'t-ok':'t-bad'}">${ABc===Rstride*c?'✓':'✗'}</span></span>`).join('\n')}`;
+}
+['r1-D','r1-s','r1-d'].forEach(id=>document.getElementById(id).addEventListener('input',updateR1));
+updateR1();
+
+// ═══════════════════════════════════════════
+// §4 Keep/divide intuition
+// ═══════════════════════════════════════════
+const KEEP_PRESETS={
+  a:{A:{shape:[4,6,8,10],stride:[2,3,5,7]}, B:{shape:6,stride:12}, Rshape:[2,3],Rstride:[9,5]},
+  b:{A:{shape:[4,6],stride:[1,4]}, B:{shape:6,stride:4}, Rshape:6,Rstride:4},
+  c:{A:{shape:[4,8],stride:[1,4]}, B:{shape:6,stride:2}, Rshape:6,Rstride:2},
+  d:{A:{shape:[4,3],stride:[2,8]}, B:{shape:6,stride:2}, Rshape:6,Rstride:2},
+};
+function updateKeep(){
+  const key=document.getElementById('keep-preset').value;
+  const {A,B,Rshape,Rstride}=KEEP_PRESETS[key];
+  const flatAS=flattenArr(A.shape), flatAD=flattenArr(A.stride);
+  // prefix products
+  let pfx=[1]; for(let i=0;i<flatAS.length-1;i++) pfx.push(pfx[pfx.length-1]*flatAS[i]);
+  const nB=shapeSize(B.shape);
+  const verify=Array.from({length:nB},(_,c)=>{
+    const Bc=evalLayout(c,B.shape,B.stride);
+    const ABc=evalLayout(Bc,A.shape,A.stride);
+    const Rc=evalLayout(c,Rshape,Rstride);
+    return {c,Bc,ABc,Rc,ok:ABc===Rc};
+  });
+  const allOk=verify.every(v=>v.ok);
+  const Astr=`(${flatAS.join(',')}):(${flatAD.join(',')})`;
+  const Rstr=Array.isArray(Rshape)?`(${flattenArr(Rshape).join(',')}):(${flattenArr(Rstride).join(',')})`:
+             `${Rshape}:${Rstride}`;
+  document.getElementById('keep-trace').innerHTML=
+    `<span class="t-dim">A = </span><span class="t-val">${Astr}</span>
+<span class="t-dim">B = </span><span class="t-val">${B.shape}:${B.stride}</span>
+<span class="t-dim">Prefix products S̄ = </span>[${pfx.join(', ')}]
+<span class="t-dim">d = ${B.stride}: "jump ${B.stride} steps into A's domain per coordinate"</span>
+<span class="t-dim">s = ${B.shape}: "keep ${B.shape} elements"</span>
+
+<span class="t-dim">R = A ∘ B = </span><span class="t-key">${Rstr}</span>
+
+<span class="t-dim">Spot-check:</span>
+${verify.slice(0,Math.min(6,verify.length)).map(v=>`<span class="t-dim">  c=${v.c}: B(${v.c})=${v.Bc}, A(${v.Bc})=${v.ABc}, R(${v.c})=${v.Rc} <span class="${v.ok?'t-ok':'t-bad'}">${v.ok?'✓':'✗'}</span></span>`).join('\n')}
+<span class="t-dim">All ${nB} values: </span><span class="${allOk?'t-ok':'t-bad'}">${allOk?'✓ correct':'✗ mismatch'}</span>`;
+
+  // Draw A's elements as a row, highlighting selected ones
+  const canvas=document.getElementById('keep-canvas');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const nA=shapeSize(A.shape);
+  const selectedOffsets=new Set(verify.map(v=>v.Bc));
+  const cw=Math.min(Math.floor((W-20)/nA),28);
+  const ch=28;
+  const ox=10, oy=10;
+  // Draw A's elements
+  for(let i=0;i<nA && i*cw<W-20;i++){
+    const off=evalLayout(i,A.shape,A.stride);
+    const x=ox+i*cw;
+    ctx.fillStyle=selectedOffsets.has(i)?'var(--teal)':'var(--bg-deep)';
+    ctx.fillRect(x,oy,cw-1,ch);
+    ctx.strokeStyle=selectedOffsets.has(i)?'var(--teal)':'var(--rule)';
+    ctx.strokeRect(x,oy,cw-1,ch);
+    ctx.fillStyle=selectedOffsets.has(i)?'white':'var(--ink-3)';
+    ctx.font='9px Fira Code, monospace';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(off,x+cw/2-0.5,oy+ch/2);
+  }
+  // Label
+  ctx.fillStyle='var(--ink-3)';
+  ctx.font='9px DM Sans, sans-serif';
+  ctx.textAlign='left'; ctx.textBaseline='top';
+  ctx.fillText(`A's ${nA} elements (teal = selected by B = ${B.shape}:${B.stride})`,ox,oy+ch+4);
+}
+document.getElementById('keep-preset').addEventListener('change',updateKeep);
+updateKeep();
+
+// ═══════════════════════════════════════════
+// §5 Divisibility checker
+// ═══════════════════════════════════════════
+function checkDiv(Ashapes, Astrides, s, d){
+  const n=Ashapes.length;
+  let pfx=1, msgs=[], valid=true;
+  for(let r=0;r<n;r++){
+    const Sr=Ashapes[r];
+    const Sbar=pfx; // prefix product before mode r
+    const divOk=(Sbar%d===0)||(d%Sbar===0);
+    const delta=Math.ceil(d/Sbar);
+    const rho=Math.ceil(Sbar/d);
+    const shapOk=(s%rho===0);
+    if(!divOk||!shapOk) valid=false;
+    msgs.push(`  r=${r}: S̄_r=${Sbar}, S_r=${Sr}, D_r=${Astrides[r]}, δ=${delta}, ρ=${rho}  stride_ok=${divOk?'✓':'✗'}, shape_ok=${shapOk?'✓':'✗'}`);
+    pfx*=Sr;
+  }
+  return {valid, msgs};
+}
+function updateDiv(){
+  const Aval=document.getElementById('div-A').value;
+  const [sh,st]=Aval.split(';');
+  const Ashapes=sh.split(',').map(Number);
+  const Astrides=st.split(',').map(Number);
+  const s=parseInt(document.getElementById('div-s').value);
+  const d=parseInt(document.getElementById('div-d').value);
+  document.getElementById('div-sv').textContent=s;
+  document.getElementById('div-dv').textContent=d;
+  const {valid,msgs}=checkDiv(Ashapes,Astrides,s,d);
+  document.getElementById('div-trace').innerHTML=
+    `<span class="t-dim">A = (${Ashapes.join(',')}):(${Astrides.join(',')})   B = ${s}:${d}</span>
+<span class="t-dim">Prefix products S̄ = [${[...Array(Ashapes.length)].reduce((a,_,i)=>{ a.push(i===0?1:a[a.length-1]*Ashapes[i-1]); return a; },[]).join(', ')}]</span>
+
+<span class="t-dim">Mode-by-mode analysis:</span>
+${msgs.map(m=>`<span class="t-dim">${m}</span>`).join('\n')}
+
+<span class="t-dim">Composition admissible?  </span><span class="${valid?'t-ok':'t-bad'}">${valid?'YES ✓ — a valid layout result exists':'NO  ✗ — divisibility violation, no layout can represent this'}</span>`;
+}
+updateDiv();
+
+// ═══════════════════════════════════════════
+// §6 Coalescing explorer
+// ═══════════════════════════════════════════
+const COAL_CASES=[
+  {
+    title:'A = (4,2,8):(3,12,97)  B = 3:3  — apparent violation, resolved',
+    lines:[
+      ['t-dim','Original A = (4,2,8):(3,12,97)'],
+      ['t-dim','coalesce → (8,8):(3,97)    [4×3=12 = 8×... wait: 4*3=12, 2*12=24 ≠ 97, so mode 0+1 merge: shape 4×2=8, stride 3; mode 2: shape 8, stride 97]'],
+      ['t-dim','Need d=3, s=3. (s-1)·d = 2·3 = 6 < 8 → only first mode matters'],
+      ['t-dim','Truncate to 8:3'],
+      ['t-key','8:3 ∘ 3:3 = 3:9   (rank-1 formula: s:(D₀·d) = 3:(3·3))'],
+      ['t-dim','Verify: c=0→A(0)=0, c=1→A(3)=9, c=2→A(6)=5  wait... 3*1=3→ A(3): nat=(3%4,0)=(3,0) → 3*3+0*12=9 ✓'],
+      ['t-ok','Result: 3:9  ✓ Verified against A(B(c)) for all c'],
+    ]
+  },
+  {
+    title:"A = (4,2,8):(3,12,97)  B = 4:3  — can't truncate",
+    lines:[
+      ['t-dim','coalesce(A) = (8,8):(3,97)'],
+      ['t-dim','d=3, s=4. (s-1)·d = 3·3 = 9 ≥ 8 → we need more than first mode'],
+      ['t-dim','But mode boundary: S̄₁ = 8, d = 3.  8%3 ≠ 0 and 3%8 ≠ 0'],
+      ['t-bad','Stride divisibility fails at r=1: S̄₁=8, d=3  ✗'],
+      ['t-bad','No layout can represent "every 3rd element of (8,8):(3,97)"'],
+      ['t-dim','Physical interpretation: the 3-step cuts across the mode-0 boundary'],
+      ['t-dim','at position 8, creating a non-uniform stride pattern'],
+    ]
+  },
+  {
+    title:"A = (4,2,8):(3,15,97)  B = 3:3  — can't coalesce",
+    lines:[
+      ['t-dim','Can modes 0 and 1 merge? Shape 4*2=8, but stride test:'],
+      ['t-dim','  D₀ * S₀ = 3 * 4 = 12 ≠ D₁ = 15'],
+      ['t-dim','  Modes can\'t coalesce (non-contiguous strides)'],
+      ['t-bad','coalesce returns (4,2,8):(3,15,97) unchanged  ✗'],
+      ['t-dim','With original shape: S̄₁ = 4, d = 3.  4%3≠0 and 3%4≠0'],
+      ['t-bad','Stride divisibility fails at r=1  ✗'],
+      ['t-dim','Physical: stride 15 (not 12=3×4) means mode 1 is "padded"'],
+      ['t-dim','and the 3-step can\'t be cleanly factored across the gap'],
+    ]
+  }
+];
+let activeCoal=0;
+function showCoal(i){
+  activeCoal=i;
+  document.getElementById('coal-btns').querySelectorAll('.btn').forEach((b,j)=>b.classList.toggle('on',j===i));
+  const c=COAL_CASES[i];
+  document.getElementById('coal-trace').innerHTML=
+    `<span class="t-dim">${c.title}</span>\n\n`+
+    c.lines.map(([cls,txt])=>`<span class="${cls}">${txt}</span>`).join('\n');
+}
+showCoal(0);
+
+// ═══════════════════════════════════════════
+// §7 Thread-Value partitioning
+// ═══════════════════════════════════════════
+// TV layout: ((4,8),2):((16,1),8)
+// Domain: (32 threads, 2 values)
+// Codomain: Z_64
+
+// Evaluate TV layout at (thread, value) to get 1D coord in 8x8
+function tvCoord(t, v){
+  // shape: ((4,8), 2)  stride: ((16,1), 8)
+  // thread mode: shape (4,8), stride (16,1)
+  // value  mode: shape 2,     stride 8
+  const t0 = t % 4,  t1 = Math.floor(t/4);
+  const v0 = v;
+  return t0*16 + t1*1 + v0*8;
+}
+function coord1Dto2D(k, rows=8){ return {row: k%rows, col: Math.floor(k/rows)}; }
+
+const DATA_LAYOUTS = [
+  {name:'Col-major', shape:[8,8], stride:[1,8]},
+  {name:'Row-major', shape:[8,8], stride:[8,1]},
+  {name:'Padded',    shape:[8,8], stride:[1,9]},
+];
+let tvDataIdx=0, tvHoverThread=-1;
+
+// Thread color palette — 32 threads
+function threadColor(t, alpha=1){
+  const hue=Math.round((t/32)*330);
+  return `hsla(${hue},65%,55%,${alpha})`;
+}
+
+function composeTVLayout(dataShape, dataStride){
+  // R = DataLayout ∘ TVLayout
+  // R(t, v) = Data(TV(t,v))
+  const res=[];
+  for(let t=0;t<32;t++){
+    const row=[];
+    for(let v=0;v<2;v++){
+      const coord=tvCoord(t,v);
+      const off=evalLayout(coord,dataShape,dataStride);
+      row.push(off);
+    }
+    res.push(row);
+  }
+  return res;
+}
+
+function drawTVCanvas(){
+  const canvas=document.getElementById('tv-canvas');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  const rows=8,cols=8;
+  const cw=Math.floor(W/cols), ch=Math.floor(H/rows);
+  ctx.clearRect(0,0,W,H);
+  const L=DATA_LAYOUTS[tvDataIdx];
+  const offsets=allOffsets(L.shape,L.stride);
+
+  for(let col=0;col<cols;col++){
+    for(let row=0;row<rows;row++){
+      const idx=row+col*rows; // 1D coord
+      // Find which (thread,value) owns this coord
+      let owner_t=-1, owner_v=-1;
+      for(let t=0;t<32&&owner_t<0;t++)
+        for(let v=0;v<2&&owner_t<0;v++)
+          if(tvCoord(t,v)===idx){ owner_t=t; owner_v=v; }
+      const x=col*cw, y=row*ch;
+      const isHi=owner_t===tvHoverThread;
+      ctx.fillStyle=owner_t>=0?threadColor(owner_t, isHi?1:0.65):'#ccc';
+      ctx.fillRect(x,y,cw-1,ch-1);
+      if(isHi){ ctx.strokeStyle='var(--ink)'; ctx.lineWidth=2; ctx.strokeRect(x+1,y+1,cw-3,ch-3); ctx.lineWidth=1; }
+      const memOff=evalLayout(idx,L.shape,L.stride);
+      ctx.fillStyle='white';
+      ctx.font='bold 10px Fira Code, monospace';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(memOff, x+cw/2, y+ch/2-5);
+      ctx.font='8px Fira Code, monospace';
+      ctx.fillStyle='rgba(255,255,255,0.8)';
+      ctx.fillText(`T${owner_t>=0?owner_t:'?'}v${owner_v>=0?owner_v:'?'}`, x+cw/2, y+ch/2+6);
+    }
+  }
+}
+
+function updateTV(){
+  const L=DATA_LAYOUTS[tvDataIdx];
+  const rv=composeTVLayout(L.shape,L.stride);
+  // Display result layout shape/stride in condensed form
+  const exR0=rv[0], exR1=rv[1];
+  document.getElementById('tv-result').innerHTML=
+    `<span class="t-dim">Data = ${JSON.stringify(L.shape).replace(/\[/g,'(').replace(/\]/g,')')} : ${JSON.stringify(L.stride).replace(/\[/g,'(').replace(/\]/g,')')}</span>
+<span class="t-dim">TV   = ((4,8),2) : ((16,1),8)</span>
+<span class="t-dim">R    = Data ∘ TV</span>
+<span class="t-dim">Domain: (32 threads × 2 values)</span>
+<span class="t-dim">Sample thread offsets:</span>
+<span class="t-key">  T0:  [${rv[0].join(', ')}]</span>
+<span class="t-key">  T1:  [${rv[1].join(', ')}]</span>
+<span class="t-key">  T16: [${rv[16].join(', ')}]</span>
+<span class="t-key">  T31: [${rv[31].join(', ')}]</span>`;
+  drawTVCanvas();
+  // Thread buttons
+  const tbtns=document.getElementById('tv-thread-btns');
+  if(!tbtns.children.length){
+    for(let t=0;t<32;t++){
+      const b=document.createElement('button');
+      b.className='btn';
+      b.textContent=`T${t}`;
+      b.style.borderColor=threadColor(t);
+      b.onclick=()=>{
+        tvHoverThread=(tvHoverThread===t)?-1:t;
+        tbtns.querySelectorAll('.btn').forEach((x,j)=>x.classList.toggle('on',j===tvHoverThread));
+        drawTVCanvas();
+        const L2=DATA_LAYOUTS[tvDataIdx];
+        const rv2=composeTVLayout(L2.shape,L2.stride);
+        document.getElementById('tv-hover').innerHTML=
+          `<span class="t-dim">Thread ${t} owns:</span>
+<span class="t-key">  val 0 → offset ${rv2[t][0]}</span>
+<span class="t-key">  val 1 → offset ${rv2[t][1]}</span>`;
+      };
+      tbtns.appendChild(b);
+    }
+  }
+}
+
+(function initTV(){
+  const btns=document.getElementById('tv-btns');
+  DATA_LAYOUTS.forEach((L,i)=>{
+    const b=document.createElement('button');
+    b.className='btn'+(i===0?' on':'');
+    b.textContent=L.name;
+    b.onclick=()=>{
+      tvDataIdx=i;
+      btns.querySelectorAll('.btn').forEach((x,j)=>x.classList.toggle('on',j===i));
+      updateTV();
+    };
+    btns.appendChild(b);
+  });
+  const canvas=document.getElementById('tv-canvas');
+  canvas.addEventListener('mousemove',e=>{
+    const r=canvas.getBoundingClientRect();
+    const sx=canvas.width/r.width, sy=canvas.height/r.height;
+    const cx=(e.clientX-r.left)*sx, cy=(e.clientY-r.top)*sy;
+    const col=Math.floor(cx/(canvas.width/8)), row=Math.floor(cy/(canvas.height/8));
+    if(col<0||col>=8||row<0||row>=8) return;
+    const idx=row+col*8;
+    let owner_t=-1,owner_v=-1;
+    for(let t=0;t<32&&owner_t<0;t++)
+      for(let v=0;v<2&&owner_t<0;v++)
+        if(tvCoord(t,v)===idx){ owner_t=t; owner_v=v; }
+    const L=DATA_LAYOUTS[tvDataIdx];
+    const memOff=evalLayout(idx,L.shape,L.stride);
+    document.getElementById('tv-hover').innerHTML=
+      `<span class="t-dim">Cell (row=${row}, col=${col})</span>
+<span class="t-dim">1D coord = ${idx} → memory offset = </span><span class="t-key">${memOff}</span>
+<span class="t-dim">Owner: </span><span class="t-val">Thread ${owner_t}, value ${owner_v}</span>`;
+    tvHoverThread=owner_t;
+    drawTVCanvas();
+  });
+  canvas.addEventListener('mouseleave',()=>{ tvHoverThread=-1; drawTVCanvas(); });
+  updateTV();
+})();
+
+// ═══════════════════════════════════════════
+// §8 Tilers
+// ═══════════════════════════════════════════
+const TILERS=[
+  {lbl:'<4:1, 8:1>',   row:{shape:4,stride:1}, col:{shape:8,stride:1}, desc:'First 4 rows × first 8 cols'},
+  {lbl:'<(2,2):(1,4), 8:1>', row:{shape:[2,2],stride:[1,4]}, col:{shape:8,stride:1}, desc:'Rows {0,1,4,5} × first 8 cols'},
+  {lbl:'<(2,2):(1,4), 8:2>', row:{shape:[2,2],stride:[1,4]}, col:{shape:8,stride:2}, desc:'Rows {0,1,4,5} × every-other col'},
+  {lbl:'<4:2, 8:2>',   row:{shape:4,stride:2}, col:{shape:8,stride:2}, desc:'Every-other row × every-other col'},
+];
+let tilerBase='col', activeTiler=0;
+function setTilerBase(b){
+  tilerBase=b;
+  document.getElementById('tiler-base-col').classList.toggle('on',b==='col');
+  document.getElementById('tiler-base-row').classList.toggle('on',b==='row');
+  drawTilerCanvases();
+}
+function drawTilerCanvases(){
+  const baseShape=[8,16];
+  const baseStride=tilerBase==='col'?[1,8]:[16,1];
+  const T=TILERS[activeTiler];
+
+  // Compute which (row,col) coordinates are selected by tiler
+  const rowIdxs=allOffsets(T.row.shape,T.row.stride);
+  const colIdxs=allOffsets(T.col.shape,T.col.stride);
+  const selected=new Set();
+  rowIdxs.forEach(r=>colIdxs.forEach(c=>{ if(r<8&&c<16) selected.add(r+c*8); }));
+
+  const baseOffsets=allOffsets(baseShape,baseStride);
+  const rows=8,cols=16;
+
+  function drawGrid(canvas, highlightFn){
+    const ctx=canvas.getContext('2d');
+    const W=canvas.width,H=canvas.height;
+    const cw=Math.floor((W-4)/cols), ch=Math.floor((H-4)/rows);
+    ctx.clearRect(0,0,W,H);
+    for(let col=0;col<cols;col++){
+      for(let row=0;row<rows;row++){
+        const idx=row+col*rows;
+        const off=baseOffsets[idx];
+        const hi=highlightFn(row,col,idx);
+        const x=2+col*cw, y=2+row*ch;
+        const hue=Math.round((off/Math.max(...baseOffsets))*200);
+        ctx.fillStyle=hi?`hsl(${hue},70%,55%)`:`hsl(${hue},25%,88%)`;
+        ctx.fillRect(x,y,cw-1,ch-1);
+        ctx.strokeStyle=hi?`hsl(${hue},60%,40%)`:'#ccc';
+        ctx.lineWidth=hi?1.5:0.5;
+        ctx.strokeRect(x,y,cw-1,ch-1);
+        ctx.lineWidth=1;
+        if(cw>20){
+          ctx.fillStyle=hi?'white':'#999';
+          ctx.font=`${cw>24?9:7}px Fira Code, monospace`;
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillText(off,x+cw/2,y+ch/2);
+        }
+      }
+    }
+  }
+  drawGrid(document.getElementById('tiler-base-canvas'), ()=>true);
+  drawGrid(document.getElementById('tiler-result-canvas'), (row,col,idx)=>selected.has(idx));
+
+  // Result layout
+  const resultOffsets=[...selected].map(idx=>baseOffsets[idx]);
+  document.getElementById('tiler-trace').innerHTML=
+    `<span class="t-dim">Base: (8,16):(${baseStride.join(',')})  (${tilerBase}-major)</span>
+<span class="t-dim">Tiler: ${T.lbl}  — ${T.desc}</span>
+<span class="t-dim">Row indices selected: [${rowIdxs.filter(r=>r<8).join(', ')}]</span>
+<span class="t-dim">Col indices selected: [${colIdxs.filter(c=>c<16).join(', ')}]</span>
+<span class="t-dim">Total selected: ${selected.size} elements  (= ${rowIdxs.filter(r=>r<8).length} rows × ${colIdxs.filter(c=>c<16).length} cols)</span>
+<span class="t-dim">Selected memory offsets: [${resultOffsets.slice(0,20).join(', ')}${resultOffsets.length>20?', ...':''}]</span>`;
+}
+(function initTiler(){
+  const btns=document.getElementById('tiler-btns');
+  TILERS.forEach((T,i)=>{
+    const b=document.createElement('button');
+    b.className='btn'+(i===0?' on':'');
+    b.textContent=T.lbl;
+    b.onclick=()=>{
+      activeTiler=i;
+      btns.querySelectorAll('.btn').forEach((x,j)=>x.classList.toggle('on',j===i));
+      drawTilerCanvases();
+    };
+    btns.appendChild(b);
+  });
+  drawTilerCanvases();
+})();
+</script>
+
+</main>
+
+<section class="reveal" style="border:none; padding-top:40px; padding-bottom:40px; text-align:center;">
+  <p style="color:var(--ink3); font-size:11px; letter-spacing:0.08em; text-transform:uppercase;">
+    <em>Part 1:</em> Loops Are Just Layouts · <em>Part 2:</em> Tensors & Folding · <em>Part 3:</em> Tuples & HTuples · <em>Part 4:</em> Shape · <em>Part 5:</em> Stride · <em>Part 6:</em> The Layout Object · <em>Part 7:</em> Tensors · <em>Part 8:</em> Applications · <em>Part 9:</em> Concatenate · <em>Part 10:</em> Coalesce · <strong>Part 11:</strong> Composition · <em>Upcoming:</em> Layout Inverses
+  </p>
+</section>
+
+</div><!-- /content -->
+
+<footer>
+  <p>Based on CuTe and CUTLASS documentation. Learn more at <a href="https://github.com/NVIDIA/cutlass" style="color:var(--green);">NVIDIA/CUTLASS</a> and <a href="https://github.com/NVIDIA/cutlass/blob/main/media/docs/cute/" style="color:var(--green);">CuTe Layouts</a>.</p>
+</footer>
+
+<script>
+// Reveal observer
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+</script>
+
+<!-- Theme toggle -->
+<script>
+(function(){
+  const saved = localStorage.getItem('theme');
+  const theme = saved || 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = document.getElementById('themeToggle');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+  }
+})();
+</script>
+</body>
+</html>

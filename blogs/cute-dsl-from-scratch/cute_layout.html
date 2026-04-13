@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CuTe Layouts: From Address Arithmetic to a Unified Tensor Algebra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Azeret+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.js" crossorigin="anonymous"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Font stack from main site */
+  --font-serif: 'Playfair Display', serif;
+  --font-mono: 'Azeret Mono', monospace;
+  --font-sans: system-ui, -apple-system, sans-serif;
+
+  /* Light theme (default) - matching main site */
+  --paper: #f4f1eb;
+  --paper2: #ede9e0;
+  --ink: #1c1a17;
+  --ink2: #3d3a35;
+  --ink3: #7a7570;
+  --rule: #d9d4c8;
+  --rule2: #c4bfb2;
+  --green: #2a5c45;
+  --green-light: #e8f0ec;
+  --orange: #b85c2a;
+  --orange-light: #f5ece6;
+  --blue: #2a4a6b;
+}
+
+[data-theme="dark"] {
+  /* Dark theme from main site */
+  --paper: #0f0d0c;
+  --paper2: #161412;
+  --ink: #f4f1eb;
+  --ink2: #d1ccc3;
+  --ink3: #8a837b;
+  --rule: #24211e;
+  --rule2: #332f2b;
+  --green: #6fb894;
+  --green-light: #16221c;
+  --orange: #e69a6e;
+  --orange-light: #261c14;
+  --blue: #6a94b8;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-mono);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12.5px;
+  line-height: 1.7;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ── NAV ── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 52px;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.logo {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+  transition: color 0.2s ease;
+}
+
+.nav-links {
+  display: flex;
+  gap: 28px;
+  list-style: none;
+  margin: 0;
+}
+
+.nav-links a {
+  font-size: 11px;
+  color: var(--ink3);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: color 0.15s;
+}
+
+.nav-links a:hover { color: var(--ink); }
+
+.theme-toggle {
+  background: transparent;
+  border: 1px solid var(--rule2);
+  border-radius: 2px;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink3);
+  transition: all 0.15s ease;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  border-color: var(--ink3);
+  color: var(--ink);
+  background: var(--paper2);
+}
+
+.theme-toggle .sun-icon { display: none; }
+.theme-toggle .moon-icon { display: block; }
+
+[data-theme="dark"] .theme-toggle .sun-icon { display: block; }
+[data-theme="dark"] .theme-toggle .moon-icon { display: none; }
+
+/* ── HERO / HEADER ── */
+.hero {
+  padding: 80px 40px 60px;
+  max-width: 1080px;
+  margin: 0 auto;
+  border-bottom: 1px solid var(--rule);
+  transition: border-color 0.2s ease;
+}
+
+.hero-label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: color 0.2s ease;
+}
+
+.hero-label::before {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  height: 1px;
+  background: var(--ink3);
+  transition: background-color 0.2s ease;
+}
+
+.hero-title {
+  font-family: var(--font-serif);
+  font-size: clamp(44px, 5vw, 72px);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  margin-bottom: 20px;
+  transition: color 0.2s ease;
+}
+
+.hero-title em {
+  font-style: italic;
+  color: var(--green);
+  transition: color 0.2s ease;
+}
+
+.hero-sub {
+  font-size: 13px;
+  color: var(--ink2);
+  line-height: 1.8;
+  max-width: 600px;
+  margin-bottom: 20px;
+  transition: color 0.2s ease;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 24px;
+  font-size: 11px;
+  color: var(--ink3);
+  letter-spacing: 0.04em;
+  flex-wrap: wrap;
+  transition: color 0.2s ease;
+}
+
+.hero-meta span::before { content: '// '; color: var(--rule2); margin-right: 4px; }
+
+/* ── CONTENT LAYOUT ── */
+.content {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+section {
+  padding: 72px 0;
+  border-bottom: 1px solid var(--rule);
+  transition: border-color 0.2s ease;
+}
+
+section:last-of-type { border-bottom: none; }
+
+.section-label {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: color 0.2s ease;
+}
+
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+  transition: background-color 0.2s ease;
+}
+
+h2 {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 28px;
+  transition: color 0.2s ease;
+  line-height: 1.3;
+}
+
+h3 {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 28px 0 16px;
+  transition: color 0.2s ease;
+}
+
+p {
+  margin-bottom: 16px;
+  color: var(--ink2);
+  line-height: 1.8;
+}
+
+p:last-child { margin-bottom: 0; }
+
+strong { color: var(--ink); font-weight: 500; }
+em { color: var(--green); font-style: italic; }
+
+/* ── Code blocks ── */
+pre {
+  background: var(--paper2);
+  border: 1px solid var(--rule);
+  padding: 1rem 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  margin: 1.2rem 0;
+  color: var(--ink);
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  background: var(--paper2);
+  border: 1px solid var(--rule);
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  color: var(--ink2);
+}
+
+/* ── Callout boxes ── */
+.callout {
+  border-left: 3px solid var(--green);
+  background: var(--green-light);
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+}
+.callout.teal {
+  border-color: var(--green);
+  background: var(--green-light);
+}
+.callout.blue {
+  border-color: var(--blue);
+  background: rgba(42, 74, 107, 0.1);
+}
+.callout strong { display: block; margin-bottom: 0.3rem; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; font-family: var(--font-mono); color: var(--ink3); }
+
+/* ── Definition boxes ── */
+.definition {
+  border: 1.5px solid var(--ink);
+  padding: 1.2rem 1.5rem;
+  margin: 2rem 0;
+  position: relative;
+}
+.definition::before {
+  content: attr(data-label);
+  position: absolute;
+  top: -0.7em;
+  left: 1rem;
+  background: var(--paper);
+  padding: 0 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink3);
+}
+
+/* ── Math ── */
+.math-block {
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  padding: 1rem 0;
+  text-align: center;
+}
+
+/* ── Interactive Demos ── */
+.demo-wrapper {
+  background: var(--paper2);
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--ink);
+  margin: 2.5rem 0;
+  padding: 1.5rem;
+}
+.demo-title {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 1rem;
+}
+
+/* ── Grid visuals ── */
+.grid-canvas {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+}
+
+/* ── Controls ── */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.controls label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.btn {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.9rem;
+  border: 1.5px solid var(--ink);
+  background: transparent;
+  cursor: pointer;
+  color: var(--ink);
+  transition: background 0.15s, color 0.15s;
+}
+.btn:hover, .btn.active { background: var(--ink); color: var(--paper); }
+.btn-group { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+select {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  padding: 0.3rem 0.6rem;
+  border: 1.5px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+/* ── Trace panel ── */
+.trace-panel {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  padding: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  line-height: 1.8;
+  min-height: 3rem;
+  white-space: pre-wrap;
+}
+
+/* ── Layout Eval Stepper ── */
+.stepper-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+.step-box {
+  border: 1.5px solid var(--rule);
+  padding: 0.4rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-align: center;
+  min-width: 80px;
+  transition: all 0.3s;
+  position: relative;
+}
+.step-box.active {
+  border-color: var(--orange);
+  background: var(--orange-light);
+  transform: translateY(-2px);
+  box-shadow: 0 3px 0 var(--orange);
+}
+.step-box .lbl {
+  font-size: 0.62rem;
+  color: var(--ink3);
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.15rem;
+}
+.arrow {
+  font-size: 1.2rem;
+  color: var(--ink3);
+  flex-shrink: 0;
+}
+
+/* ── Slider ── */
+input[type=range] {
+  -webkit-appearance: none;
+  width: 180px;
+  height: 3px;
+  background: var(--rule);
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  background: var(--ink);
+  border-radius: 50%;
+}
+
+/* ── Linearity demo ── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin: 1rem 0;
+}
+
+.vec-display {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  padding: 0.6rem;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+}
+.vec-el {
+  padding: 0.15rem 0.4rem;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  min-width: 2.2rem;
+  text-align: center;
+  transition: background 0.3s;
+}
+.vec-el.lit { background: var(--orange-light); border-color: var(--orange); }
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .two-col { grid-template-columns: 1fr; }
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .hero { padding: 56px 20px 48px; }
+  .content { padding: 0 20px; }
+  section { padding: 48px 0; }
+}
+
+/* ── REVEAL ANIMATIONS ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.reveal.in { opacity: 1; transform: translateY(0); }
+
+/* ── Alias old variable names to new ones ── */
+:root {
+  --ink-soft: var(--ink2);
+  --ink-muted: var(--ink3);
+  --paper-warm: var(--paper2);
+  --paper-rule: var(--rule);
+  --accent: var(--orange);
+  --accent-soft: var(--orange-light);
+  --accent-pale: var(--orange-light);
+  --teal: var(--green);
+  --teal-pale: var(--green-light);
+  --mono: var(--font-mono);
+  --serif: var(--font-serif);
+  --display: var(--font-serif);
+}
+
+[data-theme="dark"] {
+  --ink-soft: var(--ink2);
+  --ink-muted: var(--ink3);
+  --paper-warm: var(--paper2);
+  --paper-rule: var(--rule);
+  --accent: var(--orange);
+  --accent-soft: var(--orange-light);
+  --accent-pale: var(--orange-light);
+  --teal: var(--green);
+  --teal-pale: var(--green-light);
+  --mono: var(--font-mono);
+  --serif: var(--font-serif);
+  --display: var(--font-serif);
+}
+
+/* ── REVEAL ANIMATIONS ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.reveal.in { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<!-- NAV -->
+<nav>
+  <a href="https://bikrammajhi.github.io/" class="logo">Bikram Majhi</a>
+  <ul class="nav-links">
+    <li><a href="/#about">About</a></li>
+    <li><a href="/#ladder">GEMM</a></li>
+    <li><a href="/#results">Results</a></li>
+    <li><a href="/#projects">Projects</a></li>
+    <li><a href="/#writing">Writing</a></li>
+    <li><a href="/#journal">Journal</a></li>
+    <li><a href="/#contact">Contact</a></li>
+  </ul>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="5"></circle>
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+    </svg>
+    <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+  </button>
+</nav>
+
+<!-- HERO -->
+<div class="hero reveal">
+  <div class="hero-label">GPU Programming · CuTe DSL</div>
+  <h1 class="hero-title">CuTe DSL from scratch:<br>The <em>Layout</em> Object</h1>
+  <p class="hero-sub">How a shape and a stride compose into a function that describes every tensor layout you'll ever need. From address arithmetic to a unified tensor algebra.</p>
+  <div class="hero-meta">
+    <span>April 2026</span>
+    <span>~25 minute read</span>
+    <span>Part 6 of 15</span>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- ═══════════════════════════════ §1 INTUITION ═══════════════════════════════ -->
+  <section class="reveal">
+  <div class="section-label">§1 — Intuition</div>
+  <h2 id="intuition">The address arithmetic you already know</h2>
+
+  <p>Before any formalism, let's start from something concrete. You've written C code like this before:</p>
+
+  <pre style="background:var(--paper-warm);border:1px solid var(--paper-rule);padding:1rem 1.25rem;font-family:var(--mono);font-size:0.8rem;line-height:1.6;overflow-x:auto;margin:1.2rem 0"><span style="color:var(--ink-muted)">// A matrix A of shape (4 rows, 8 cols), stored column-major
+// Access element at row i, col j:</span>
+float val = A[i + j * 4];   <span style="color:var(--ink-muted)">// stride-in-col = 4, stride-in-row = 1</span>
+
+<span style="color:var(--ink-muted)">// Row-major instead: stride-in-row = 8, stride-in-col = 1</span>
+float val = A[i * 8 + j];
+</pre>
+
+  <p>The pattern is always the same: <strong>multiply each coordinate by its corresponding stride, then add them up.</strong> This is address arithmetic. You do it without thinking.</p>
+
+  <p>Now ask: what if your matrix wasn't just 4×8, but a <em>grid of tiles</em>? Say 2×4 tiles, each of size 2×2, like the way a GPU loads a register file? The naive indexing formula breaks down. You'd need nested loops, pointer arithmetic, and a comment explaining why <code>stride = 16</code>.</p>
+
+  <p>CuTe's insight is: <strong>this is all the same idea, just hierarchically composed.</strong> A Layout unifies flat N-d indexing and nested tiled indexing into a single algebraic object: a shape paired with a stride, both of which can be <em>nested tuples</em>.</p>
+
+  <p>The payoff is enormous — once you express your tensor's shape and stride as a CuTe Layout, the library can reason about tiling, partitioning, and transposition symbolically, at compile time, without you writing a single explicit pointer.</p>
+  </section>
+
+  <!-- ═══════════════════════════════ §2 DEFINITION ═══════════════════════════════ -->
+  <section class="reveal">
+  <div class="section-label">§2 — Definition</div>
+  <h2 id="definition">Definition: Layout = Shape ∘ Stride</h2>
+
+  <p>A <strong>shape</strong> \(S\) answers: <em>what coordinates are valid?</em> A shape like <code>(4, 8)</code> describes a 4×8 grid; a shape like <code>((2,2),(4,2))</code> describes a 2×2 sub-grid in one dimension crossed with a 4×2 sub-grid in another.</p>
+
+  <p>A <strong>stride</strong> \(D\) answers: <em>given a coordinate, what memory offset do I compute?</em> The stride mirrors the shape's structure exactly — for every number in the shape, there's a corresponding stride telling you "one step in this direction = how many elements in memory."</p>
+
+  <div class="definition" data-label="Definition 2.17">
+    A <strong>layout</strong> \(L = D \circ S\) is the functional composition of a shape \(S\) and a stride \(D\), where \(S \sim D\) (they are congruent in structure), and defines a mapping \(Z \mapsto D\) for each coordinate \(Z \in \mathcal{Z}(S)\).<br><br>
+    Concretely: \(L(c) = \langle d, e_c \rangle\) — the dot product of the flat stride vector \(d\) with the <em>natural coordinate</em> \(e_c\) of \(c\) inside the shape.
+  </div>
+
+  <p>Three notations for the same thing:</p>
+
+  <div class="math-block">
+    \[\underbrace{\frac{(4, (3, 2))}{(2, (8, 1))}}_{\text{fraction}} = \underbrace{(4, (3,2)) : (2, (8,1))}_{S : D \text{ notation}} = \underbrace{(2,(8,1)) \circ (4,(3,2))}_{D \circ S \text{ composition}}\]
+  </div>
+
+  <p>The last form makes explicit that shape and stride are each <em>functions</em>: the shape function maps a coordinate to a natural coordinate, and the stride function maps that to an integer offset. You compose them left-to-right.</p>
+
+  <!-- ═══════════════════════════════ §3 PROPERTIES ═══════════════════════════════ -->
+  <h2 id="properties">Properties and notation</h2>
+
+  <p>Because a layout is driven by its shape, its structural properties come straight from the shape. For a layout \(L = S : D\):</p>
+
+  <div class="demo-wrapper">
+    <div class="demo-title">▸ Interactive Properties — Layout L = ((2,2),(4,2)) : ((1,8),(2,16))</div>
+    <div class="controls">
+      <label>Click a property to highlight it</label>
+    </div>
+    <div id="props-viz" style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem"></div>
+    <div id="props-desc" class="trace-panel">Click a property above to see its explanation.</div>
+  </div>
+
+  <p>The <strong>cosize</strong> deserves special mention: it's the smallest index \(k\) such that all offsets produced by the layout are less than \(k\). For contiguous layouts, <code>size = cosize</code>. For padded or strided layouts, <code>cosize > size</code> — the layout's image lives in a larger memory region.</p>
+  </section>
+
+  <!-- ═══════════════════════════════ §4 EVALUATION ═══════════════════════════════ -->
+  <section class="reveal">
+  <div class="section-label">§3 — Evaluation</div>
+  <h2 id="evaluation">Evaluating a layout, step by step</h2>
+
+  <p>Let's trace through exactly what happens when you evaluate a layout at a coordinate. Consider the "mixed" layout \(L = ((2,2),(4,2)) : ((1,8),(2,16))\) and the coordinate \(22\).</p>
+
+  <p>There are three equivalent routes — same answer, different coordinate representations. The interactive stepper below walks you through all three.</p>
+
+  <div class="demo-wrapper">
+    <div class="demo-title">▸ Coordinate Resolution Stepper</div>
+    <div class="controls">
+      <label>Input coordinate:</label>
+      <input type="range" id="coord-slider" min="0" max="31" value="22" style="width:150px">
+      <span id="coord-val" style="font-family:var(--mono);font-size:0.85rem;min-width:2rem">22</span>
+      <div class="btn-group">
+        <button class="btn" onclick="setCoord(0)">0</button>
+        <button class="btn" onclick="setCoord(1)">1</button>
+        <button class="btn" onclick="setCoord(7)">7</button>
+        <button class="btn" onclick="setCoord(22)">22</button>
+        <button class="btn" onclick="setCoord(31)">31</button>
+      </div>
+    </div>
+    <div class="stepper-row" id="stepper-row"></div>
+    <div id="stepper-detail" class="trace-panel" style="margin-top:0.75rem"></div>
+    <canvas id="eval-grid" class="grid-canvas" width="420" height="130" style="margin-top:1rem"></canvas>
+  </div>
+
+  <p>Notice that all three routes — integral → 2D → natural → offset — give the same answer. This is not a coincidence; it's the definition of a well-formed layout. The shape function is a bijection, so every representation is equivalent.</p>
+  </section>
+
+  <!-- ═══════════════════════════════ §5 DOMAIN/IMAGE ═══════════════════════════════ -->
+  <section class="reveal">
+  <div class="section-label">§4 — Domain & Image</div>
+  <h2 id="image">Domain vs. image</h2>
+
+  <p>Two concepts that trip people up:</p>
+
+  <ul style="margin:0 0 1.1rem 1.5rem;line-height:2">
+    <li>The <strong>domain</strong> \(\mathcal{Z}(L)\) is the set of valid input coordinates — determined by the shape. It's always finite.</li>
+    <li>The <strong>image</strong> \(L(\mathcal{Z}(L))\) is the set of output offsets. For most layouts (bijective ones), <code>|image| = |domain|</code>. But layouts with zero strides (broadcast layouts) map multiple inputs to the same offset, so <code>|image| &lt; |domain|</code>.</li>
+    <li>The <strong>codomain</strong> is the ambient space — usually all integers \(\mathbb{Z}\). The image is a finite subset of the codomain.</li>
+  </ul>
+
+  <div class="demo-wrapper">
+    <div class="demo-title">▸ Injective vs. Broadcast Layouts</div>
+    <div class="controls">
+      <div class="btn-group">
+        <button class="btn active" id="btn-col" onclick="showImageDemo('col')">Column-major (injective)</button>
+        <button class="btn" id="btn-bcast" onclick="showImageDemo('bcast')">Broadcast (non-injective)</button>
+      </div>
+    </div>
+    <canvas id="image-grid" class="grid-canvas" width="520" height="160" style="display:block;margin:0 auto"></canvas>
+    <div id="image-info" class="trace-panel" style="margin-top:0.75rem"></div>
+  </div>
+
+  <p>Broadcast layouts are fundamental to GPU programming: they let you express "all threads in a warp read the same value" directly in the layout algebra, without any special-casing in your kernel logic.</p>
+  </section>
+
+  <!-- ═══════════════════════════════ §6 EXAMPLES ═══════════════════════════════ -->
+  <section class="reveal">
+  <div class="section-label">§5 — Layout Patterns</div>
+  <h2 id="examples">Six canonical layout patterns</h2>
+
+  <p>Here are the six layouts from Figure 3 of the CuTe paper. Each maps logical coordinates \((m,n) \in \mathcal{Z}_{(4,8)}\) to memory offsets. The first three are what you already know from NumPy/C arrays. The last three are what CuTe uniquely enables with nested tuples.</p>
+
+  <div class="demo-wrapper">
+    <div class="demo-title">▸ Layout Gallery — click a cell to inspect its offset</div>
+    <div class="controls">
+      <div class="btn-group" id="layout-btns"></div>
+    </div>
+    <div id="layout-meta" style="font-family:var(--mono);font-size:0.78rem;color:var(--ink-muted);margin-bottom:0.75rem"></div>
+    <canvas id="layout-grid" class="grid-canvas" width="520" height="200"></canvas>
+    <div id="layout-info" class="trace-panel" style="margin-top:0.75rem">Click any cell in the grid above.</div>
+  </div>
+
+  <p>Pay close attention to <strong>(d) Interleave</strong> and <strong>(e) Mixed</strong>. These aren't just "weird" layouts — they are the natural description of how GPU tensor cores partition work. A warp loads a tile; within that tile, threads own specific elements. CuTe layouts describe both levels of hierarchy with a single expression.</p>
+
+  <div class="callout teal">
+    <strong>Key insight</strong>
+    The "Mixed" layout <code>((2,2),(4,2)):((1,8),(2,16))</code> describes a <em>grid of tiles</em>. The outer shape <code>(2,4)</code> indexes which 2×4 tile you're in; the inner shape <code>(2,2)</code> indexes where within the tile. This is exactly the structure of GEMM tiling on a GPU.
+  </div>
+  </section>
+
+  <!-- ═══════════════════════════════ §7 COMPLETENESS ═══════════════════════════════ -->
+  <section class="reveal">
+  <div class="section-label">§6 — Completeness</div>
+  <h2 id="completeness">Completeness: layouts can represent anything</h2>
+
+  <p>Here's a remarkable fact: <strong>any function \(f\) with \(f(0) = 0\) and finite domain \(\mathbb{Z}_N\) can be represented as a composition of CuTe layouts.</strong></p>
+
+  <p>The proof is constructive. The key piece is a "lookup table" layout: a shape <code>(2,2,2,...)</code> paired with stride <code>(f(1), f(2), f(3), ...)</code>. When you pass in a power-of-two \(2^{i-1}\), exactly one bit is set, selecting exactly stride element \(i\), giving \(f(i)\).</p>
+
+  <div class="demo-wrapper">
+    <div class="demo-title">▸ Completeness: Arbitrary Lookup via Layout Composition</div>
+    <div class="controls">
+      <label>Target function f:</label>
+      <select id="fn-select" onchange="updateCompleteness()">
+        <option value="7,3,11,2">f = {1→7, 2→3, 3→11, 4→2}</option>
+        <option value="1,4,9,16">f = {1→1, 2→4, 3→9, 4→16} (squares)</option>
+        <option value="5,10,15,20">f = {1→5, 2→10, 3→15, 4→20} (×5)</option>
+        <option value="3,1,4,1">f = {1→3, 2→1, 3→4, 4→1} (π digits)</option>
+      </select>
+    </div>
+    <div id="completeness-viz"></div>
+    <div id="completeness-info" class="trace-panel" style="margin-top:0.75rem"></div>
+  </div>
+
+  <p>This result is mostly of theoretical interest — it tells you that CuTe layouts don't accidentally leave any access pattern on the table. In practice, the layouts you need (tiling, transposition, padding) all have clean, direct representations.</p>
+  </section>
+
+  <!-- ═══════════════════════════════ §8 LINEARITY ═══════════════════════════════ -->
+  <section class="reveal">
+  <div class="section-label">§7 — Semi-linearity</div>
+  <h2 id="linearity">Semi-linearity: where the algebra lives</h2>
+
+  <p>This is the deep structural property that makes CuTe's layout algebra tractable.</p>
+
+  <p>Recall that \(L(c) = d \cdot e_c\), the dot product of the stride vector with the natural coordinate. The natural coordinate \(e_c\) is the result of unpacking \(c\) according to the shape — essentially, a mixed-radix decomposition.</p>
+
+  <p>In the <strong>natural coordinates</strong>, \(L\) is linear:</p>
+
+  <div class="math-block">
+    \[L(\alpha e_{c_0} + \beta e_{c_1}) = \alpha L(e_{c_0}) + \beta L(e_{c_1})\]
+  </div>
+
+  <p>This is just the linearity of the dot product — totally unsurprising once you see it.</p>
+
+  <p>In <strong>arbitrary coordinates</strong>, \(L\) is <em>not</em> linear:</p>
+
+  <div class="math-block">
+    \[S(c_0 + c_1) \neq S(c_0) + S(c_1)\]
+  </div>
+
+  <p>Why? The shape function uses modular arithmetic (mixed-radix decomposition). Carries don't propagate linearly through <code>% 2</code>, <code>% 4</code>, etc. Two coordinates can sum to a third whose decomposition looks nothing like the sum of their decompositions.</p>
+
+  <div class="demo-wrapper">
+    <div class="demo-title">▸ Linearity vs. Non-linearity Explorer</div>
+    <div class="controls">
+      <label>α:</label>
+      <input type="range" id="alpha-slider" min="1" max="5" value="3" style="width:80px">
+      <span id="alpha-val" style="font-family:var(--mono);font-size:0.82rem">3</span>
+      <label style="margin-left:1rem">β:</label>
+      <input type="range" id="beta-slider" min="1" max="5" value="2" style="width:80px">
+      <span id="beta-val" style="font-family:var(--mono);font-size:0.82rem">2</span>
+    </div>
+    <div class="two-col" id="linearity-viz"></div>
+    <div id="linearity-result" class="trace-panel" style="margin-top:0.75rem"></div>
+  </div>
+
+  <div class="callout blue">
+    <strong>Why this matters for kernels</strong>
+    Semi-linearity is what lets CUTLASS prove, at compile time, that two tensor partitions are non-overlapping, that a tiled layout composes correctly with a stride layout, and that MMA fragment assignments are valid. If layout evaluation were fully nonlinear, these proofs would require runtime checks.
+  </div>
+
+  <p>The matrix form makes the linear structure explicit. For \(L = ((2,2),(4,2)):((1,8),(2,16))\), the stride vector is \(d = [1, 8, 2, 16]\) and the layout evaluation is literally a matrix-vector product:</p>
+
+  <div class="math-block">
+    \[L(c) = \underbrace{[1 \quad 8 \quad 2 \quad 16]}_{D \;\in\; \mathbb{Z}^{1\times 4}} \begin{bmatrix} e_{c_0} \\ e_{c_1} \\ e_{c_2} \\ e_{c_3} \end{bmatrix}\]
+  </div>
+
+  <div class="demo-wrapper">
+    <div class="demo-title">▸ The D-matrix View — verify L(c) = D @ e_c</div>
+    <div class="controls">
+      <label>Coordinate c:</label>
+      <input type="range" id="dmat-slider" min="0" max="31" value="22" style="width:150px">
+      <span id="dmat-val" style="font-family:var(--mono);font-size:0.85rem">22</span>
+    </div>
+    <div id="dmat-viz"></div>
+    <div id="dmat-result" class="trace-panel" style="margin-top:0.75rem"></div>
+  </div>
+
+  <hr style="border:none;border-top:3px double var(--rule);margin:3rem 0">
+
+  <p><strong>What comes next.</strong> With layouts as maps, CuTe builds a full algebra: <em>layout composition</em> (applying one layout inside another), <em>logical divide</em> (partitioning a layout's domain into tiles), <em>complement</em> (finding the layout that picks up the "rest" of a space), and <em>coalesce</em> (simplifying nested hierarchies into flat ones when possible). Each of these operations has a clean implementation purely in terms of shapes and strides — no pointer manipulation, no case analysis on dimension count.</p>
+  </section>
+
+  <!-- Series Navigation -->
+  <section class="reveal" style="border:none; padding-top:40px; padding-bottom:40px; text-align:center;">
+    <p style="color:var(--ink3); font-size:11px; letter-spacing:0.08em; text-transform:uppercase;">
+      <em>Part 1:</em> Loops Are Just Layouts · <em>Part 2:</em> Tensors & Folding · <em>Part 3:</em> Tuples & HTuples · <em>Part 4:</em> Shape · <em>Part 5:</em> Stride · <strong>Part 6:</strong> The Layout Object · <em>Part 7:</em> Tensors · <em>Upcoming:</em> One Loop Every Layout
+    </p>
+  </section>
+
+</div><!-- /content -->
+
+<footer>
+  <p>Based on CuTe and CUTLASS documentation. Learn more at <a href="https://github.com/NVIDIA/cutlass" style="color:var(--green);">NVIDIA/CUTLASS</a> and <a href="https://github.com/NVIDIA/cutlass/blob/main/media/docs/cute/" style="color:var(--green);">CuTe Layouts</a>.</p>
+</footer>
+
+<script>
+// ── Theme Toggle ──
+(function() {
+  const toggle = document.getElementById('themeToggle');
+  const html = document.documentElement;
+  const stored = localStorage.getItem('theme');
+  if (stored) { html.setAttribute('data-theme', stored); }
+  toggle.addEventListener('click', () => {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  });
+})();
+
+// ── Reveal Observer ──
+(function() {
+  const els = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    els.forEach(el => obs.observe(el));
+  } else {
+    els.forEach(el => el.classList.add('in'));
+  }
+})();
+</script>
+
+<script>
+// ════════════════════════════════════════════════
+// Utilities: layout arithmetic in JS
+// ════════════════════════════════════════════════
+
+// Flatten a nested tuple (JS arrays) to a flat array
+function flattenTuple(t) {
+  if (!Array.isArray(t)) return [t];
+  return t.flatMap(x => flattenTuple(x));
+}
+
+// size of a (possibly nested) shape
+function shapeSize(s) {
+  if (!Array.isArray(s)) return s;
+  return s.reduce((a, b) => a * shapeSize(b), 1);
+}
+
+// colexicographic idx2crd for a nested shape
+function idx2crd(idx, shape) {
+  if (!Array.isArray(shape)) {
+    return idx % shape;
+  }
+  let result = [];
+  let rem = idx;
+  for (let i = 0; i < shape.length; i++) {
+    let sz = shapeSize(shape[i]);
+    result.push(idx2crd(rem % sz, shape[i]));
+    rem = Math.floor(rem / sz);
+  }
+  return result;
+}
+
+// flatten natural coord using shape to get a vector of mixed-radix digits
+function naturalCoord(idx, shape) {
+  return flattenTuple(idx2crd(idx, shape));
+}
+
+// dot product of two flat arrays
+function dot(a, b) {
+  return a.reduce((s, ai, i) => s + ai * b[i], 0);
+}
+
+// Evaluate layout L = (shape, stride) at integer index idx
+// Returns memory offset
+function evalLayout(idx, shape, stride) {
+  const flatShape = flattenTuple(shape);
+  const flatStride = flattenTuple(stride);
+  const e = naturalCoord(idx, shape);
+  return dot(e, flatStride);
+}
+
+// Compute all offsets for a layout
+function allOffsets(shape, stride) {
+  const n = shapeSize(shape);
+  return Array.from({length: n}, (_, i) => evalLayout(i, shape, stride));
+}
+
+// Compute cosize: max(offset)+1
+function cosize(shape, stride) {
+  const offs = allOffsets(shape, stride);
+  return Math.max(...offs) + 1;
+}
+
+// COLOR PALETTE: assign hue based on column index for the grid
+const PALETTE = [
+  '#c0392b','#e67e22','#f1c40f','#27ae60','#1abc9c',
+  '#2980b9','#8e44ad','#e91e63','#00bcd4','#ff5722',
+  '#795548','#607d8b','#d32f2f','#388e3c','#1976d2',
+  '#7b1fa2','#f57c00','#455a64','#c2185b','#0288d1'
+];
+
+// ════════════════════════════════════════════════
+// §3 Properties Demo
+// ════════════════════════════════════════════════
+const PROPS = [
+  {label: 'rank', val: '2', desc: `rank(L) = rank(S) = 2\n\nThe layout has 2 top-level modes.\nEach mode is a sublayout.\n\nmode 0: (2,2) : (1,8)   [rows]\nmode 1: (4,2) : (2,16)  [cols]`},
+  {label: 'depth', val: '2', desc: `depth(L) = depth(S) = 2\n\nThe shape has 2 levels of nesting.\nA flat shape like (4,8) has depth 1.\nOurs is ((2,2),(4,2)) — depth 2.`},
+  {label: 'size', val: '32', desc: `size(L) = size(S) = 32\n\nTotal number of logical elements:\n  size((2,2)) × size((4,2))\n= (2×2) × (4×2)\n= 4 × 8 = 32`},
+  {label: 'cosize', val: '32', desc: `cosize(L) = max(image) + 1 = 32\n\nFor this layout, the image is {0,1,...,31}.\ncosize == size means it's contiguous\n(no gaps in the memory footprint).`},
+  {label: 'mode 0', val: '(2,2):(1,8)', desc: `mode(L,0) = S₀ : D₀ = (2,2) : (1,8)\n\nThe 0th sublayout independently controls\nthe "row" dimension.\n\nWithin mode 0:\n  coord 0 → offset 0\n  coord 1 → offset 1  (stride 1)\n  coord 2 → offset 8  (stride 8)\n  coord 3 → offset 9`},
+  {label: 'mode 1', val: '(4,2):(2,16)', desc: `mode(L,1) = S₁ : D₁ = (4,2) : (2,16)\n\nThe 1st sublayout controls the "column"\ndimension.\n\nWithin mode 1:\n  coord 0 → offset 0\n  coord 1 → offset 2   (stride 2)\n  coord 2 → offset 4\n  coord 3 → offset 6\n  coord 4 → offset 16  (stride 16)\n  coord 5 → offset 18\n  coord 6 → offset 20\n  coord 7 → offset 22`},
+];
+
+(function initProps() {
+  const cont = document.getElementById('props-viz');
+  const desc = document.getElementById('props-desc');
+  PROPS.forEach((p, i) => {
+    const btn = document.createElement('div');
+    btn.style.cssText = `
+      border: 1.5px solid var(--paper-rule);
+      padding: 0.35rem 0.75rem;
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      transition: all 0.15s;
+    `;
+    btn.innerHTML = `<span style="color:var(--ink-muted);font-size:0.65rem;display:block;margin-bottom:2px">${p.label}</span>${p.val}`;
+    btn.addEventListener('click', () => {
+      cont.querySelectorAll('div').forEach(b => {
+        b.style.background = '';
+        b.style.borderColor = 'var(--paper-rule)';
+        b.style.color = 'var(--ink)';
+      });
+      btn.style.background = 'var(--ink)';
+      btn.style.borderColor = 'var(--ink)';
+      btn.style.color = 'var(--paper)';
+      desc.textContent = p.desc;
+    });
+    cont.appendChild(btn);
+  });
+  desc.textContent = 'Click a property above to see its explanation.';
+})();
+
+// ════════════════════════════════════════════════
+// §4 Evaluation Stepper
+// ════════════════════════════════════════════════
+const EVAL_SHAPE = [[2,2],[4,2]];
+const EVAL_STRIDE = [[1,8],[2,16]];
+
+function setCoord(v) {
+  document.getElementById('coord-slider').value = v;
+  updateStepper();
+}
+
+function updateStepper() {
+  const c = parseInt(document.getElementById('coord-slider').value);
+  document.getElementById('coord-val').textContent = c;
+
+  // compute representations
+  // top shape for 2d: (4, 8)
+  const r2d_col = c % 4, r2d_row = Math.floor(c / 4);
+  const nat = naturalCoord(c, EVAL_SHAPE);
+  const flatStride = flattenTuple(EVAL_STRIDE);
+  const offset = dot(nat, flatStride);
+
+  const steps = [
+    {lbl:'Integral', val: `${c}`, detail: `In-bounds integer coordinate.\nRange: 0 to ${shapeSize(EVAL_SHAPE)-1}`},
+    {lbl:'2D (m,n)', val: `(${r2d_col}, ${r2d_row})`, detail: `2D colexicographic:\n  m = ${c} % 4 = ${r2d_col}\n  n = ${c} ÷ 4 = ${r2d_row}\n\nEquiv to shape (4,8)`},
+    {lbl:'Natural e_c', val: `((${nat[0]},${nat[1]}),(${nat[2]},${nat[3]}))`, detail: `Mixed-radix decomposition:\n  idx2crd(${c}, ((2,2),(4,2)))\n\nFlat: [${nat.join(', ')}]\n\nEach digit ∈ its sub-shape range.`},
+    {lbl:'Offset', val: `${offset}`, detail: `Inner product d · e_c:\n  ${flatStride.map((d,i)=>`${d}×${nat[i]}`).join(' + ')}\n= ${flatStride.map((d,i)=>d*nat[i]).join(' + ')}\n= ${offset}`},
+  ];
+
+  const row = document.getElementById('stepper-row');
+  row.innerHTML = '';
+  steps.forEach((s, i) => {
+    if (i > 0) {
+      const arr = document.createElement('span');
+      arr.className = 'arrow';
+      arr.textContent = '→';
+      row.appendChild(arr);
+    }
+    const box = document.createElement('div');
+    box.className = 'step-box' + (i===0||i===3?' active':'');
+    box.innerHTML = `<span class="lbl">${s.lbl}</span>${s.val}`;
+    box.addEventListener('click', () => {
+      document.getElementById('stepper-detail').textContent = s.detail;
+      row.querySelectorAll('.step-box').forEach(b=>b.classList.remove('active'));
+      box.classList.add('active');
+    });
+    row.appendChild(box);
+  });
+
+  document.getElementById('stepper-detail').textContent =
+    `L(${c}) = L(${r2d_col},${r2d_row}) = L((${nat[0]},${nat[1]}),(${nat[2]},${nat[3]})) = ${offset}\n\nClick any step box above for details.`;
+
+  drawEvalGrid(c, offset);
+}
+
+function drawEvalGrid(selected, offset) {
+  const canvas = document.getElementById('eval-grid');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cols = 8, rows = 4;
+  const cw = Math.floor((W - 80) / cols), ch = Math.floor((H - 10) / rows);
+  const ox = 40;
+
+  ctx.clearRect(0, 0, W, H);
+
+  const offsets = allOffsets(EVAL_SHAPE, EVAL_STRIDE);
+
+  for (let n = 0; n < cols; n++) {
+    for (let m = 0; m < rows; m++) {
+      const idx = m + n * rows; // colexicographic
+      const off = offsets[idx];
+      const x = ox + n * cw, y = 4 + m * ch;
+
+      ctx.fillStyle = idx === selected ? '#b85c2c' : off === offset ? '#e8a07a' : '#f0e9df';
+      ctx.fillRect(x, y, cw-1, ch-1);
+      ctx.strokeStyle = idx === selected ? '#b85c2c' : '#c8bba8';
+      ctx.strokeRect(x, y, cw-1, ch-1);
+
+      ctx.fillStyle = idx === selected ? 'white' : '#3d3730';
+      ctx.font = `${idx===selected?'bold ':''}10px JetBrains Mono, monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(off, x + cw/2 - 0.5, y + ch/2);
+    }
+  }
+  // Axis labels
+  ctx.fillStyle = '#7a7069';
+  ctx.font = '10px JetBrains Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('n →', ox + (cols * cw)/2, H - 2);
+  ctx.save(); ctx.translate(12, H/2); ctx.rotate(-Math.PI/2);
+  ctx.fillText('m →', 0, 0); ctx.restore();
+}
+
+document.getElementById('coord-slider').addEventListener('input', updateStepper);
+updateStepper();
+
+// ════════════════════════════════════════════════
+// §5 Image Demo
+// ════════════════════════════════════════════════
+const IMAGE_LAYOUTS = {
+  col:   { shape: [4,8], stride: [1,4], label: 'Col-major (4,8):(1,4)', rows:4, cols:8 },
+  bcast: { shape: [[2,2],[2,4]], stride: [[0,2],[0,4]], label: 'Broadcast ((2,2),(2,4)):((0,2),(0,4))', rows:4, cols:8 },
+};
+
+function showImageDemo(key) {
+  document.getElementById('btn-col').classList.toggle('active', key==='col');
+  document.getElementById('btn-bcast').classList.toggle('active', key==='bcast');
+  const L = IMAGE_LAYOUTS[key];
+  const offsets = allOffsets(L.shape, L.stride);
+  const imageSet = [...new Set(offsets)].sort((a,b)=>a-b);
+  const canvas = document.getElementById('image-grid');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const rows = L.rows, cols = L.cols;
+  const cw = Math.floor((W - 60) / cols), ch = Math.floor((H - 10) / rows);
+  const ox = 30;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // color by offset value
+  const maxOff = Math.max(...offsets);
+  for (let n = 0; n < cols; n++) {
+    for (let m = 0; m < rows; m++) {
+      const idx = m + n * rows;
+      const off = offsets[idx];
+      const x = ox + n * cw, y = 4 + m * ch;
+
+      // hue by offset
+      const hue = Math.round((off / Math.max(maxOff,1)) * 220);
+      ctx.fillStyle = `hsl(${hue}, 60%, 82%)`;
+      ctx.fillRect(x, y, cw-1, ch-1);
+      ctx.strokeStyle = '#c8bba8';
+      ctx.strokeRect(x, y, cw-1, ch-1);
+
+      ctx.fillStyle = '#1a1714';
+      ctx.font = '10px JetBrains Mono, monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(off, x + cw/2 - 0.5, y + ch/2);
+    }
+  }
+
+  const isInjective = imageSet.length === shapeSize(L.shape);
+  document.getElementById('image-info').textContent =
+    `${L.label}\nsize = ${shapeSize(L.shape)},  cosize = ${cosize(L.shape, L.stride)}\nimage = {${imageSet.join(', ')}}\n|image| = ${imageSet.length}  →  ${isInjective ? '✓ injective (no memory aliases)' : '✗ non-injective ('+shapeSize(L.shape)+' coords → '+imageSet.length+' distinct offsets = broadcast!)'}`;
+}
+
+showImageDemo('col');
+
+// ════════════════════════════════════════════════
+// §6 Layout Gallery
+// ════════════════════════════════════════════════
+const LAYOUTS = [
+  { name:'(a) Col-major',   shape:[4,8],          stride:[1,4],          info:'(4,8):(1,4)\nClassic column-major. Stride-in-row=1, stride-in-col=4.\nContiguous in memory.' },
+  { name:'(b) Row-major',   shape:[4,8],          stride:[8,1],          info:'(4,8):(8,1)\nClassic row-major (C-style). Stride-in-row=8, stride-in-col=1.\nContiguous in memory, transposed access pattern.' },
+  { name:'(c) Padded',      shape:[4,8],          stride:[1,5],          info:'(4,8):(1,5)\nColumn-major with padding. Column stride=5 > 4 rows.\nLeaves 1 element gap between columns.\ncosize=39 > size=32.' },
+  { name:'(d) Interleave',  shape:[4,[4,2]],      stride:[4,[1,16]],     info:'(4,(4,2)):(4,(1,16))\nInterleaved tiles. The "col" mode is hierarchical:\n4 columns per tile × 2 tiles.\nSeparate tiles are 16 apart in memory.' },
+  { name:'(e) Mixed',       shape:[[2,2],[4,2]],  stride:[[1,8],[2,16]], info:'((2,2),(4,2)):((1,8),(2,16))\nFully hierarchical. Grid of 2×4 tiles, each 2×2.\nBoth dimensions have inner and outer structure.\nThis is the running example in the notebook.' },
+  { name:'(f) Broadcast',   shape:[[2,2],[2,4]],  stride:[[0,2],[0,4]], info:'((2,2),(2,4)):((0,2),(0,4))\nZero strides = broadcast.\nMultiple logical coords → same memory offset.\nsize=32, but only 8 distinct offsets in image.' },
+];
+
+let activeLayout = 4;
+
+function drawLayoutGrid(lIdx, highlightCell) {
+  const L = LAYOUTS[lIdx];
+  const canvas = document.getElementById('layout-grid');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const rows = 4, cols = 8;
+  const cw = Math.floor((W - 60) / cols), ch = Math.floor((H - 10) / rows);
+  const ox = 30;
+
+  ctx.clearRect(0, 0, W, H);
+
+  const offsets = allOffsets(L.shape, L.stride);
+  const maxOff = Math.max(...offsets, 1);
+
+  for (let n = 0; n < cols; n++) {
+    for (let m = 0; m < rows; m++) {
+      const idx = m + n * rows;
+      const off = offsets[idx];
+      const x = ox + n * cw, y = 4 + m * ch;
+      const isHL = idx === highlightCell;
+
+      const hue = Math.round((off / maxOff) * 200);
+      ctx.fillStyle = isHL ? '#b85c2c' : `hsl(${hue}, 55%, 80%)`;
+      ctx.fillRect(x, y, cw-1, ch-1);
+      ctx.strokeStyle = isHL ? '#b85c2c' : '#c8bba8';
+      ctx.lineWidth = isHL ? 2 : 1;
+      ctx.strokeRect(x, y, cw-1, ch-1);
+      ctx.lineWidth = 1;
+
+      ctx.fillStyle = isHL ? 'white' : '#1a1714';
+      ctx.font = `${isHL?'bold ':''}10px JetBrains Mono, monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(off, x + cw/2 - 0.5, y + ch/2);
+    }
+  }
+}
+
+(function initLayoutGallery() {
+  const btns = document.getElementById('layout-btns');
+  LAYOUTS.forEach((L, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn' + (i === activeLayout ? ' active' : '');
+    btn.textContent = L.name;
+    btn.addEventListener('click', () => {
+      activeLayout = i;
+      btns.querySelectorAll('.btn').forEach((b,j) => b.classList.toggle('active', j===i));
+      updateLayoutMeta(i);
+      drawLayoutGrid(i, null);
+      document.getElementById('layout-info').textContent = 'Click any cell in the grid above.';
+    });
+    btns.appendChild(btn);
+  });
+
+  const canvas = document.getElementById('layout-grid');
+  canvas.addEventListener('click', e => {
+    const L = LAYOUTS[activeLayout];
+    const W = canvas.width, H = canvas.height;
+    const rows = 4, cols = 8;
+    const cw = Math.floor((W - 60) / cols), ch = Math.floor((H - 10) / rows);
+    const ox = 30;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const cx = (e.clientX - rect.left) * scaleX;
+    const cy = (e.clientY - rect.top) * scaleY;
+    const n = Math.floor((cx - ox) / cw);
+    const m = Math.floor((cy - 4) / ch);
+    if (n < 0 || n >= cols || m < 0 || m >= rows) return;
+    const idx = m + n * rows;
+    const off = allOffsets(L.shape, L.stride)[idx];
+    const nat = naturalCoord(idx, L.shape);
+    const flatStride = flattenTuple(L.stride);
+    drawLayoutGrid(activeLayout, idx);
+    document.getElementById('layout-info').textContent =
+      `Cell (m=${m}, n=${n})  →  integral index ${idx}\nNatural coord e_c = [${nat.join(', ')}]\nOffset = [${flatStride.join(', ')}] · [${nat.join(', ')}] = ${flatStride.map((d,i)=>d*nat[i]).join('+')} = ${off}`;
+  });
+
+  updateLayoutMeta(activeLayout);
+  drawLayoutGrid(activeLayout, null);
+})();
+
+function updateLayoutMeta(i) {
+  const L = LAYOUTS[i];
+  const n = shapeSize(L.shape);
+  const cs = cosize(L.shape, L.stride);
+  const imgs = new Set(allOffsets(L.shape, L.stride)).size;
+  document.getElementById('layout-meta').textContent =
+    `shape=${JSON.stringify(L.shape).replace(/\[/g,'(').replace(/\]/g,')')}  stride=${JSON.stringify(L.stride).replace(/\[/g,'(').replace(/\]/g,')')}  size=${n}  cosize=${cs}  |image|=${imgs}`;
+}
+
+// ════════════════════════════════════════════════
+// §7 Completeness Demo
+// ════════════════════════════════════════════════
+function updateCompleteness() {
+  const sel = document.getElementById('fn-select').value;
+  const vals = sel.split(',').map(Number); // f(1), f(2), f(3), f(4)
+  const fMap = {0:0, 1:vals[0], 2:vals[1], 3:vals[2], 4:vals[3]};
+  const stride = vals;
+  // Lookup layout: shape (2,2,2,2), stride = (f(1),f(2),f(3),f(4))
+  // Input 2^(i-1) selects stride[i-1]
+  const lookupEval = (inp) => {
+    // inp is power of 2: 2^k selects stride[k]
+    let result = 0;
+    for (let k = 0; k < 4; k++) {
+      if (inp & (1 << k)) result += stride[k];
+    }
+    return result;
+  };
+
+  const cont = document.getElementById('completeness-viz');
+  cont.innerHTML = '';
+
+  // Build table
+  const table = document.createElement('div');
+  table.style.cssText = 'overflow-x:auto;';
+
+  // Header row
+  let html = `<div style="font-family:var(--mono);font-size:0.75rem;margin-bottom:0.5rem">
+    <strong>Lookup layout:</strong> (2,2,2,2) : (${vals.join(', ')})
+  </div>
+  <table style="border-collapse:collapse;font-family:var(--mono);font-size:0.78rem;margin:0 auto">
+    <tr style="color:var(--ink-muted)">
+      <th style="padding:0.3rem 0.6rem;text-align:center;border-bottom:1px solid var(--paper-rule)">i</th>
+      <th style="padding:0.3rem 0.6rem;text-align:center;border-bottom:1px solid var(--paper-rule)">input = 2^(i-1)</th>
+      <th style="padding:0.3rem 0.6rem;text-align:center;border-bottom:1px solid var(--paper-rule)">binary</th>
+      <th style="padding:0.3rem 0.6rem;text-align:center;border-bottom:1px solid var(--paper-rule)">lookup output</th>
+      <th style="padding:0.3rem 0.6rem;text-align:center;border-bottom:1px solid var(--paper-rule)">f(i) target</th>
+      <th style="padding:0.3rem 0.6rem;text-align:center;border-bottom:1px solid var(--paper-rule)">✓</th>
+    </tr>`;
+
+  let allOk = true;
+  for (let i = 1; i <= 4; i++) {
+    const inp = 1 << (i-1);
+    const out = lookupEval(inp);
+    const target = fMap[i];
+    const ok = out === target;
+    if (!ok) allOk = false;
+    html += `<tr style="background:${ok?'var(--teal-pale)':'var(--accent-pale)'}">
+      <td style="padding:0.3rem 0.6rem;text-align:center">${i}</td>
+      <td style="padding:0.3rem 0.6rem;text-align:center">${inp}</td>
+      <td style="padding:0.3rem 0.6rem;text-align:center">${inp.toString(2).padStart(4,'0')}</td>
+      <td style="padding:0.3rem 0.6rem;text-align:center;font-weight:500;color:var(--teal)">${out}</td>
+      <td style="padding:0.3rem 0.6rem;text-align:center">${target}</td>
+      <td style="padding:0.3rem 0.6rem;text-align:center">${ok?'✓':'✗'}</td>
+    </tr>`;
+  }
+  // Also f(0) = 0
+  html += `<tr style="background:var(--teal-pale)">
+    <td style="padding:0.3rem 0.6rem;text-align:center">0</td>
+    <td style="padding:0.3rem 0.6rem;text-align:center">0</td>
+    <td style="padding:0.3rem 0.6rem;text-align:center">0000</td>
+    <td style="padding:0.3rem 0.6rem;text-align:center;font-weight:500;color:var(--teal)">0</td>
+    <td style="padding:0.3rem 0.6rem;text-align:center">0</td>
+    <td style="padding:0.3rem 0.6rem;text-align:center">✓</td>
+  </tr>`;
+  html += '</table>';
+  table.innerHTML = html;
+  cont.appendChild(table);
+
+  document.getElementById('completeness-info').textContent =
+    `The "lookup" works because binary AND selects exactly one stride per power-of-two input.\n2^0=1 → bit 0 set → selects stride[0] = f(1) = ${vals[0]}\n2^1=2 → bit 1 set → selects stride[1] = f(2) = ${vals[1]}\n2^2=4 → bit 2 set → selects stride[2] = f(3) = ${vals[2]}\n2^3=8 → bit 3 set → selects stride[3] = f(4) = ${vals[3]}\n\nAll ${allOk?'5':'some'} values reproduced correctly.`;
+}
+
+updateCompleteness();
+
+// ════════════════════════════════════════════════
+// §8 Linearity Demo
+// ════════════════════════════════════════════════
+const LIN_SHAPE = [[2,2],[4,2]];
+const LIN_STRIDE = [[1,8],[2,16]];
+const LIN_D = [1,8,2,16];
+
+function updateLinearity() {
+  const alpha = parseInt(document.getElementById('alpha-slider').value);
+  const beta  = parseInt(document.getElementById('beta-slider').value);
+  document.getElementById('alpha-val').textContent = alpha;
+  document.getElementById('beta-val').textContent = beta;
+
+  // fixed natural coords
+  const e0 = [1,0,1,0];
+  const e1 = [0,1,0,1];
+
+  const Le0 = dot(LIN_D, e0);
+  const Le1 = dot(LIN_D, e1);
+
+  // alpha*e0 + beta*e1
+  const combined = e0.map((v,i) => alpha*v + beta*e1[i]);
+  const lhs = dot(LIN_D, combined);
+  const rhs = alpha*Le0 + beta*Le1;
+
+  const cont = document.getElementById('linearity-viz');
+  cont.innerHTML = '';
+
+  // LEFT: natural coords panel
+  const left = document.createElement('div');
+  left.innerHTML = `
+    <div style="font-family:var(--mono);font-size:0.72rem;color:var(--ink-muted);margin-bottom:0.4rem">NATURAL COORDINATES</div>
+    <div style="margin-bottom:0.5rem">
+      <div style="font-family:var(--mono);font-size:0.75rem;color:var(--ink-muted);margin-bottom:0.2rem">e_c0 = [1,0,1,0]  →  L(e_c0) = d·e_c0 = ${Le0}</div>
+      <div class="vec-display">${e0.map((v,i)=>`<div class="vec-el ${v?'lit':''}">${v}</div>`).join('')} <span style="margin:0 0.3rem;color:var(--ink-muted)">·</span> ${LIN_D.map(v=>`<div class="vec-el">${v}</div>`).join('')} <span style="margin:0 0.3rem">=</span> <strong>${Le0}</strong></div>
+    </div>
+    <div style="margin-bottom:0.5rem">
+      <div style="font-family:var(--mono);font-size:0.75rem;color:var(--ink-muted);margin-bottom:0.2rem">e_c1 = [0,1,0,1]  →  L(e_c1) = d·e_c1 = ${Le1}</div>
+      <div class="vec-display">${e1.map((v,i)=>`<div class="vec-el ${v?'lit':''}">${v}</div>`).join('')} <span style="margin:0 0.3rem;color:var(--ink-muted)">·</span> ${LIN_D.map(v=>`<div class="vec-el">${v}</div>`).join('')} <span style="margin:0 0.3rem">=</span> <strong>${Le1}</strong></div>
+    </div>
+    <div style="background:var(--teal-pale);border:1px solid var(--teal);padding:0.6rem 0.75rem;font-family:var(--mono);font-size:0.78rem">
+      α·e_c0 + β·e_c1 = [${combined.join(', ')}]<br>
+      L(combined) = d·[${combined.join(',')}] = <strong style="color:var(--teal)">${lhs}</strong>
+    </div>`;
+
+  const right = document.createElement('div');
+  right.innerHTML = `
+    <div style="font-family:var(--mono);font-size:0.72rem;color:var(--ink-muted);margin-bottom:0.4rem">LINEARITY CHECK</div>
+    <div style="font-family:var(--mono);font-size:0.85rem;line-height:2.2;background:var(--paper);border:1px solid var(--paper-rule);padding:0.75rem">
+      α = <strong>${alpha}</strong>,  β = <strong>${beta}</strong><br>
+      <span style="color:var(--teal)">LHS</span>: L(α·e_c0 + β·e_c1) = <strong style="color:var(--teal)">${lhs}</strong><br>
+      <span style="color:var(--accent)">RHS</span>: α·L(e_c0) + β·L(e_c1)<br>
+      &nbsp;&nbsp; = ${alpha}·${Le0} + ${beta}·${Le1}<br>
+      &nbsp;&nbsp; = ${alpha*Le0} + ${beta*Le1}<br>
+      &nbsp;&nbsp; = <strong style="color:var(--accent)">${rhs}</strong><br>
+      <br>
+      <span style="font-size:1rem">${lhs===rhs?'✓ LHS = RHS  (linearity holds!)':'✗ mismatch'}</span>
+    </div>`;
+
+  cont.appendChild(left);
+  cont.appendChild(right);
+
+  // Non-linearity
+  // Demonstrate S(c0+c1) != S(c0)+S(c1) for c0=3, c1=5
+  const c0=3, c1=5;
+  const nat_c0 = naturalCoord(c0, LIN_SHAPE);
+  const nat_c1 = naturalCoord(c1, LIN_SHAPE);
+  const nat_sum_expected = nat_c0.map((v,i) => v + nat_c1[i]);
+  const nat_actual = naturalCoord(c0+c1, LIN_SHAPE);
+  const nonLinear = nat_sum_expected.join(',') !== nat_actual.join(',');
+
+  document.getElementById('linearity-result').textContent =
+    `LINEARITY in natural coordinates: L(α·e_c0 + β·e_c1) = α·L(e_c0) + β·L(e_c1)\n  = ${alpha}×${Le0} + ${beta}×${Le1} = ${lhs}  ✓ (always holds — it's just a dot product)\n\nNON-LINEARITY in arbitrary coords (c0=3, c1=5):\n  S(c0) = ${JSON.stringify(nat_c0)} (natural coord of 3)\n  S(c1) = ${JSON.stringify(nat_c1)} (natural coord of 5)\n  S(c0) + S(c1) = [${nat_sum_expected.join(', ')}]  ← what linearity would predict\n  S(c0 + c1) = S(8) = [${nat_actual.join(', ')}]  ← actual (modular arithmetic!)\n  Equal? ${!nonLinear}  ←  modular carries break linearity`;
+}
+
+document.getElementById('alpha-slider').addEventListener('input', updateLinearity);
+document.getElementById('beta-slider').addEventListener('input', updateLinearity);
+updateLinearity();
+
+// ════════════════════════════════════════════════
+// §8b D-matrix demo
+// ════════════════════════════════════════════════
+function updateDmat() {
+  const c = parseInt(document.getElementById('dmat-slider').value);
+  document.getElementById('dmat-val').textContent = c;
+
+  const e = naturalCoord(c, LIN_SHAPE);
+  const D = LIN_D;
+  const result = dot(D, e);
+
+  const terms = D.map((d,i) => `${d}×${e[i]}`).join(' + ');
+  const vals  = D.map((d,i) => d*e[i]).join(' + ');
+
+  const cont = document.getElementById('dmat-viz');
+  cont.innerHTML = `
+    <div style="font-family:var(--mono);font-size:0.8rem;line-height:2;padding:0.75rem;background:var(--paper);border:1px solid var(--paper-rule)">
+      c = <strong>${c}</strong><br>
+      e_c = idx2crd(${c}, ((2,2),(4,2))) = [${e.join(', ')}]<br>
+      <br>
+      D = [<span style="color:var(--accent)">1  8  2  16</span>]<br>
+      e_c= [${e.map((v,i)=>`<span style="color:${v?'var(--teal)':'var(--ink-muted)'}">${v}</span>`).join('  ')}]<br>
+      <br>
+      r = D @ e_c = ${terms} = ${vals} = <strong style="color:var(--accent)">${result}</strong><br>
+      Verify: L(${c}) = ${result}  ✓
+    </div>`;
+
+  document.getElementById('dmat-result').textContent =
+    `Layout ((2,2),(4,2)):((1,8),(2,16)) evaluated at c=${c}:\n  Natural coord e_c = [${e.join(', ')}]\n  D = [1, 8, 2, 16]  (flat stride vector)\n  r = ${D.map((d,i)=>d+'×'+e[i]).join(' + ')} = ${result}\n\nThis is a plain matrix-vector product: r = D @ e_c.`;
+}
+
+document.getElementById('dmat-slider').addEventListener('input', updateDmat);
+updateDmat();
+</script>
+</body>
+</html>

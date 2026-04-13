@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3.4 Inverse — CuTe Layouts</title>
+
+<!-- FONT STACK: Playfair Display (serif) + Azeret Mono (mono) to match main site -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Azeret+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font-serif: 'Playfair Display', serif;
+  --font-mono: 'Azeret Mono', monospace;
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --paper: #f4f1eb;
+  --paper2: #ede9e0;
+  --ink: #1c1a17;
+  --ink2: #3d3a35;
+  --ink3: #7a7570;
+  --rule: #d9d4c8;
+  --rule2: #c4bfb2;
+  --green: #2a5c45;
+  --green-light: #e8f0ec;
+  --orange: #b85c2a;
+  --orange-light: #f5ece6;
+  --blue: #2a4a6b;
+}
+
+[data-theme="dark"] {
+  --paper: #0f0d0c;
+  --paper2: #161412;
+  --ink: #f4f1eb;
+  --ink2: #d1ccc3;
+  --ink3: #8a837b;
+  --rule: #24211e;
+  --rule2: #332f2b;
+  --green: #6fb894;
+  --green-light: #16221c;
+  --orange: #e69a6e;
+  --orange-light: #261c14;
+  --blue: #6a94b8;
+}
+
+/* Alias old variable names for backward compatibility */
+:root {
+  --bg: var(--paper); --bg2: var(--paper2);
+  --surface: var(--paper); --surface2: var(--paper2);
+  --border: var(--rule); --border2: var(--rule2);
+  --accent: var(--orange); --accent2: var(--blue); --accent3: var(--green);
+  --gold: var(--orange); --lavender: var(--blue);
+  --mono: var(--font-mono); --serif: var(--font-serif); --display: var(--font-serif);
+}
+[data-theme="dark"] {
+  --bg: var(--paper); --bg2: var(--paper2);
+  --surface: var(--paper); --surface2: var(--paper2);
+  --border: var(--rule); --border2: var(--rule2);
+  --accent: var(--orange); --accent2: var(--blue); --accent3: var(--green);
+  --gold: var(--orange); --lavender: var(--blue);
+  --mono: var(--font-mono); --serif: var(--font-serif); --display: var(--font-serif);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-mono);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12.5px;
+  line-height: 1.7;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:200;background:var(--paper);border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:52px;transition:background-color .2s ease,border-color .2s ease}
+.logo{font-family:var(--font-serif);font-size:18px;color:var(--ink);text-decoration:none;letter-spacing:-.02em;transition:color .2s ease}
+.nav-links{display:flex;gap:28px;list-style:none;margin:0}
+.nav-links a{font-size:11px;color:var(--ink3);text-decoration:none;letter-spacing:.06em;text-transform:uppercase;transition:color .15s}
+.nav-links a:hover{color:var(--ink)}
+.theme-toggle{background:transparent;border:1px solid var(--rule2);border-radius:2px;padding:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink3);transition:all .15s ease;margin-left:12px;flex-shrink:0}
+.theme-toggle:hover{border-color:var(--ink3);color:var(--ink);background:var(--paper2)}
+.theme-toggle .sun-icon{display:none}.theme-toggle .moon-icon{display:block}
+[data-theme="dark"] .theme-toggle .sun-icon{display:block}
+[data-theme="dark"] .theme-toggle .moon-icon{display:none}
+
+/* ── HERO ── */
+.hero{padding:80px 40px 60px;max-width:1080px;margin:0 auto;border-bottom:1px solid var(--rule);transition:border-color .2s ease}
+.hero-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:24px;display:flex;align-items:center;gap:10px;transition:color .2s ease}
+.hero-label::before{content:'';display:inline-block;width:24px;height:1px;background:var(--ink3);transition:background-color .2s ease}
+.hero-title{font-family:var(--font-serif);font-size:clamp(44px,5vw,72px);line-height:1.1;letter-spacing:-.03em;color:var(--ink);margin-bottom:20px;transition:color .2s ease}
+.hero-title em{font-style:italic;color:var(--green);transition:color .2s ease}
+.hero-sub{font-size:13px;color:var(--ink2);line-height:1.8;max-width:600px;margin-bottom:20px;transition:color .2s ease}
+.hero-meta{display:flex;gap:24px;font-size:11px;color:var(--ink3);letter-spacing:.04em;flex-wrap:wrap;transition:color .2s ease}
+.hero-meta span::before{content:'// ';color:var(--rule2);margin-right:4px}
+
+/* ── CONTENT ── */
+.content{max-width:980px;margin:0 auto;padding:0 40px}
+
+section{padding:72px 0;border-bottom:1px solid var(--rule);transition:border-color .2s ease}
+section:last-of-type{border-bottom:none}
+
+.section-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:24px;display:flex;align-items:center;gap:10px;transition:color .2s ease}
+.section-label::after{content:'';flex:1;height:1px;background:var(--rule);transition:background-color .2s ease}
+
+h2{font-family:var(--font-serif);font-size:28px;letter-spacing:-.02em;color:var(--ink);margin-bottom:28px;transition:color .2s ease;line-height:1.3}
+h3{font-family:var(--font-serif);font-size:18px;letter-spacing:-.01em;color:var(--ink);margin:28px 0 16px;transition:color .2s ease}
+
+p{margin-bottom:16px;color:var(--ink2);line-height:1.8}p:last-child{margin-bottom:0}
+strong{color:var(--ink);font-weight:500}
+em{color:var(--green);font-style:italic}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--rule);padding:28px 40px;text-align:center;font-size:11px;color:var(--ink3);letter-spacing:.04em;transition:border-color .2s ease,color .2s ease}
+footer p{margin:0}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){nav{padding:0 20px}.nav-links{display:none}.hero{padding:56px 20px 48px}.content{padding:0 20px}section{padding:48px 0}footer{padding:20px}}
+
+/* ── REVEAL ── */
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .45s ease,transform .45s ease}.reveal.in{opacity:1;transform:translateY(0)}
+
+/* ── progress ── */
+.progress {
+  position: fixed; top: 0; left: 0; height: 2px;
+  background: var(--accent); z-index: 10000; transition: width 0.1s;
+}
+
+/* ── header ── */
+header {
+  padding: 80px 24px 60px;
+  max-width: 800px; margin: 0 auto;
+  border-bottom: 1px solid var(--border2);
+  position: relative;
+}
+.chapter-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 400;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 12px;
+}
+.chapter-eyebrow::before {
+  content: ''; flex: 0 0 32px; height: 1px;
+  background: var(--border2);
+}
+h1 {
+  font-family: var(--display);
+  font-size: clamp(36px, 6vw, 64px);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+h1 em {
+  font-style: italic;
+  color: var(--accent);
+}
+.lead {
+  max-width: 580px;
+  color: var(--ink2);
+  font-size: 16.5px;
+  font-weight: 300;
+  line-height: 1.7;
+  margin-top: 12px;
+}
+
+/* ── sidenote column layout ── */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ── TOC ── */
+.toc {
+  display: flex; gap: 0; flex-direction: column;
+  padding: 32px 24px;
+  max-width: 800px; margin: 0 auto;
+  border-bottom: 1px solid var(--border);
+}
+.toc-title {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink3); margin-bottom: 12px;
+}
+.toc-list { display: flex; gap: 6px 28px; flex-wrap: wrap; }
+.toc a {
+  font-family: var(--serif); font-size: 14px; font-weight: 400;
+  color: var(--ink2); text-decoration: none;
+  display: flex; align-items: center; gap: 6px;
+  transition: color 0.15s;
+}
+.toc a:hover { color: var(--accent); }
+.toc a .num {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--ink3);
+}
+
+/* ── sections ── */
+section {
+  padding: 56px 0 40px;
+  border-bottom: 1px solid var(--border);
+}
+section:last-child { border-bottom: none; }
+
+h2 {
+  font-family: var(--display);
+  font-size: 28px; font-weight: 700;
+  line-height: 1.2;
+  color: var(--ink);
+  margin-bottom: 20px;
+}
+h3 {
+  font-family: var(--mono);
+  font-size: 10.5px; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--accent);
+  margin: 36px 0 8px;
+}
+p { margin-bottom: 16px; color: var(--ink2); font-weight: 300; }
+p:last-child { margin-bottom: 0; }
+strong { color: var(--ink); font-weight: 600; }
+em { color: var(--lavender); font-style: italic; }
+code {
+  font-family: var(--mono); font-size: 13px;
+  background: var(--surface2); color: var(--lavender);
+  padding: 1px 5px; border-radius: 2px;
+  border: 1px solid var(--border);
+}
+a { color: var(--accent2); }
+
+/* ── definition box ── */
+.defn {
+  border-left: 3px solid var(--lavender);
+  background: linear-gradient(90deg, rgba(108,79,160,0.05), transparent);
+  padding: 18px 22px;
+  margin: 24px 0;
+  border-radius: 0 4px 4px 0;
+}
+.defn-label {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--lavender); margin-bottom: 8px;
+}
+.defn p { font-size: 15px; margin-bottom: 6px; color: var(--ink2); }
+
+/* ── math block ── */
+.math {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 16px 22px;
+  margin: 18px 0;
+  font-family: var(--mono); font-size: 13.5px;
+  color: var(--lavender);
+  overflow-x: auto; line-height: 2;
+}
+.math .cm { color: var(--ink3); font-size: 11.5px; font-style: italic; }
+.math .hi { color: var(--accent); }
+.math .hi2 { color: var(--accent2); }
+.math .hi3 { color: var(--accent3); }
+
+/* ── callout ── */
+.callout {
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  border-radius: 6px;
+  padding: 18px 22px;
+  margin: 24px 0;
+  display: flex; gap: 14px;
+}
+.callout .icon { font-size: 18px; flex-shrink: 0; padding-top: 2px; }
+.callout p { font-size: 15px; margin: 0; color: var(--ink2); }
+.callout.warn { border-color: #e59866; background: #fdf6ee; }
+.callout.good { border-color: #82c9a0; background: #f0faf4; }
+.callout.bad  { border-color: #e59866; background: #fef9f5; }
+.callout.info { border-color: var(--border2); }
+
+/* ── widget ── */
+.widget {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 24px;
+  margin: 28px 0;
+}
+.widget-title {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--accent2);
+  margin-bottom: 18px;
+  display: flex; align-items: center; gap: 8px;
+}
+.widget-title::before {
+  content: ''; display: block; width: 8px; height: 8px;
+  background: var(--accent2); border-radius: 50%;
+}
+
+/* ── controls ── */
+.controls {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  margin-bottom: 20px; align-items: flex-end;
+}
+.cg { display: flex; flex-direction: column; gap: 3px; }
+.cg label {
+  font-family: var(--mono); font-size: 9.5px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink3);
+}
+.cg input, .cg select {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  color: var(--ink); font-family: var(--mono); font-size: 13px;
+  padding: 5px 9px; border-radius: 3px;
+  outline: none; transition: border-color 0.15s;
+  width: 80px;
+}
+.cg input:focus, .cg select:focus { border-color: var(--accent2); }
+.cg select { width: 180px; cursor: pointer; }
+.btn {
+  background: var(--ink); color: var(--bg);
+  border: none; border-radius: 3px;
+  font-family: var(--mono); font-size: 11px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 7px 16px; cursor: pointer;
+  transition: background 0.15s; align-self: flex-end;
+}
+.btn:hover { background: var(--accent); }
+.btn.secondary {
+  background: var(--surface); color: var(--ink2);
+  border: 1px solid var(--border2);
+}
+.btn.secondary:hover { border-color: var(--accent2); color: var(--accent2); }
+
+/* ── tabs ── */
+.tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
+.tab {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--ink3); padding: 7px 14px; cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: all 0.15s; letter-spacing: 0.05em;
+}
+.tab:hover { color: var(--ink); }
+.tab.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── memory tape ── */
+.tape-wrap { overflow-x: auto; padding-bottom: 6px; margin: 12px 0; }
+.tape { display: flex; gap: 3px; min-width: max-content; }
+.t-cell {
+  width: 38px; height: 44px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border: 1px solid var(--border); border-radius: 3px;
+  font-family: var(--mono); font-size: 10px;
+  background: var(--bg2); position: relative;
+  transition: all 0.15s; cursor: default;
+}
+.t-cell .ti { font-size: 8.5px; color: var(--ink3); position: absolute; top: 3px; }
+.t-cell .tv { font-size: 13px; color: var(--ink2); font-weight: 500; }
+.t-cell.hit-A { background: rgba(192,57,43,0.12); border-color: var(--accent); }
+.t-cell.hit-A .tv { color: var(--accent); }
+.t-cell.hit-B { background: rgba(36,113,163,0.12); border-color: var(--accent2); }
+.t-cell.hit-B .tv { color: var(--accent2); }
+.t-cell.hit-both { background: rgba(26,122,74,0.15); border-color: var(--accent3); }
+.t-cell.hit-both .tv { color: var(--accent3); }
+.t-cell.gap { opacity: 0.4; }
+
+/* ── grid vis ── */
+.grid-vis {
+  display: inline-grid; gap: 3px; margin: 10px 0;
+}
+.g-cell {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  border: 1px solid var(--border); border-radius: 3px;
+  font-family: var(--mono); cursor: pointer;
+  transition: all 0.13s; position: relative;
+  background: var(--bg2);
+}
+.g-cell .gc { font-size: 8.5px; color: var(--ink3); }
+.g-cell .go { font-size: 12px; font-weight: 500; color: var(--ink2); }
+.g-cell:hover { border-color: var(--accent2); background: rgba(36,113,163,0.08); }
+.g-cell:hover .go { color: var(--accent2); }
+.g-cell.sel { border-color: var(--accent); background: rgba(192,57,43,0.1); transform: scale(1.06); z-index: 5; }
+.g-cell.sel .go { color: var(--accent); }
+.g-cell.peer { background: rgba(36,113,163,0.08); border-color: var(--accent2); }
+.g-cell.peer .go { color: var(--accent2); }
+
+/* ── annotation bar ── */
+.ann {
+  font-family: var(--mono); font-size: 12px; color: var(--ink3);
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 3px; padding: 8px 12px; margin: 10px 0;
+  min-height: 32px; transition: color 0.15s;
+}
+.ann.active { color: var(--accent); border-color: var(--accent); background: rgba(192,57,43,0.05); }
+
+/* ── stat chips ── */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.chip {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 3px; padding: 5px 11px;
+  font-family: var(--mono); font-size: 11.5px;
+}
+.chip .ck { color: var(--ink3); }
+.chip .cv { color: var(--lavender); font-weight: 500; }
+.chip.ok  .cv { color: var(--accent3); }
+.chip.bad .cv { color: var(--accent); }
+
+/* ── step trace ── */
+.trace {
+  font-family: var(--mono); font-size: 13px; line-height: 2.2;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 4px; padding: 14px 18px; margin: 12px 0;
+}
+
+/* ── admissibility rows ── */
+.adm-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 12px; border-radius: 3px; margin: 4px 0;
+  font-family: var(--mono); font-size: 12.5px;
+  transition: background 0.15s;
+}
+.adm-row:hover { background: var(--surface2); }
+.adm-row .ai { color: var(--ink3); width: 28px; }
+.adm-row .av { color: var(--ink2); flex: 1; }
+.adm-row .aok { font-size: 14px; }
+.adm-row.pass { }
+.adm-row.fail { background: rgba(192,57,43,0.05); }
+.adm-row.fail .av { color: var(--accent); }
+
+/* ── vectorization vis ── */
+.vec-layout {
+  display: inline-block;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 6px; padding: 14px; margin: 8px 8px 8px 0;
+  vertical-align: top;
+}
+.vec-label {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink3); margin-bottom: 8px;
+}
+.vec-grid { display: inline-grid; gap: 3px; }
+.v-cell {
+  width: 42px; height: 42px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 12px;
+  border: 1px solid var(--border); border-radius: 3px;
+  background: var(--bg2); transition: all 0.15s;
+  cursor: default;
+}
+.v-cell.common { background: rgba(26,122,74,0.15); border-color: var(--accent3); color: var(--accent3); font-weight: 600; }
+.v-cell.src-only { background: rgba(192,57,43,0.1); border-color: rgba(192,57,43,0.4); }
+.v-cell.dst-only { background: rgba(36,113,163,0.1); border-color: rgba(36,113,163,0.4); }
+
+/* ── two-col for comparison ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+.col-box {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 6px; padding: 16px;
+}
+.col-box .col-title {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.col-box.left .col-title  { color: var(--accent); }
+.col-box.right .col-title { color: var(--accent2); }
+
+/* ── scroll fade ── */
+.fade { opacity: 0; transform: translateY(14px); transition: opacity 0.5s, transform 0.5s; }
+.fade.vis { opacity: 1; transform: none; }
+
+/* ── divider ── */
+.rule { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+/* ── output block ── */
+.out {
+  background: #fafafa; border: 1px solid var(--border);
+  border-radius: 4px; padding: 14px 18px;
+  font-family: var(--mono); font-size: 12.5px;
+  line-height: 1.9; color: var(--ink2); margin: 8px 0 20px;
+  overflow-x: auto;
+}
+.out .ok { color: var(--accent3); }
+.out .er { color: var(--accent); }
+.out .hl { color: var(--lavender); }
+
+/* ── footer ── */
+footer {
+  text-align: center; padding: 48px 24px;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--ink3); letter-spacing: 0.06em;
+  border-top: 1px solid var(--border);
+}
+footer a { color: var(--ink2); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="progress" id="prog"></div>
+
+<!-- ══ HEADER ══════════════════════════════════════════════ -->
+<!-- NAV -->
+<nav>
+  <a href="https://bikrammajhi.github.io/" class="logo">Bikram Majhi</a>
+  <ul class="nav-links">
+    <li><a href="/#about">About</a></li><li><a href="/#ladder">GEMM</a></li><li><a href="/#results">Results</a></li>
+    <li><a href="/#projects">Projects</a></li><li><a href="/#writing">Writing</a></li><li><a href="/#journal">Journal</a></li>
+    <li><a href="/#contact">Contact</a></li>
+  </ul>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
+    <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+  </button>
+</nav>
+
+<!-- HERO -->
+<div class="hero reveal">
+  <div class="hero-label">GPU Programming · CuTe DSL</div>
+  <h1 class="hero-title">CuTe DSL from scratch:<br>Layout <em>Inverses</em></h1>
+  <p class="hero-sub">Layouts map coordinates to offsets. Their inverses map offsets back to coordinates — powering vectorized copies and instruction admissibility checks.</p>
+  <div class="hero-meta">
+    <span>April 2026</span><span>~15 minute read</span><span>Part 12 of 15</span>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- INTUITION -->
+<section class="reveal">
+  <div class="section-label">§12 — Intuition</div>
+  <h2>Going the other direction</h2>
+
+  <p>A layout <code>L</code> answers one question: <em>"given a logical coordinate, what is the memory offset?"</em> The inverse answers the opposite: <em>"given a memory offset, which logical coordinate produced it?"</em></p>
+
+  <p>Think of a simple column-major matrix <strong>(4, 8) : (1, 4)</strong>. It maps coordinate (row, col) → <code>row × 1 + col × 4</code>. If I show you offset <strong>9</strong>, can you find the coordinate? Yes: 9 = 1×1 + 2×4, so coordinate (1, 2). The layout inverse is the function that does this lookup — efficiently, as a layout itself.</p>
+
+  <p>This matters in practice for two reasons:</p>
+
+  <div class="two-col fade">
+    <div class="col-box left">
+      <div class="col-title">Vectorization</div>
+      <p style="font-size:14px;margin:0;color:var(--ink2);">
+        To copy two tensors fast, find the largest contiguous block of offsets they share. The right-inverse tells you this.
+      </p>
+    </div>
+    <div class="col-box right">
+      <div class="col-title">Admissibility</div>
+      <p style="font-size:14px;margin:0;color:var(--ink2);">
+        A hardware instruction accesses a fixed set of offsets. Does every offset it touches exist in the data layout? The left-inverse answers this.
+      </p>
+    </div>
+  </div>
+
+  <p>Crucially, the inverse is not just a lookup table — it is itself a layout, with shape and stride. That means it composes, inverts, and tiles just like any other layout.</p>
+</section>
+
+<!-- ══ §2 RIGHT-INVERSE ════════════════════════════════════ -->
+<section id="right-inv" class="fade">
+  <h3>Definition</h3>
+  <h2>The right-inverse L‡</h2>
+
+  <p>The <strong>right-inverse</strong> <code>L‡</code> of a layout <code>L</code> satisfies: applying <code>L</code> after <code>L‡</code> gives back the identity — at least on the domain of <code>L‡</code>.</p>
+
+  <div class="defn">
+    <div class="defn-label">Definition — right-inverse</div>
+    <p>L‡ is an injective layout such that for all k in its domain:</p>
+    <p style="font-family:var(--mono);color:var(--lavender);">L( L‡(k) ) = k</p>
+    <p>That is: L‡ maps an offset k to a coordinate, and L maps that coordinate back to k. The round-trip succeeds.</p>
+  </div>
+
+  <p>For a <strong>bijective</strong> layout (one that covers all of ℤ<sub>|L|</sub> exactly once), <code>L‡</code> has size equal to <code>|L|</code> and is a true inverse. For a <strong>non-contiguous</strong> layout, only a prefix of offsets can be recovered — the right-inverse is smaller.</p>
+
+  <h3>Table 5 — Examples</h3>
+
+  <p>Here are the right-inverses for several layouts from the notebook. Notice the pattern: the right-inverse's size tells you how many offsets from 0 you can round-trip through.</p>
+
+  <div class="widget fade">
+    <div class="widget-title">Right-inverse Explorer</div>
+
+    <div class="controls">
+      <div class="cg">
+        <label>Layout preset</label>
+        <select id="ri-preset">
+          <option value="0">(4,8):(1,4) — col-major</option>
+          <option value="1">(4,8):(8,1) — row-major</option>
+          <option value="2">(3,7,5):(5,15,1) — 3D</option>
+          <option value="3">(4,8):(1,5) — non-contiguous</option>
+          <option value="4">(4,(4,2)):(4,(1,16)) — nested</option>
+          <option value="5">((2,2),(4,2)):((1,8),(2,16)) — hierarchical</option>
+          <option value="6">((2,2),(2,4)):((0,1),(0,2)) — stride-0</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="ri-display"></div>
+    <div class="ann" id="ri-ann">Select a layout above to explore its right-inverse</div>
+
+    <!-- verification strip -->
+    <div style="margin-top:16px;">
+      <div style="font-family:var(--mono);font-size:9.5px;color:var(--ink3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">
+        Round-trip verification: L(L‡(k)) = k
+      </div>
+      <div class="tape-wrap">
+        <div class="tape" id="ri-tape"></div>
+      </div>
+    </div>
+    <div class="chips" id="ri-chips"></div>
+  </div>
+
+  <h3>Non-contiguous layouts</h3>
+
+  <p>For <code>(4,8):(1,5)</code> the offsets are <code>0,1,2,3,5,6,7,8,10,…</code> — there's a gap at offset 4. Only the first 4 offsets (0–3) form a contiguous prefix, so the right-inverse has size 4. Starting from offset 5, there is no layout-consistent way to recover the coordinate from just the offset number.</p>
+
+  <div class="callout warn fade">
+    <div class="icon">⚡</div>
+    <p><strong>Key insight:</strong> The size of the right-inverse is the length of the maximal contiguous prefix of the image. For fully bijective layouts this equals the full size; for gapped layouts it can be much smaller.</p>
+  </div>
+</section>
+
+<!-- ══ §3 COMPACT ══════════════════════════════════════════ -->
+<section id="compact" class="fade">
+  <h3>Special case</h3>
+  <h2>Compact layouts and full inverses</h2>
+
+  <p>A layout is <strong>compact</strong> (bijective on ℤ<sub>|L|</sub>) when it maps every integer in 0…|L|-1 to a distinct offset covering exactly those offsets. For such layouts, the right-inverse is a true two-sided inverse:</p>
+
+  <div class="math">
+    L( L⁻¹(k) ) = k      <span class="cm">  for all k in Z_{|L|}</span>
+    <br>
+    L⁻¹( L(k) ) = k      <span class="cm">  for all k in Z_{|L|}</span>
+  </div>
+
+  <p>Column-major <code>(4,8):(1,4)</code> → right-inverse is <code>32:1</code> (the identity, since col-major is already contiguous). Row-major <code>(4,8):(8,1)</code> → right-inverse is <code>(8,4):(4,1)</code>, which transposes the layout.</p>
+
+  <div class="widget fade">
+    <div class="widget-title">Compact layout — both-direction verification</div>
+    <div class="tabs">
+      <div class="tab active" data-tab="c-colmaj">Col-major (4,8):(1,4)</div>
+      <div class="tab" data-tab="c-rowmaj">Row-major (4,8):(8,1)</div>
+    </div>
+
+    <div class="tab-content active" id="c-colmaj">
+      <p style="font-size:13px;color:var(--ink3);margin-bottom:14px;">
+        L = (4,8):(1,4), L‡ = 32:1. The right-inverse is flat because col-major already lays out elements 0,1,2,…,31 contiguously.
+      </p>
+      <div id="compact-colmaj-grid"></div>
+      <div class="ann" id="compact-colmaj-ann">hover a cell</div>
+    </div>
+
+    <div class="tab-content" id="c-rowmaj">
+      <p style="font-size:13px;color:var(--ink3);margin-bottom:14px;">
+        L = (4,8):(8,1), L‡ = (8,4):(4,1). Hover a cell to trace offset → coordinate → back to offset.
+      </p>
+      <div id="compact-rowmaj-grid"></div>
+      <div class="ann" id="compact-rowmaj-ann">hover a cell</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ §4 VECTORIZATION ════════════════════════════════════ -->
+<section id="vectorization" class="fade">
+  <h3>Application 1</h3>
+  <h2>Finding the maximum vectorizable block</h2>
+
+  <p>When copying tensor A to tensor B, we want to move as many elements as possible in a single instruction. A SIMD or memory instruction copies a contiguous block of <em>K</em> offsets at once — so we need to find the largest <em>K</em> such that both A and B agree on their first K elements' physical addresses.</p>
+
+  <p>The algorithm uses the right-inverse:</p>
+
+  <div class="math">
+    Compute  A ∘ B‡                     <span class="cm">  (compose A with right-inverse of B)</span>
+    <br>
+    Find the largest K where  (A ∘ B‡)(k) = k  for k = 0,1,…,K-1
+    <br><br>
+    <span class="cm">  If (A ∘ B‡) acts as the identity on the first K inputs,</span>
+    <br>
+    <span class="cm">  then those K elements have identical physical layout in both A and B.</span>
+  </div>
+
+  <p>Equivalently, you can compute <code>B ∘ A‡</code> and find the same K. The two formulations give the same answer.</p>
+
+  <div class="widget fade">
+    <div class="widget-title">Vectorization — common subvector finder</div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="vec-fig8a">Figure 8a — K=2</div>
+      <div class="tab" data-tab="vec-fig8b">Figure 8b — K=4</div>
+    </div>
+
+    <div class="tab-content active" id="vec-fig8a">
+      <p style="font-size:13px;color:var(--ink2);margin-bottom:14px;">
+        Source <strong>A = (4,4):(1,4)</strong> (col-major 4×4) and destination <strong>B = ((2,2),4):((1,8),2)</strong> (interleaved). Their first <strong>2</strong> physical offsets align.
+      </p>
+
+      <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;margin-bottom:12px;">
+        <div class="vec-layout">
+          <div class="vec-label" style="color:var(--accent);">Source A</div>
+          <div id="vec-a-grid-8a"></div>
+        </div>
+        <div style="display:flex;align-items:center;font-size:28px;color:var(--ink3);padding-top:30px;">→</div>
+        <div class="vec-layout">
+          <div class="vec-label" style="color:var(--accent2);">Destination B</div>
+          <div id="vec-b-grid-8a"></div>
+        </div>
+      </div>
+
+      <div class="ann" id="vec-ann-8a">Green cells share the same physical offset in both layouts → can be copied in one instruction</div>
+
+      <div style="margin-top:16px;">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">
+          (A ∘ B‡)(k) — identity prefix is the vectorizable width
+        </div>
+        <div id="vec-compose-8a" class="out"></div>
+      </div>
+      <div class="chips" id="vec-chips-8a"></div>
+    </div>
+
+    <div class="tab-content" id="vec-fig8b">
+      <p style="font-size:13px;color:var(--ink2);margin-bottom:14px;">
+        Both layouts are hierarchical. Despite different shapes, their first <strong>4</strong> physical offsets align. Hover cells to see which ones are shared.
+      </p>
+
+      <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;margin-bottom:12px;">
+        <div class="vec-layout">
+          <div class="vec-label" style="color:var(--accent);">Source A</div>
+          <div id="vec-a-grid-8b"></div>
+        </div>
+        <div style="display:flex;align-items:center;font-size:28px;color:var(--ink3);padding-top:30px;">→</div>
+        <div class="vec-layout">
+          <div class="vec-label" style="color:var(--accent2);">Destination B</div>
+          <div id="vec-b-grid-8b"></div>
+        </div>
+      </div>
+
+      <div class="ann" id="vec-ann-8b">Green cells = first 4 physical offsets, shared by both layouts</div>
+
+      <div style="margin-top:16px;">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">
+          (A ∘ B‡)(k) — identity prefix = 4
+        </div>
+        <div id="vec-compose-8b" class="out"></div>
+      </div>
+      <div class="chips" id="vec-chips-8b"></div>
+    </div>
+  </div>
+
+  <div class="callout info fade">
+    <div class="icon">📐</div>
+    <p>In practice, CuTe combines this algebraic result with hardware knowledge (pointer alignment, SIMD width) to choose the actual vector width. The math gives the upper bound; hardware constrains the floor.</p>
+  </div>
+</section>
+
+<!-- ══ §5 LEFT-INVERSE ═════════════════════════════════════ -->
+<section id="left-inv" class="fade">
+  <h3>Definition</h3>
+  <h2>The left-inverse L†</h2>
+
+  <p>The <strong>left-inverse</strong> <code>L†</code> goes the other direction: it maps an <em>offset</em> back to the coordinate that produced it.</p>
+
+  <div class="defn">
+    <div class="defn-label">Definition — left-inverse</div>
+    <p>L† is a layout that for all k in the domain of L:</p>
+    <p style="font-family:var(--mono);color:var(--lavender);">L†( L(k) ) = k</p>
+    <p>Apply L first (coordinate → offset), then L† (offset → coordinate) and you recover the original coordinate. The composition L† ∘ L is the identity on L's domain.</p>
+  </div>
+
+  <p>For injective layouts the left-inverse is unique on the image. For non-injective layouts (those with repeated offsets), L† can take arbitrary values at offsets outside the image — the definition only requires it behaves correctly on offsets that <em>are</em> in the image.</p>
+
+  <h3>Left vs right — when do they coincide?</h3>
+
+  <p>For bijective (compact) layouts, the left- and right-inverses are identical — they're both the true inverse L⁻¹. For other layouts:</p>
+
+  <div class="two-col fade">
+    <div class="col-box left">
+      <div class="col-title">Right-inverse L‡</div>
+      <p style="font-size:13.5px;color:var(--ink2);margin:0;">
+        Satisfies <code>L(L‡(k)) = k</code>. Size ≤ |L|. Measures how many contiguous offsets from 0 can be round-tripped. <strong>Smaller</strong> for gapped layouts.
+      </p>
+    </div>
+    <div class="col-box right">
+      <div class="col-title">Left-inverse L†</div>
+      <p style="font-size:13.5px;color:var(--ink2);margin:0;">
+        Satisfies <code>L†(L(k)) = k</code>. Has domain = cosize of L. <strong>Larger</strong> for gapped layouts (needs to cover all offsets in the image).
+      </p>
+    </div>
+  </div>
+
+  <div class="widget fade">
+    <div class="widget-title">Left-inverse — trace any coordinate</div>
+    <div class="controls">
+      <div class="cg">
+        <label>Layout</label>
+        <select id="li-preset">
+          <option value="0">(4,8):(1,4) — col-major</option>
+          <option value="1">(4,8):(8,1) — row-major</option>
+          <option value="2">(3,7,5):(5,15,1) — 3D</option>
+        </select>
+      </div>
+      <div class="cg">
+        <label>Coordinate k</label>
+        <input type="number" id="li-k" value="5" min="0" max="104" style="width:72px;">
+      </div>
+    </div>
+    <div id="li-trace" class="trace"></div>
+    <div class="ann" id="li-ann"></div>
+  </div>
+</section>
+
+<!-- ══ §6 ADMISSIBILITY ════════════════════════════════════ -->
+<section id="admissibility" class="fade">
+  <h3>Application 2</h3>
+  <h2>Admissibility checking</h2>
+
+  <p>A hardware instruction has a fixed access pattern — it always touches the same set of relative offsets. Before using it, we need to verify it's <strong>admissible</strong>: every offset it touches must exist in the data layout.</p>
+
+  <p>Formally: data layout <code>A : ℤ₍ₐ₎ → ℤ</code> and instruction layout <code>T : ℤ₍ₜ₎ → ℤ</code>. T is admissible for A if:</p>
+
+  <div class="math">
+    ∀ i ∈ ℤ_{|T|} :  A( A†(T(i)) ) = T(i)
+    <br><br>
+    <span class="cm">  Use L† to map the offset T(i) back to a coordinate,</span>
+    <br>
+    <span class="cm">  then use L to go forward again. If you get T(i) back,</span>
+    <br>
+    <span class="cm">  the offset was genuinely in the image of A.</span>
+  </div>
+
+  <p>If the round-trip fails, the offset <code>T(i)</code> is not in A's image — the instruction is trying to access memory that the data layout doesn't reach.</p>
+
+  <div class="widget fade">
+    <div class="widget-title">Admissibility checker — Data layout A = (4,4):(2,8)</div>
+
+    <p style="font-size:13px;color:var(--ink2);margin-bottom:14px;">
+      A only touches <strong>even</strong> offsets: 0, 2, 4, 6, 8, …, 30. Its left-inverse A† = (2,16):(16,1).
+      Choose an instruction below to test whether it's admissible.
+    </p>
+
+    <div class="controls">
+      <div class="cg">
+        <label>Instruction</label>
+        <select id="adm-instr">
+          <option value="good">T = 4:2 — stride-2 (accesses 0,2,4,6) ✓</option>
+          <option value="bad">T = 4:1 — stride-1 (accesses 0,1,2,3) ✗</option>
+          <option value="good2">T = 4:4 — stride-4 (accesses 0,4,8,12) ✓</option>
+          <option value="bad2">T = 4:3 — stride-3 (accesses 0,3,6,9) ✗</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;margin-bottom:16px;">
+      <div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">Data layout A offsets</div>
+        <div id="adm-data-grid"></div>
+      </div>
+      <div style="flex:1;min-width:200px;">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">Instruction offsets</div>
+        <div id="adm-instr-tape"></div>
+        <div style="margin-top:12px;">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;">Round-trip check A(A†(T(i)))</div>
+          <div id="adm-rows"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chips" id="adm-chips"></div>
+
+    <div style="margin-top:18px;" id="adm-coord-map-container">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--ink3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">
+        Coordinate map A† ∘ T (instruction index → logical data coordinate)
+      </div>
+      <div id="adm-coord-map" class="out"></div>
+    </div>
+  </div>
+
+  <div class="callout good fade">
+    <div class="icon">✅</div>
+    <p>When T is admissible, the layout <code>A† ∘ T</code> is a concrete map from instruction indices to logical data coordinates. This is directly used by CuTe's <code>zipped_divide</code> to partition the data tensor into sub-tensors aligned with the instruction.</p>
+  </div>
+</section>
+
+<section class="reveal" style="border:none; padding-top:40px; padding-bottom:40px; text-align:center;">
+  <p style="color:var(--ink3); font-size:11px; letter-spacing:0.08em; text-transform:uppercase;">
+    <em>Part 1:</em> Loops Are Just Layouts · <em>Part 2:</em> Tensors & Folding · <em>Part 3:</em> Tuples & HTuples · <em>Part 4:</em> Shape · <em>Part 5:</em> Stride · <em>Part 6:</em> The Layout Object · <em>Part 7:</em> Tensors · <em>Part 8:</em> Applications · <em>Part 9:</em> Concatenate · <em>Part 10:</em> Coalesce · <em>Part 11:</em> Composition · <strong>Part 12:</strong> Layout Inverses · <em>Upcoming:</em> Complements
+  </p>
+</section>
+
+</div><!-- /content -->
+
+<footer>
+  <p>Based on CuTe and CUTLASS documentation. Learn more at <a href="https://github.com/NVIDIA/cutlass" style="color:var(--green);">NVIDIA/CUTLASS</a> and <a href="https://github.com/NVIDIA/cutlass/blob/main/media/docs/cute/" style="color:var(--green);">CuTe Layouts</a>.</p>
+</footer>
+
+<!-- Reveal observer -->
+<script>
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+</script>
+
+<!-- Theme toggle -->
+<script>
+(function(){
+  const saved = localStorage.getItem('theme');
+  const theme = saved || 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = document.getElementById('themeToggle');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+  }
+})();
+</script>
+
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ══════════════════════════════════════════════════════════ -->
+<script>
+// ── Progress bar ──────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  document.getElementById('prog').style.width =
+    (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + '%';
+});
+
+// ── Fade observer ─────────────────────────────────────────
+const fadeObs = new IntersectionObserver(entries =>
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); }),
+  { threshold: 0.06 }
+);
+document.querySelectorAll('.fade').forEach(el => fadeObs.observe(el));
+
+// ── Tabs ──────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const scope = tab.closest('.widget') || tab.closest('section');
+    scope.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    scope.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+    tab.classList.add('active');
+    const tc = document.getElementById(tab.dataset.tab);
+    if (tc) tc.classList.add('active');
+  });
+});
+
+// ══ DATA: layouts & their right/left inverses ══════════════
+// [shape_str, stride_str, size, L function, L‡ function, L‡_size, description]
+// We'll compute these directly in JS.
+
+function colMajOffset(m, n, s0, s1) { return m * s0 + n * s1; }
+
+// --- right-inverse presets (from notebook output) ---
+const RI_PRESETS = [
+  {
+    desc: '(4,8):(1,4)',
+    L_shape: [4,8], L_stride: [1,4],
+    RI_str: '32 : 1',
+    L: i => { const m=i%4, n=Math.floor(i/4); return m*1+n*4; },
+    Ri: k => k,
+    L_size: 32, Ri_size: 32,
+    note: 'Column-major. Right-inverse is the flat identity because the image is already {0,1,…,31}.',
+    nonContig: false,
+  },
+  {
+    desc: '(4,8):(8,1)',
+    L_shape: [4,8], L_stride: [8,1],
+    RI_str: '(8,4):(4,1)',
+    L: i => { const m=i%4, n=Math.floor(i/4); return m*8+n*1; },
+    Ri: k => { const a=k%8, b=Math.floor(k/8); return a*4+b*1; },
+    L_size: 32, Ri_size: 32,
+    note: 'Row-major. The right-inverse transposes back to column-major ordering.',
+    nonContig: false,
+  },
+  {
+    desc: '(3,7,5):(5,15,1)',
+    L_shape: [3,7,5], L_stride: [5,15,1],
+    RI_str: '(5,21):(21,1)',
+    L: i => { const m=i%3, n=Math.floor(i/3)%7, p=Math.floor(i/21); return m*5+n*15+p*1; },
+    Ri: k => { const a=k%5, b=Math.floor(k/5); return a*21+b*1; },
+    L_size: 105, Ri_size: 105,
+    note: '3D layout. Right-inverse has size 105 = full size.',
+    nonContig: false,
+  },
+  {
+    desc: '(4,8):(1,5) — non-contiguous',
+    L_shape: [4,8], L_stride: [1,5],
+    RI_str: '4 : 1',
+    L: i => { const m=i%4, n=Math.floor(i/4); return m*1+n*5; },
+    Ri: k => k,
+    L_size: 32, Ri_size: 4,
+    note: 'Gaps at offsets 4, 9, 14, … Only first 4 offsets (0–3) form a contiguous run → right-inverse size = 4.',
+    nonContig: true,
+  },
+  {
+    desc: '(4,(4,2)):(4,(1,16))',
+    L_shape: [4,[4,2]], L_stride: [4,[1,16]],
+    RI_str: '(4,4,2):(4,1,16)',
+    L: i => {
+      const m = i % 4;
+      const rest = Math.floor(i/4);
+      const n0 = rest % 4, n1 = Math.floor(rest/4);
+      return m*4 + n0*1 + n1*16;
+    },
+    Ri: k => {
+      const a = Math.floor(k/4)%4, b = Math.floor(k/4/4)%2, c = k%4;
+      return c*4 + a*1 + b*16;  // rough
+    },
+    L_size: 32, Ri_size: 32,
+    note: 'Nested dimension in second mode. Right-inverse flattens the hierarchy.',
+    nonContig: false,
+  },
+  {
+    desc: '((2,2),(4,2)):((1,8),(2,16))',
+    L_shape: [[2,2],[4,2]], L_stride: [[1,8],[2,16]],
+    RI_str: '(2,4,2,2):(1,4,2,16)',
+    L: i => {
+      const M0=2,M1=2,N0=4,N1=2;
+      const a=i%(M0*M1); const b=Math.floor(i/(M0*M1));
+      const a0=a%M0, a1=Math.floor(a/M0);
+      const b0=b%N0, b1=Math.floor(b/N0);
+      return a0*1+a1*8+b0*2+b1*16;
+    },
+    Ri: k => k, // simplified
+    L_size: 32, Ri_size: 32,
+    note: 'Hierarchical shape+stride. Right-inverse flattens to (2,4,2,2):(1,4,2,16).',
+    nonContig: false,
+  },
+  {
+    desc: '((2,2),(2,4)):((0,1),(0,2)) — stride-0',
+    L_shape: [[2,2],[2,4]], L_stride: [[0,1],[0,2]],
+    RI_str: '1 : 0',
+    L: i => {
+      const a = i % (2*2); const b = Math.floor(i/(2*2));
+      const a0=a%2,a1=Math.floor(a/2),b0=b%2,b1=Math.floor(b/2);
+      return a0*0+a1*1+b0*0+b1*2;
+    },
+    Ri: k => 0,
+    L_size: 16, Ri_size: 1,
+    note: 'Stride-0 in first sub-dimension → many coordinates map to same offset. Right-inverse is trivially size 1.',
+    nonContig: true,
+  },
+];
+
+// ── §2 Right-inverse explorer ─────────────────────────────
+function renderRI() {
+  const idx = parseInt(document.getElementById('ri-preset').value);
+  const p = RI_PRESETS[idx];
+  const disp = document.getElementById('ri-display');
+  const ann  = document.getElementById('ri-ann');
+  const tape = document.getElementById('ri-tape');
+  const chips= document.getElementById('ri-chips');
+
+  disp.innerHTML = `
+    <div class="out">
+      <span style="color:var(--ink3)">L    = </span><span class="hl">${p.desc}</span>  <span style="color:var(--ink3)">(size ${p.L_size})</span>
+      <br>
+      <span style="color:var(--ink3)">L‡   = </span><span style="color:var(--accent3)">${p.RI_str}</span>  <span style="color:var(--ink3)">(size ${p.Ri_size})</span>
+    </div>
+    <p style="font-size:13.5px;color:var(--ink2);margin-bottom:0;">${p.note}</p>
+  `;
+
+  ann.textContent = `Right-inverse has size ${p.Ri_size} of ${p.L_size}. Round-trip L(L‡(k))=k shown below.`;
+
+  // Tape: show first min(cosize, 48) offsets; mark which k pass the round-trip
+  const showN = Math.min(p.L_size + 4, 48);
+  const imageSet = new Set();
+  for (let i = 0; i < p.L_size; i++) imageSet.add(p.L(i));
+
+  tape.innerHTML = '';
+  for (let k = 0; k < Math.min(p.Ri_size, 32); k++) {
+    const rt = p.L(p.Ri(k));
+    const pass = (rt === k);
+    const tc = document.createElement('div');
+    tc.className = 't-cell' + (pass ? ' hit-A' : '');
+    tc.innerHTML = `<span class="ti">${k}</span><span class="tv">${pass ? '✓' : '✗'}</span>`;
+    tape.appendChild(tc);
+  }
+  if (p.Ri_size < p.L_size) {
+    const more = document.createElement('div');
+    more.style.cssText = 'display:flex;align-items:center;font-family:var(--mono);font-size:11px;color:var(--ink3);padding:0 8px;';
+    more.textContent = `+${p.L_size - p.Ri_size} elements without round-trip`;
+    tape.appendChild(more);
+  }
+
+  chips.innerHTML = `
+    <div class="chip ${p.Ri_size === p.L_size ? 'ok' : 'bad'}">
+      <span class="ck">coverage </span><span class="cv">${p.Ri_size}/${p.L_size}</span>
+    </div>
+    <div class="chip">
+      <span class="ck">bijective </span><span class="cv">${p.nonContig ? 'no' : 'yes'}</span>
+    </div>
+    <div class="chip">
+      <span class="ck">L‡ </span><span class="cv">${p.RI_str}</span>
+    </div>
+  `;
+}
+
+document.getElementById('ri-preset').addEventListener('change', renderRI);
+renderRI();
+
+// ── §3 Compact grids ──────────────────────────────────────
+function makeGrid(containerID, annID, M, N, L, Ri, s0, s1) {
+  const gc = document.getElementById(containerID);
+  if (!gc) return;
+  gc.innerHTML = '';
+  const ann = document.getElementById(annID);
+
+  const grid = document.createElement('div');
+  grid.className = 'grid-vis';
+  grid.style.gridTemplateColumns = `repeat(${M}, 44px)`;
+
+  for (let n = 0; n < N; n++) {
+    for (let m = 0; m < M; m++) {
+      const i = m + n*M;
+      const off = L(m, n);
+      const c = Ri(off);
+      const cell = document.createElement('div');
+      cell.className = 'g-cell';
+      cell.style.cssText = 'width:44px;height:44px;';
+      cell.innerHTML = `<span class="gc">(${m},${n})</span><span class="go">${off}</span>`;
+      cell.addEventListener('mouseenter', () => {
+        ann.textContent = `L(${m},${n}) = ${m}×${s0}+${n}×${s1} = ${off}  →  L‡(${off}) = ${c}  →  L(${c}) = ${L(c%M, Math.floor(c/M))}`;
+        ann.classList.add('active');
+      });
+      cell.addEventListener('mouseleave', () => ann.classList.remove('active'));
+      grid.appendChild(cell);
+    }
+  }
+
+  const lbl = document.createElement('div');
+  lbl.style.cssText = 'font-family:var(--mono);font-size:9.5px;color:var(--ink3);text-align:center;margin-top:6px;';
+  lbl.textContent = `← dim 0 (M=${M}) →  /  ↕ dim 1 (N=${N})`;
+  gc.appendChild(grid);
+  gc.appendChild(lbl);
+}
+
+makeGrid('compact-colmaj-grid','compact-colmaj-ann', 4,8,
+  (m,n)=>m*1+n*4, k=>k, 1, 4);
+makeGrid('compact-rowmaj-grid','compact-rowmaj-ann', 4,8,
+  (m,n)=>m*8+n*1, k=>{ const a=k%8,b=Math.floor(k/8); return a*4+b*1; }, 8, 1);
+
+// ── §4 Vectorization ──────────────────────────────────────
+// Figure 8a: A = (4,4):(1,4)  B = ((2,2),4):((1,8),2)
+// Source A offsets for (row,col):
+function LA_8a(i) { const m=i%4,n=Math.floor(i/4); return m*1+n*4; }
+// Destination B: shape ((2,2),4), stride ((1,8),2)
+// natural coord for i in (4,4):
+// first dim has shape (2,2): a=i%2, b=floor(i/2)%2, second dim: c=floor(i/4)
+function LB_8a(i) {
+  const m = i % 4, n = Math.floor(i/4);
+  // B stride: ((1,8),2) with shape ((2,2),4)
+  const a = m%2, bv = Math.floor(m/2);
+  return a*1 + bv*8 + n*2;
+}
+// B‡: B right-inverse is (2,4,2):(1,4,2) — maps k to a coord in B's natural space
+function LBri_8a(k) {
+  // shape (2,4,2) stride (1,4,2)
+  const a = k % 2, b = Math.floor(k/2)%4, c = Math.floor(k/8);
+  return a*1 + b*4 + c*2;
+}
+// A ∘ B‡: compute A(B‡(k)) for k=0..15
+function compABri_8a(k) { return LA_8a(LBri_8a(k)); }
+
+function renderVecFig(label_a, label_b, size, LA, LB, compFn, common_k,
+                       grid_a_id, grid_b_id, compose_id, chips_id, ann_id) {
+  const M = 4, N = size/4;
+
+  // Common offsets are those where offset is in {0..common_k-1}
+  // For 8a: common offsets are 0,1 (the first 2)
+  // Actually: the common elements are those where LA(i) = LB(i) for first K
+  // We identify common by: source coords that map to offsets in [0, common_k-1]
+  const commonOffsets = new Set();
+  for (let k = 0; k < common_k; k++) commonOffsets.add(k);
+
+  function makeVecGrid(cid, L, color) {
+    const gc = document.getElementById(cid);
+    if (!gc) return;
+    gc.innerHTML = '';
+    const g = document.createElement('div');
+    g.className = 'vec-grid';
+    g.style.gridTemplateColumns = `repeat(${M}, 42px)`;
+    for (let n=0;n<N;n++) for (let m=0;m<M;m++) {
+      const i = m+n*M, off = L(i);
+      const isCommon = commonOffsets.has(off);
+      const cell = document.createElement('div');
+      cell.className = 'v-cell' + (isCommon ? ' common' : '');
+      cell.textContent = off;
+      g.appendChild(cell);
+    }
+    gc.appendChild(g);
+  }
+
+  makeVecGrid(grid_a_id, LA, 'accent');
+  makeVecGrid(grid_b_id, LB, 'accent2');
+
+  // Compose output
+  const compEl = document.getElementById(compose_id);
+  let html = '';
+  for (let k=0; k<size; k++) {
+    const v = compFn(k);
+    const isId = (v === k);
+    html += `<span style="color:var(--ink3)">k=${k}: </span>`;
+    html += isId
+      ? `<span class="ok">(A∘B‡)(${k}) = ${v} ← identity</span>`
+      : `<span style="color:var(--ink2)">(A∘B‡)(${k}) = ${v}</span>`;
+    html += '  ';
+    if ((k+1)%4===0) html += '\n';
+  }
+  compEl.innerHTML = html;
+
+  // Chips
+  document.getElementById(chips_id).innerHTML = `
+    <div class="chip ok"><span class="ck">max_common_layout size </span><span class="cv">${common_k}</span></div>
+    <div class="chip"><span class="ck">elements/instruction </span><span class="cv">${common_k}</span></div>
+  `;
+
+  document.getElementById(ann_id).textContent =
+    `Green = first ${common_k} physical offsets, shared layout between source and destination`;
+}
+
+// Figure 8b: both hierarchical, K=4
+function LA_8b(i) {
+  // ((2,2),(2,2)):((8,2),(4,1))
+  const a=i%2, b=Math.floor(i/2)%2, c=Math.floor(i/4)%2, d=Math.floor(i/8);
+  return a*8+b*2+c*4+d*1;
+}
+function LB_8b(i) {
+  // ((2,2),(2,2)):((4,2),(8,1))
+  const a=i%2, b=Math.floor(i/2)%2, c=Math.floor(i/4)%2, d=Math.floor(i/8);
+  return a*4+b*2+c*8+d*1;
+}
+// B‡ for 8b: (2,2,2,2):(8,2,1,4)
+function LBri_8b(k) {
+  const a=k%2, b=Math.floor(k/2)%2, c=Math.floor(k/4)%2, d=Math.floor(k/8);
+  return a*8+b*2+c*1+d*4;
+}
+function compABri_8b(k) { return LA_8b(LBri_8b(k)); }
+
+renderVecFig('A','B',16, LA_8a, LB_8a, compABri_8a, 2,
+  'vec-a-grid-8a','vec-b-grid-8a','vec-compose-8a','vec-chips-8a','vec-ann-8a');
+renderVecFig('A2','B2',16, LA_8b, LB_8b, compABri_8b, 4,
+  'vec-a-grid-8b','vec-b-grid-8b','vec-compose-8b','vec-chips-8b','vec-ann-8b');
+
+// ── §5 Left-inverse trace ─────────────────────────────────
+const LI_PRESETS = [
+  {
+    desc: '(4,8):(1,4)',
+    L: i => { const m=i%4,n=Math.floor(i/4); return m*1+n*4; },
+    Li_desc: '32 : 1',
+    // L†(off) = off (since bijective)
+    Li: off => off,
+    L_size: 32, Li_size: 32,
+    shapeStr: '(4,8)', strideStr: '(1,4)',
+    LiShapeStr: '32', LiStrideStr: '1',
+  },
+  {
+    desc: '(4,8):(8,1)',
+    L: i => { const m=i%4,n=Math.floor(i/4); return m*8+n*1; },
+    Li_desc: '(8,4):(4,1)',
+    // L(i) = row*8 + col. L†(off) = col_major index from (8,4) layout
+    Li: off => { const a=off%8, b=Math.floor(off/8); return a*4+b; },
+    L_size: 32, Li_size: 32,
+    shapeStr: '(4,8)', strideStr: '(8,1)',
+    LiShapeStr: '(8,4)', LiStrideStr: '(4,1)',
+  },
+  {
+    desc: '(3,7,5):(5,15,1)',
+    L: i => { const m=i%3,n=Math.floor(i/3)%7,p=Math.floor(i/21); return m*5+n*15+p*1; },
+    Li_desc: '(5,21):(21,1)',
+    Li: off => { const a=off%5, b=Math.floor(off/5); return a*21+b; },
+    L_size: 105, Li_size: 105,
+    shapeStr: '(3,7,5)', strideStr: '(5,15,1)',
+    LiShapeStr: '(5,21)', LiStrideStr: '(21,1)',
+  },
+];
+
+function renderLI() {
+  const idx = parseInt(document.getElementById('li-preset').value);
+  const k = Math.min(parseInt(document.getElementById('li-k').value)||5, LI_PRESETS[idx].L_size - 1);
+  const p = LI_PRESETS[idx];
+  document.getElementById('li-k').max = p.L_size - 1;
+
+  const off = p.L(k);
+  const coord_back = p.Li(off);
+  const roundtrip = p.L(coord_back);
+  const pass = (roundtrip === off);
+
+  document.getElementById('li-trace').innerHTML = `
+    <span style="color:var(--ink3)">Layout         </span><span style="color:var(--lavender)">${p.desc}</span><br>
+    <span style="color:var(--ink3)">Left-inverse   </span><span style="color:var(--accent3)">${p.Li_desc}</span><br>
+    <br>
+    <span style="color:var(--ink3)">Coordinate k   </span><span style="color:var(--accent)">${k}</span><br>
+    <span style="color:var(--ink3)">Offset L(k)    </span><span style="color:var(--ink)">${off}</span><br>
+    <span style="color:var(--ink3)">L†(L(k))       </span><span style="color:var(--accent2)">${coord_back}</span>  <span style="color:var(--ink3)">(should be ${k})</span><br>
+    <span style="color:var(--ink3)">Round-trip     </span><span style="${pass?'color:var(--accent3)':'color:var(--accent)'}">${pass ? '✓ L†(L(k)) = k' : '✗ mismatch'}</span>
+  `;
+  const ann = document.getElementById('li-ann');
+  ann.textContent = pass
+    ? `Starting from coordinate ${k} → offset ${off} → back to coordinate ${coord_back}. Round-trip succeeds.`
+    : `Round-trip failed: L(${coord_back}) = ${roundtrip} ≠ ${off}`;
+  ann.className = 'ann' + (pass ? '' : ' active');
+}
+
+document.getElementById('li-preset').addEventListener('change', renderLI);
+document.getElementById('li-k').addEventListener('input', renderLI);
+renderLI();
+
+// ── §6 Admissibility ──────────────────────────────────────
+// Data layout A = (4,4):(2,8), image = even offsets 0,2,4,...,30
+// A†: left_inverse = (2,16):(16,1)  → maps offset to: a = floor(off/2)%2*16 + floor(off/16)*1
+// Simplified: A(i) = (i%4)*2 + floor(i/4)*8
+// A†(off) = floor(off/2) % 16   (rough model — works for even offsets)
+
+function A_data(i) { return (i%4)*2 + Math.floor(i/4)*8; }
+
+// A† = (2,16):(16,1)
+// shape (2,16) stride (16,1):  coord a=k%2, b=floor(k/2)  → offset = a*16+b*1
+// But we need A†: offset → coord in [0,16)
+// A(i) = 2*(i%4) + 8*floor(i/4). Invert: given off, coord = off/2 if even (roughly)
+// Full model from notebook: A† = (2,16):(16,1), meaning A†(off) = (off%16)*16 + floor(off/16)*1
+// But the notebook says A†(T(i)): i=1, T(i)=1 → A†(1)=16
+// So: A† shape (2,16) stride (16,1): A†(k) = (k%2)*16 + floor(k/2)*1
+// Let's verify: k=0 → 0*16+0=0 ✓; k=1 → 1*16+0=16; k=2 → 0*16+1=1; k=3 → 1*16+1=17
+function A_li(off) {
+  // A† = (2,16):(16,1) — maps raw offset index to a coordinate in A's domain
+  // domain size = 2*16=32
+  const a = off % 2, b = Math.floor(off/2);
+  if (b >= 16) return off; // out of domain
+  return a * 16 + b * 1;
+}
+
+const ADM_INSTRS = {
+  good:  { stride: 2, size: 4, label: 'T = 4:2' },
+  bad:   { stride: 1, size: 4, label: 'T = 4:1' },
+  good2: { stride: 4, size: 4, label: 'T = 4:4' },
+  bad2:  { stride: 3, size: 4, label: 'T = 4:3' },
+};
+
+// Build the data grid (4×4 grid showing offsets of A)
+function buildAdmDataGrid() {
+  const gc = document.getElementById('adm-data-grid');
+  gc.innerHTML = '';
+  const g = document.createElement('div');
+  g.className = 'grid-vis';
+  g.style.gridTemplateColumns = 'repeat(4, 44px)';
+  for (let n=0;n<4;n++) for (let m=0;m<4;m++) {
+    const i=m+n*4, off=A_data(i);
+    const cell = document.createElement('div');
+    cell.className = 'g-cell';
+    cell.id = 'adm-dc-'+off;
+    cell.style.cssText = 'width:44px;height:44px;';
+    cell.innerHTML = `<span class="gc">(${m},${n})</span><span class="go">${off}</span>`;
+    g.appendChild(cell);
+  }
+  gc.appendChild(g);
+}
+buildAdmDataGrid();
+
+function renderAdm() {
+  const key = document.getElementById('adm-instr').value;
+  const instr = ADM_INSTRS[key];
+  const instrOffsets = Array.from({length:instr.size}, (_,i) => i*instr.stride);
+
+  // Reset data grid highlights
+  document.querySelectorAll('[id^="adm-dc-"]').forEach(c => {
+    c.classList.remove('sel','peer');
+  });
+
+  // Instruction tape
+  const tapeEl = document.getElementById('adm-instr-tape');
+  tapeEl.innerHTML = '';
+  instrOffsets.forEach(off => {
+    const tc = document.createElement('div');
+    tc.style.cssText = 'display:inline-flex;flex-direction:column;align-items:center;width:44px;height:48px;border:1px solid var(--border);border-radius:3px;background:var(--bg2);font-family:var(--mono);font-size:11px;margin-right:3px;justify-content:center;';
+    tc.innerHTML = `<span style="color:var(--ink3);font-size:9px">${off}</span>`;
+    tapeEl.appendChild(tc);
+  });
+
+  // Rows
+  const rowsEl = document.getElementById('adm-rows');
+  rowsEl.innerHTML = '';
+  let allPass = true;
+  const admResult = [];
+  instrOffsets.forEach((off, i) => {
+    const coord = A_li(off);
+    const rt = A_data(coord % 16);
+    const pass = (rt === off);
+    if (!pass) allPass = false;
+    admResult.push({i, off, coord, rt, pass});
+
+    const row = document.createElement('div');
+    row.className = 'adm-row ' + (pass ? 'pass' : 'fail');
+    row.innerHTML = `
+      <span class="ai">i=${i}</span>
+      <span class="av">T(i)=${off} → A†=${coord} → A(A†)=${rt}</span>
+      <span class="aok">${pass ? '✓' : '✗'}</span>
+    `;
+    // Highlight data grid cell
+    row.addEventListener('mouseenter', () => {
+      const dc = document.getElementById('adm-dc-'+off);
+      if (dc) dc.classList.add('sel');
+    });
+    row.addEventListener('mouseleave', () => {
+      const dc = document.getElementById('adm-dc-'+off);
+      if (dc) dc.classList.remove('sel');
+    });
+    rowsEl.appendChild(row);
+  });
+
+  // Chips
+  const chipsEl = document.getElementById('adm-chips');
+  chipsEl.innerHTML = `
+    <div class="chip ${allPass?'ok':'bad'}">
+      <span class="ck">admissible </span><span class="cv">${allPass ? '✓ yes' : '✗ no'}</span>
+    </div>
+    <div class="chip">
+      <span class="ck">instruction </span><span class="cv">${instr.label}</span>
+    </div>
+    <div class="chip">
+      <span class="ck">offsets checked </span><span class="cv">${instr.size}</span>
+    </div>
+  `;
+
+  // Coord map (only when admissible)
+  const coordMapEl = document.getElementById('adm-coord-map');
+  const coordContainer = document.getElementById('adm-coord-map-container');
+  if (allPass) {
+    coordContainer.style.display = 'block';
+    let html = '';
+    admResult.forEach(({i, off, coord}) => {
+      html += `<span style="color:var(--ink3)">instr[${i}]</span> → logical coord <span style="color:var(--lavender)">${coord}</span> → offset <span style="color:var(--accent3)">${off}</span>\n`;
+    });
+    coordMapEl.innerHTML = html;
+  } else {
+    coordContainer.style.display = 'none';
+  }
+}
+
+document.getElementById('adm-instr').addEventListener('change', renderAdm);
+renderAdm();
+</script>
+
+<!-- Theme toggle script -->
+<script>
+(function(){
+  const saved = localStorage.getItem('theme');
+  const theme = saved || 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = document.getElementById('themeToggle');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+  }
+})();
+</script>
+</body>
+</html>

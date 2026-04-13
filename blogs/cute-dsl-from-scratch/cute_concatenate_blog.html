@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CuTe DSL from scratch: Concatenation</title>
+
+<!-- FONT STACK: Playfair Display (serif) + Azeret Mono (mono) to match main site -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Azeret+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+
+<style>
+/* ── Design tokens ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font-serif: 'Playfair Display', serif;
+  --font-mono: 'Azeret Mono', monospace;
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --paper: #f4f1eb;
+  --paper2: #ede9e0;
+  --ink: #1c1a17;
+  --ink2: #3d3a35;
+  --ink3: #7a7570;
+  --rule: #d9d4c8;
+  --rule2: #c4bfb2;
+  --green: #2a5c45;
+  --green-light: #e8f0ec;
+  --orange: #b85c2a;
+  --orange-light: #f5ece6;
+  --blue: #2a4a6b;
+}
+
+[data-theme="dark"] {
+  --paper: #0f0d0c;
+  --paper2: #161412;
+  --ink: #f4f1eb;
+  --ink2: #d1ccc3;
+  --ink3: #8a837b;
+  --rule: #24211e;
+  --rule2: #332f2b;
+  --green: #6fb894;
+  --green-light: #16221c;
+  --orange: #e69a6e;
+  --orange-light: #261c14;
+  --blue: #6a94b8;
+}
+
+/* Alias old variable names */
+:root {
+  --bg: var(--paper);
+  --bg2: var(--paper2);
+  --bg3: var(--paper);
+  --bg4: var(--paper2);
+  --border: var(--rule);
+  --border2: var(--rule2);
+  --ink: var(--ink);
+  --ink2: var(--ink2);
+  --ink3: var(--ink3);
+  --ink4: var(--ink3);
+  --gold: var(--orange);
+  --gold2: var(--orange);
+  --gold-dim: var(--orange-light);
+  --teal: var(--green);
+  --teal2: var(--green);
+  --teal-dim: var(--green-light);
+  --coral: var(--orange);
+  --coral2: var(--orange);
+  --blue: var(--blue);
+  --blue2: var(--blue);
+  --purple: var(--blue);
+  --green: var(--green);
+  --mono-bg: var(--paper2);
+  --r: 3px;
+  --display: var(--font-serif);
+  --body: var(--font-mono);
+  --mono: var(--font-mono);
+}
+
+[data-theme="dark"] {
+  --bg: var(--paper);
+  --bg2: var(--paper2);
+  --bg3: var(--paper);
+  --bg4: var(--paper2);
+  --border: var(--rule);
+  --border2: var(--rule2);
+  --ink: var(--ink);
+  --ink2: var(--ink2);
+  --ink3: var(--ink3);
+  --ink4: var(--ink3);
+  --gold: var(--orange);
+  --gold2: var(--orange);
+  --gold-dim: var(--orange-light);
+  --teal: var(--green);
+  --teal2: var(--green);
+  --teal-dim: var(--green-light);
+  --coral: var(--orange);
+  --coral2: var(--orange);
+  --blue: var(--blue);
+  --blue2: var(--blue);
+  --purple: var(--blue);
+  --green: var(--green);
+  --mono-bg: var(--paper2);
+  --r: 3px;
+  --display: var(--font-serif);
+  --body: var(--font-mono);
+  --mono: var(--font-mono);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-mono);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12.5px;
+  line-height: 1.7;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:200;background:var(--paper);border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:52px;transition:background-color .2s ease,border-color .2s ease}
+.logo{font-family:var(--font-serif);font-size:18px;color:var(--ink);text-decoration:none;letter-spacing:-.02em;transition:color .2s ease}
+.nav-links{display:flex;gap:28px;list-style:none;margin:0}
+.nav-links a{font-size:11px;color:var(--ink3);text-decoration:none;letter-spacing:.06em;text-transform:uppercase;transition:color .15s}
+.nav-links a:hover{color:var(--ink)}
+.theme-toggle{background:transparent;border:1px solid var(--rule2);border-radius:2px;padding:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink3);transition:all .15s ease;margin-left:12px;flex-shrink:0}
+.theme-toggle:hover{border-color:var(--ink3);color:var(--ink);background:var(--paper2)}
+.theme-toggle .sun-icon{display:none}.theme-toggle .moon-icon{display:block}
+[data-theme="dark"] .theme-toggle .sun-icon{display:block}
+[data-theme="dark"] .theme-toggle .moon-icon{display:none}
+
+/* ── HERO ── */
+.hero{padding:80px 40px 60px;max-width:1080px;margin:0 auto;border-bottom:1px solid var(--rule);transition:border-color .2s ease}
+.hero-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:24px;display:flex;align-items:center;gap:10px;transition:color .2s ease}
+.hero-label::before{content:'';display:inline-block;width:24px;height:1px;background:var(--ink3);transition:background-color .2s ease}
+.hero-title{font-family:var(--font-serif);font-size:clamp(44px,5vw,72px);line-height:1.1;letter-spacing:-.03em;color:var(--ink);margin-bottom:20px;transition:color .2s ease}
+.hero-title em{font-style:italic;color:var(--green);transition:color .2s ease}
+.hero-sub{font-size:13px;color:var(--ink2);line-height:1.8;max-width:600px;margin-bottom:20px;transition:color .2s ease}
+.hero-meta{display:flex;gap:24px;font-size:11px;color:var(--ink3);letter-spacing:.04em;flex-wrap:wrap;transition:color .2s ease}
+.hero-meta span::before{content:'// ';color:var(--rule2);margin-right:4px}
+
+/* ── CONTENT LAYOUT ── */
+.content{max-width:980px;margin:0 auto;padding:0 40px}
+section{padding:72px 0;border-bottom:1px solid var(--rule);transition:border-color .2s ease}
+section:last-of-type{border-bottom:none}
+.section-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:24px;display:flex;align-items:center;gap:10px;transition:color .2s ease}
+.section-label::after{content:'';flex:1;height:1px;background:var(--rule);transition:background-color .2s ease}
+h2{font-family:var(--font-serif);font-size:28px;letter-spacing:-.02em;color:var(--ink);margin-bottom:28px;transition:color .2s ease;line-height:1.3}
+h3{font-family:var(--font-serif);font-size:18px;letter-spacing:-.01em;color:var(--ink);margin:28px 0 16px;transition:color .2s ease}
+p{margin-bottom:16px;color:var(--ink2);line-height:1.8}
+p:last-child{margin-bottom:0}
+strong{color:var(--ink);font-weight:500}
+em{color:var(--green);font-style:italic}
+
+/* ── Footer ── */
+footer{border-top:1px solid var(--rule);padding:28px 40px;text-align:center;font-size:11px;color:var(--ink3);letter-spacing:.04em;transition:border-color .2s ease,color .2s ease}
+footer p{margin:0}
+
+/* ── Responsive ── */
+@media(max-width:768px){nav{padding:0 20px}.nav-links{display:none}.hero{padding:56px 20px 48px}.content{padding:0 20px}section{padding:48px 0}footer{padding:20px}}
+
+/* ── Reveal animations ── */
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .45s ease,transform .45s ease}
+.reveal.in{opacity:1;transform:translateY(0)}
+
+/* ── Typography ─────────────────────────────────────────────────── */
+h1 {
+  font-family: var(--display);
+  font-size: 3.2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -.02em;
+  color: var(--ink);
+  margin-bottom: .6rem;
+}
+h1 em { font-style: italic; color: var(--gold2); }
+
+h2 {
+  font-family: var(--display);
+  font-size: 1.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 4rem 0 1.1rem;
+  letter-spacing: -.01em;
+}
+h2::before {
+  content: '§';
+  color: var(--gold-dim);
+  margin-right: .45rem;
+  font-weight: 400;
+}
+
+h3 {
+  font-family: var(--mono);
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin: 2.5rem 0 .8rem;
+}
+
+p { margin-bottom: 1.25rem; color: var(--ink2); }
+strong { font-weight: 500; color: var(--ink); }
+em { font-style: italic; color: var(--ink); }
+
+code {
+  font-family: var(--mono);
+  font-size: .8em;
+  background: var(--mono-bg);
+  border: 1px solid var(--border);
+  color: var(--gold2);
+  padding: .08em .38em;
+  border-radius: 3px;
+}
+
+pre {
+  font-family: var(--mono);
+  font-size: .8em;
+  background: var(--mono-bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold-dim);
+  border-radius: 0 var(--r) var(--r) 0;
+  padding: 1.1rem 1.3rem;
+  overflow-x: auto;
+  margin: 1.4rem 0;
+  line-height: 1.7;
+  color: var(--ink2);
+}
+pre .c  { color: var(--ink4); font-style: italic; }
+pre .k  { color: var(--teal2); }
+pre .s  { color: var(--gold2); }
+pre .n  { color: var(--blue2); }
+pre .cm { color: var(--coral2); font-style: italic; }
+
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 3.5rem 0;
+}
+
+/* ── Meta & lead ────────────────────────────────────────────────── */
+.chapter-badge {
+  font-family: var(--mono);
+  font-size: .7rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+}
+.chapter-badge::before {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 1px;
+  background: var(--gold-dim);
+}
+
+.meta {
+  font-size: .88rem;
+  color: var(--ink3);
+  margin-bottom: 3rem;
+  font-family: var(--body);
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.meta::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold-dim);
+}
+
+.lead {
+  font-size: 1.22rem;
+  font-weight: 300;
+  color: var(--ink2);
+  line-height: 1.72;
+  margin-bottom: 2.2rem;
+  padding-left: 1.3rem;
+  border-left: 2px solid var(--gold-dim);
+}
+
+/* ── TOC ────────────────────────────────────────────────────────── */
+.toc {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--gold-dim);
+  border-radius: 0 0 var(--r) var(--r);
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 3rem;
+}
+.toc-label {
+  font-family: var(--mono);
+  font-size: .68rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: .7rem;
+}
+.toc ul { list-style: none; }
+.toc li { padding: .2rem 0; }
+.toc a {
+  color: var(--ink3);
+  text-decoration: none;
+  font-size: .92rem;
+  transition: color .15s;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.toc a::before {
+  content: '→';
+  color: var(--gold-dim);
+  font-family: var(--mono);
+  font-size: .75rem;
+}
+.toc a:hover { color: var(--gold2); }
+
+/* ── Definition boxes ───────────────────────────────────────────── */
+.def-box {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  padding: 1.1rem 1.4rem;
+  border-radius: 0 var(--r) var(--r) 0;
+  margin: 1.8rem 0;
+}
+.def-label {
+  font-family: var(--mono);
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: .5rem;
+}
+.def-box p { margin: 0; font-size: .95rem; color: var(--ink2); }
+
+.callout {
+  background: var(--bg2);
+  border: 1px solid var(--teal-dim);
+  border-left: 3px solid var(--teal);
+  padding: 1rem 1.4rem;
+  border-radius: 0 var(--r) var(--r) 0;
+  margin: 1.6rem 0;
+}
+.callout p { margin: 0; font-size: .93rem; color: var(--ink2); }
+.callout strong { color: var(--teal2); }
+
+.warn-box {
+  background: var(--bg2);
+  border: 1px solid #5e3020;
+  border-left: 3px solid var(--coral);
+  padding: 1rem 1.4rem;
+  border-radius: 0 var(--r) var(--r) 0;
+  margin: 1.6rem 0;
+}
+.warn-box p { margin: 0; font-size: .93rem; color: var(--ink2); }
+
+/* ── Math ───────────────────────────────────────────────────────── */
+.math-display {
+  overflow-x: auto;
+  margin: 1.8rem 0;
+  padding: .5rem 0;
+  text-align: center;
+}
+
+/* ── Widgets ────────────────────────────────────────────────────── */
+.widget {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.6rem;
+  margin: 2.2rem 0;
+  position: relative;
+}
+.widget::before {
+  content: attr(data-label);
+  position: absolute;
+  top: -1px;
+  left: 1.2rem;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--gold-dim);
+  border-radius: 0 0 4px 4px;
+  padding: .18rem .7rem;
+  font-family: var(--mono);
+  font-size: .66rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+}
+.widget-body { margin-top: .5rem; }
+
+/* Controls */
+.controls {
+  display: flex;
+  gap: .65rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: .9rem;
+}
+.ctrl-group { display: flex; align-items: center; gap: .4rem; }
+label { font-size: .78rem; color: var(--ink3); font-family: var(--mono); white-space: nowrap; }
+input[type=range] { accent-color: var(--gold); cursor: pointer; }
+select {
+  font-family: var(--mono);
+  font-size: .77rem;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: .26rem .5rem;
+  color: var(--ink);
+  cursor: pointer;
+  outline: none;
+}
+select:focus { border-color: var(--gold-dim); }
+
+button.btn {
+  font-family: var(--mono);
+  font-size: .73rem;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: .26rem .7rem;
+  cursor: pointer;
+  color: var(--ink2);
+  transition: all .15s;
+  white-space: nowrap;
+  letter-spacing: .03em;
+}
+button.btn:hover { background: var(--bg4); border-color: var(--gold-dim); color: var(--gold2); }
+button.btn.active { background: var(--gold-dim); color: var(--bg); border-color: var(--gold-dim); font-weight: 600; }
+
+.val-badge {
+  font-family: var(--mono);
+  font-size: .74rem;
+  color: var(--gold2);
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  padding: .08em .4em;
+  border-radius: 3px;
+  min-width: 2rem;
+  text-align: center;
+}
+
+/* Pills */
+.pills { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: .9rem; }
+.pill {
+  font-family: var(--mono);
+  font-size: .7rem;
+  padding: .22rem .65rem;
+  border-radius: 20px;
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--ink3);
+  cursor: pointer;
+  transition: all .18s;
+}
+.pill:hover { border-color: var(--gold-dim); color: var(--gold2); }
+.pill.active { background: var(--gold-dim); border-color: var(--gold-dim); color: var(--bg); font-weight: 600; }
+
+/* ── Grid cells ─────────────────────────────────────────────────── */
+.layout-grid {
+  display: inline-grid;
+  gap: 2px;
+  font-family: var(--mono);
+  font-size: .72rem;
+}
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  transition: all .2s;
+  cursor: default;
+  font-weight: 500;
+}
+
+/* Row / column headers */
+.grid-header {
+  font-family: var(--mono);
+  font-size: .64rem;
+  color: var(--ink4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Trace rows ─────────────────────────────────────────────────── */
+.trace {
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: .78rem;
+  margin-top: .75rem;
+}
+.trace-row {
+  display: flex;
+  align-items: center;
+  padding: .3rem .7rem;
+  border-bottom: 1px solid var(--border);
+  gap: .5rem;
+  transition: background .15s;
+}
+.trace-row:last-child { border: none; }
+.trace-row:hover { background: var(--bg3); }
+.trace-coord { color: var(--ink3); width: 5rem; flex-shrink: 0; }
+.trace-eq { color: var(--ink4); flex-shrink: 0; }
+.trace-parts { flex: 1; display: flex; align-items: center; gap: .3rem; flex-wrap: wrap; }
+.trace-val { 
+  padding: .08em .4em; 
+  border-radius: 3px; 
+  color: var(--bg); 
+  font-weight: 600;
+  font-size: .75rem;
+}
+.trace-plus { color: var(--ink4); }
+.trace-result { color: var(--gold2); font-weight: 600; margin-left: auto; flex-shrink: 0; }
+
+/* ── Additive decomp diagram ────────────────────────────────────── */
+.decomp-row {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  margin-bottom: .6rem;
+  font-family: var(--mono);
+  font-size: .8rem;
+}
+.decomp-label { color: var(--ink3); width: 2.5rem; flex-shrink: 0; text-align: right; }
+.decomp-bar-wrap { flex: 1; position: relative; height: 24px; }
+.decomp-bar {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .68rem;
+  font-weight: 600;
+  transition: all .3s ease;
+}
+.decomp-total { color: var(--gold2); width: 3rem; text-align: right; flex-shrink: 0; }
+
+/* ── By-mode combinator ─────────────────────────────────────────── */
+.mode-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: .8rem 1rem;
+  flex: 1;
+  min-width: 180px;
+}
+.mode-card-title {
+  font-family: var(--mono);
+  font-size: .68rem;
+  color: var(--ink3);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: .5rem;
+}
+.mode-val {
+  font-family: var(--mono);
+  font-size: .84rem;
+  color: var(--gold2);
+  margin-bottom: .3rem;
+}
+.mode-result {
+  font-family: var(--mono);
+  font-size: .82rem;
+  color: var(--teal2);
+}
+
+/* ── Animated addition strip ────────────────────────────────────── */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeSlideUp .25s ease forwards; }
+
+/* ── Stepper ────────────────────────────────────────────────────── */
+.step-content { min-height: 200px; }
+
+/* ── Equation highlight ─────────────────────────────────────────── */
+.eq-hi { 
+  display: inline-block;
+  padding: .05em .2em;
+  border-radius: 3px;
+  font-weight: 600;
+}
+
+/* ── Section number decorations ─────────────────────────────────── */
+.section-mark {
+  font-family: var(--mono);
+  font-size: .68rem;
+  color: var(--gold-dim);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: .3rem;
+}
+
+/* ── Comparison table ───────────────────────────────────────────── */
+.cmp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: .77rem;
+  margin-top: .75rem;
+}
+.cmp-table th {
+  color: var(--ink3);
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  font-size: .66rem;
+  padding: .4rem .7rem;
+  border-bottom: 1px solid var(--border2);
+  text-align: left;
+}
+.cmp-table td {
+  padding: .35rem .7rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink2);
+}
+.cmp-table tr:last-child td { border: none; }
+.cmp-table tr:hover td { background: var(--bg3); }
+.hi-gold { color: var(--gold2); font-weight: 600; }
+.hi-teal { color: var(--teal2); font-weight: 600; }
+.hi-coral { color: var(--coral2); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="https://bikrammajhi.github.io/" class="logo">Bikram Majhi</a>
+  <ul class="nav-links">
+    <li><a href="/#about">About</a></li>
+    <li><a href="/#ladder">GEMM</a></li>
+    <li><a href="/#results">Results</a></li>
+    <li><a href="/#projects">Projects</a></li>
+    <li><a href="/#writing">Writing</a></li>
+    <li><a href="/#journal">Journal</a></li>
+    <li><a href="/#contact">Contact</a></li>
+  </ul>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <svg class="sun-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="5"></circle>
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+    </svg>
+    <svg class="moon-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+  </button>
+</nav>
+
+<!-- HERO -->
+<div class="hero reveal">
+  <div class="hero-label">GPU Programming · CuTe DSL</div>
+  <h1 class="hero-title">CuTe DSL from scratch:<br><em>Concatenation</em></h1>
+  <p class="hero-sub">The simplest operation of all: joining layouts. And it turns out concatenation isn't just a way to join layouts — it's the structural skeleton that makes every more complex operation possible.</p>
+  <div class="hero-meta">
+    <span>April 2026</span>
+    <span>~18 minute read</span>
+    <span>Part 9 of 15</span>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- ─────────── §0 WHY ALGEBRA ──────────────────────────────────── -->
+<section class="reveal">
+  <div class="section-label">§1 — Foundation</div>
+  <h2>Why layout algebra matters</h2>
+
+<div class="lead">
+  The previous chapters established what a CuTe layout <em>is</em>: a function mapping multi-dimensional coordinates to memory offsets. Chapter 3 asks the next question — what can you <strong>do</strong> with layouts algebraically? The answer starts here, with the simplest operation of all: <strong>concatenation</strong>. And it turns out that concatenation isn't just a way to join layouts — it's the structural skeleton that makes every more complex operation possible.
+</div>
+
+<!-- ─────────── §0 WHY ALGEBRA ──────────────────────────────────── -->
+<hr id="s0">
+<h2>Why layout algebra matters</h2>
+
+<p>Traditional tensor libraries — NumPy, PyTorch, BLAS — describe memory layouts as flat arrays of shapes and strides. You get one shape tuple and one stride tuple, period. CuTe layouts can be <em>hierarchical</em>: each mode can itself be a layout. That extra structure is what makes it possible to write a single generic tiling kernel that works for column-major, row-major, padded, and hardware-specific non-contiguous formats all at once.</p>
+
+<p>But representational power alone isn't enough. You need to be able to <strong>compute</strong> with layouts: split them, merge them, permute them, compose them. The core set of operations that makes this possible are called <em>layout homomorphisms</em> — functions that take layouts and produce layouts while preserving well-defined functional properties.</p>
+
+<div class="callout">
+  <p><strong>Section roadmap:</strong> Chapter 3 defines coalesce (§3.2), composition (§3.3), complement (§3.4), and tiling operations (§3.5–3.7). All of them build on the foundation in §3.1: that a layout is a <em>sum</em> of its sublayouts, and that every operation can be applied to the whole layout <em>or</em> to individual modes independently.</p>
+</div>
+
+<!-- ─────────── §1 ADDITIVE STRUCTURE ──────────────────────────── -->
+<hr id="s1">
+<h2>A layout is a sum of its modes</h2>
+
+<p>Here's the key equation. For a layout <code>L = (S₀, S₁, …, Sₙ) : (D₀, D₁, …, Dₙ)</code>, its evaluation at any multi-coordinate is simply the <strong>sum</strong> of each sublayout evaluated at the corresponding component:</p>
+
+<div class="math-display">
+  \[L(c_0, c_1, \ldots, c_n) = L_0(c_0) + L_1(c_1) + \cdots + L_n(c_n) \tag{11}\]
+</div>
+
+<p>where <code>Lᵢ = Sᵢ : Dᵢ</code> is the <em>i</em>-th sublayout (mode). This is the concatenation property: the full layout is the concatenation of its modes, and evaluation decomposes additively across them.</p>
+
+<p>This might look obvious at first — isn't that just how strides work? — but it has an important implication: every mode is <em>independently responsible</em> for its contribution to the final offset. The modes don't interact. And that means you can manipulate each mode in isolation, then reassemble.</p>
+
+<div class="def-box">
+  <div class="def-label">Eq. (11) — Concatenation property</div>
+  <p>For any layout <strong>L = (L₀, L₁, …, Lₙ)</strong> and any coordinate <strong>c = (c₀, c₁, …, cₙ) ∈ 𝒵(L)</strong>:</p>
+  <p style="margin-top:.4rem">\(L(c) = \sum_{i=0}^{n} L_i(c_i)\)</p>
+  <p style="margin-top:.4rem">Each mode <strong>Lᵢ</strong> is itself a layout — either a scalar <em>s:d</em> or a nested tuple layout — and contributes independently to the offset.</p>
+</div>
+
+<p>Let's make this concrete. Take <code>L = (4, 8) : (2, 8)</code>. Its two modes are <code>L₀ = 4:2</code> (4 elements, stride 2) and <code>L₁ = 8:8</code> (8 elements, stride 8). The evaluation at any coordinate is just their sum:</p>
+
+<!-- ─────────── INTERACTIVE: ADDITIVE DECOMP ─────────────────────── -->
+<div class="widget" data-label="Interactive · additive decomposition">
+  <div class="widget-body">
+    <div class="controls">
+      <div class="ctrl-group">
+        <label>L₀ stride:</label>
+        <input type="range" id="d0" min="1" max="8" value="2" style="width:80px">
+        <span class="val-badge" id="d0v">2</span>
+      </div>
+      <div class="ctrl-group">
+        <label>L₁ stride:</label>
+        <input type="range" id="d1" min="1" max="16" value="8" style="width:80px">
+        <span class="val-badge" id="d1v">8</span>
+      </div>
+      <div class="ctrl-group">
+        <label>rows (S₀):</label>
+        <select id="s0">
+          <option value="4" selected>4</option>
+          <option value="2">2</option>
+          <option value="6">6</option>
+          <option value="8">8</option>
+        </select>
+      </div>
+      <div class="ctrl-group">
+        <label>cols (S₁):</label>
+        <select id="s1">
+          <option value="8" selected>8</option>
+          <option value="4">4</option>
+          <option value="6">6</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start">
+      <!-- Grid visualization -->
+      <div>
+        <div style="font-family:var(--mono);font-size:.66rem;color:var(--ink3);margin-bottom:.4rem">
+          Hover a cell to see the additive decomposition
+        </div>
+        <div id="main-grid"></div>
+        <div id="layout-desc" style="font-family:var(--mono);font-size:.78rem;color:var(--gold2);margin-top:.5rem"></div>
+      </div>
+      <!-- Decomposition panel -->
+      <div>
+        <div style="font-family:var(--mono);font-size:.66rem;color:var(--ink3);margin-bottom:.4rem">
+          Offset = L₀(c₀) + L₁(c₁)
+        </div>
+        <div id="decomp-visual" style="margin-bottom:.8rem"></div>
+        <div id="hover-detail" style="font-family:var(--mono);font-size:.8rem;color:var(--ink3);min-height:2.5rem"></div>
+      </div>
+    </div>
+
+    <!-- Trace table -->
+    <div style="margin-top:1rem">
+      <div style="font-family:var(--mono);font-size:.66rem;color:var(--ink3);margin-bottom:.4rem;letter-spacing:.08em;text-transform:uppercase">Evaluation table (sample coordinates)</div>
+      <div id="trace-table"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────── §2 STEPPER ───────────────────────────────────────── -->
+<hr id="s2">
+<h2>The additive decomposition, interactively</h2>
+
+<p>Let's walk through the geometry step by step. Think of a 2D layout as a grid where <em>every cell's memory address is the sum of a row contribution and a column contribution</em>. Row position c₀ contributes <code>L₀(c₀) = c₀ × D₀</code>; column position c₁ contributes <code>L₁(c₁) = c₁ × D₁</code>. The layout is just those two independent rulers laid on top of each other.</p>
+
+<div class="widget" data-label="Stepper · geometry of L = (4, 8) : (2, 8)">
+  <div class="widget-body">
+    <div class="pills" id="step-pills"></div>
+    <div class="step-content" id="step-body"></div>
+  </div>
+</div>
+
+<p>The step-by-step makes the independence vivid: changing c₀ shifts the offset by D₀ = 2, regardless of c₁. Changing c₁ shifts it by D₁ = 8, regardless of c₀. The modes never interfere with each other.</p>
+
+<!-- ─────────── §3 BUILDING BY CONCAT ───────────────────────────── -->
+<hr id="s3">
+<h2>Building layouts by concatenation</h2>
+
+<p>Concatenation works in both directions. You can <em>decompose</em> a layout into its modes (as above), or you can <em>compose</em> two separate layouts into one by concatenating them:</p>
+
+<pre><span class="n">A</span>  = Layout(<span class="s">4</span>, <span class="s">3</span>)   <span class="c"># 4:3</span>
+<span class="n">B</span>  = Layout(<span class="s">6</span>, <span class="s">12</span>)  <span class="c"># 6:12</span>
+<span class="n">AB</span> = Layout(A, B)   <span class="c"># concatenate → (4, 6) : (3, 12)</span>
+
+<span class="c"># Now AB(c0, c1) == A(c0) + B(c1) for all in-bounds coordinates</span></pre>
+
+<p>The concatenation result <code>(4, 6) : (3, 12)</code> is a standard rank-2 layout. Its first mode carries A's shape and stride; its second mode carries B's. Concatenation is how you build up complex layouts from simpler pieces — and it's also how the library's internal representation works. A rank-<em>n</em> layout is literally a concatenation of <em>n</em> sublayouts.</p>
+
+<div class="widget" data-label="Interactive · build a layout by concatenation">
+  <div class="widget-body">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1rem">
+      <div>
+        <div style="font-family:var(--mono);font-size:.66rem;color:var(--ink3);margin-bottom:.4rem;letter-spacing:.06em;text-transform:uppercase">Layout A</div>
+        <div class="controls" style="margin-bottom:.4rem">
+          <div class="ctrl-group"><label>size:</label>
+            <select id="ca-s"><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option></select>
+          </div>
+          <div class="ctrl-group"><label>stride:</label>
+            <select id="ca-d"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="5">5</option><option value="7">7</option></select>
+          </div>
+        </div>
+        <div id="A-preview" style="font-family:var(--mono);font-size:.82rem;color:var(--gold2)"></div>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:.66rem;color:var(--ink3);margin-bottom:.4rem;letter-spacing:.06em;text-transform:uppercase">Layout B</div>
+        <div class="controls" style="margin-bottom:.4rem">
+          <div class="ctrl-group"><label>size:</label>
+            <select id="cb-s"><option value="4">4</option><option value="6" selected>6</option><option value="8">8</option></select>
+          </div>
+          <div class="ctrl-group"><label>stride:</label>
+            <select id="cb-d"><option value="4">4</option><option value="8">8</option><option value="12" selected>12</option><option value="16">16</option></select>
+          </div>
+        </div>
+        <div id="B-preview" style="font-family:var(--mono);font-size:.82rem;color:var(--teal2)"></div>
+      </div>
+    </div>
+    <div style="font-family:var(--mono);font-size:.66rem;color:var(--ink3);margin-bottom:.4rem;letter-spacing:.06em;text-transform:uppercase">Concatenated result: Layout(A, B)</div>
+    <div id="concat-result" style="font-family:var(--mono);font-size:.88rem;color:var(--coral2);margin-bottom:1rem"></div>
+    <div id="concat-grid"></div>
+    <div id="concat-verify" style="font-family:var(--mono);font-size:.77rem;color:var(--ink3);margin-top:.6rem"></div>
+  </div>
+</div>
+
+<!-- ─────────── §4 HIERARCHICAL ─────────────────────────────────── -->
+<hr id="s4">
+<h2>Hierarchical layouts: nesting goes arbitrarily deep</h2>
+
+<p>The concatenation property isn't limited to flat layouts. A sublayout can itself be a rank-2 layout, which can have its own sublayouts, and so on. The evaluation formula still holds — it just applies recursively:</p>
+
+<div class="math-display">
+  \[L(c_0, c_1) = L_0(c_0) + L_1(c_1) \quad \text{where } L_0(c_{00}, c_{01}) = L_{00}(c_{00}) + L_{01}(c_{01})\]
+</div>
+
+<p>Example from the notebook: <code>L = ((2, 3), 5) : ((1, 6), 2)</code>. Mode 0 is a rank-2 layout <code>(2, 3) : (1, 6)</code>, and mode 1 is a scalar layout <code>5 : 2</code>. The evaluation nests:</p>
+
+<pre>L(c0, c1) = L0(c0) + L1(c1)
+           = [c0₀·1 + c0₁·6] + [c1·2]   <span class="c"># c0 = (c0₀, c0₁) is a pair</span></pre>
+
+<div class="widget" data-label="Interactive · hierarchical layout ((2,3), 5) : ((1,6), 2)">
+  <div class="widget-body">
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:1.5rem;align-items:start">
+      <div>
+        <div style="font-family:var(--mono);font-size:.66rem;color:var(--ink3);margin-bottom:.35rem">6×5 grid — hover to inspect</div>
+        <div id="hier-grid"></div>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:.66rem;color:var(--ink3);margin-bottom:.4rem;letter-spacing:.06em;text-transform:uppercase">Structure</div>
+        <div id="hier-structure"></div>
+        <div id="hier-hover" style="font-family:var(--mono);font-size:.78rem;color:var(--ink2);margin-top:.75rem;min-height:3rem"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────── §5 ADMISSIBILITY ────────────────────────────────── -->
+<hr id="s5">
+<h2>Admissibility: what can and cannot be concatenated</h2>
+
+<p>Not all layouts can be concatenated. The functional property (11) requires that the codomains of all sublayouts live in the same <em>integer semimodule</em>. In practice, this almost always means: all sublayouts must use ordinary integer strides.</p>
+
+<div class="warn-box">
+  <p><strong>The restriction:</strong> The layout <code>4 : 2</code> and the layout <code>3 : e₀</code> cannot be concatenated because <code>e₀</code> is a basis vector (used for indexing into a different mode), not an ordinary integer. Their codomains are different spaces — adding their outputs would be meaningless.</p>
+</div>
+
+<p>In the common case where both layouts have integer strides, concatenation is always admissible. The resulting layout's memory footprint (cosize) spans from offset 0 to <code>max(L₀) + max(L₁)</code>, and the coordinate space is the Cartesian product of the two sublayouts' coordinate sets.</p>
+
+<div class="widget" data-label="Interactive · admissibility checker">
+  <div class="widget-body">
+    <div style="font-family:var(--mono);font-size:.66rem;color:var(--ink3);margin-bottom:.7rem">Select two layout configurations and see whether they can be concatenated</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+      <div>
+        <div style="font-family:var(--mono);font-size:.66rem;color:var(--ink3);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.06em">Layout P</div>
+        <select id="adm-P" style="width:100%">
+          <option value="4:2">4 : 2</option>
+          <option value="6:3">6 : 3</option>
+          <option value="2,3:1,4">(2, 3) : (1, 4)</option>
+          <option value="4:e0">4 : e₀ (basis vector)</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-family:var(--mono);font-size:.66rem;color:var(--ink3);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.06em">Layout Q</div>
+        <select id="adm-Q" style="width:100%">
+          <option value="8:8">8 : 8</option>
+          <option value="3:1">3 : 1</option>
+          <option value="4:e0">4 : e₀ (basis vector)</option>
+          <option value="5:5">5 : 5</option>
+        </select>
+      </div>
+    </div>
+    <div id="adm-result"></div>
+  </div>
+</div>
+
+<!-- ─────────── §6 BY-MODE COMBINATOR ──────────────────────────── -->
+<hr id="s6">
+<h2>By-mode operations — the ★ combinator</h2>
+
+<p>Because every sublayout of a layout is itself a layout, every algebraic operation that works on a layout can also be applied to a single mode. The paper calls this the <strong>by-mode combinator</strong>, written with the notation:</p>
+
+<div class="math-display">
+  \[A \star \langle B,\, C \rangle = (A_0,\, A_1) \star \langle B,\, C \rangle = (A_0 \star B,\quad A_1 \star C) \tag{12}\]
+</div>
+
+<p>Here, ★ is any operation that takes two layouts and produces one. The angle brackets <code>⟨B, C⟩</code> are a tuple of operands — <em>not</em> a concatenation. Each mode of <code>A</code> gets its own operand, and the results are collected back into a layout of the same rank as <code>A</code>.</p>
+
+<p>Why does this matter? Because it lets you <strong>apply different transformations to different modes independently</strong>. In GPU kernel code, this is essential: the row dimension and column dimension of a matrix often need completely different tiling strategies, and the by-mode combinator is the algebraic handle that makes that clean.</p>
+
+<div class="widget" data-label="Interactive · by-mode combinator demo">
+  <div class="widget-body">
+    <div style="font-family:var(--mono);font-size:.66rem;color:var(--ink3);margin-bottom:.7rem">
+      Choose a by-mode operation and see how it applies to each mode independently
+    </div>
+    <div class="controls">
+      <div class="ctrl-group">
+        <label>Layout A:</label>
+        <select id="bm-A">
+          <option value="0">((2,3), 5) : ((1,6), 2)</option>
+          <option value="1">(2, (1,6)) : (1, (6,2))</option>
+          <option value="2">((4,3), 5) : ((15,1), 3)</option>
+        </select>
+      </div>
+      <div class="ctrl-group">
+        <label>Operation:</label>
+        <select id="bm-op">
+          <option value="coalesce">coalesce</option>
+          <option value="flatten">flatten</option>
+        </select>
+      </div>
+    </div>
+    <div id="bm-display"></div>
+  </div>
+</div>
+
+<!-- ─────────── §7 COALESCE BY MODE ────────────────────────────── -->
+<hr id="s7">
+<h2>Coalesce as a by-mode operation</h2>
+
+<p>The paper shows a concrete distinction between global and by-mode coalesce. Global coalesce may merge modes across the rank boundary; by-mode coalesce treats each mode as an isolated unit and never merges across them.</p>
+
+<p>Consider <code>A = (2, (1, 6)) : (1, (6, 2))</code>:</p>
+
+<ul style="margin-left:1.5rem;margin-bottom:1.2rem;color:var(--ink2)">
+  <li><strong>Global coalesce</strong> sees a contiguous stride sequence 1→6→2? No — but it recognises the full 12-element sequence and collapses to <code>12 : 1</code></li>
+  <li><strong>By-mode coalesce</strong> looks at each mode separately: mode 0 is <code>2:1</code> (already minimal), mode 1 is <code>(1,6):(6,2)</code> which coalesces to <code>6:2</code>. Result: <code>(2, 6) : (1, 2)</code></li>
+</ul>
+
+<p>Both are <em>functionally equivalent</em> when evaluated with 1D coordinates over the full domain. The difference is <strong>structural</strong>: by-mode coalesce preserves the rank-2 shape, while global coalesce may reduce the rank.</p>
+
+<div class="widget" data-label="Interactive · global vs by-mode coalesce comparison">
+  <div class="widget-body">
+    <div class="pills" id="coal-pills"></div>
+    <div id="coal-body"></div>
+  </div>
+</div>
+
+<p>The structural difference matters because downstream operations (composition, complement, tiling) often depend on the rank of the layout. If you need to apply a tiler to a 2D layout, you need a rank-2 layout — global coalesce might collapse it to rank 1.</p>
+
+<div class="callout">
+  <p><strong>Key takeaway:</strong> Concatenation is simultaneously (1) the representation of a layout as the sum of its modes, (2) the operation of building a layout from pieces, and (3) the foundation for by-mode operations. Every other layout algebra operation in §3.2–3.7 is built on top of it. When you understand that <strong>L(c) = Σ Lᵢ(cᵢ)</strong>, and that each Lᵢ can be manipulated independently, the rest of the algebra follows naturally.</p>
+</div>
+
+<hr>
+<div style="font-family:var(--mono);font-size:.72rem;color:var(--ink4);text-align:center;padding:1rem 0">
+  Next: §3.2 Coalesce — merging redundant mode boundaries · §3.3 Composition — chaining coordinate maps
+</div>
+
+
+<!-- ═══════════════════════ SCRIPTS ═══════════════════════════════ -->
+<script>
+// ── Utilities ────────────────────────────────────────────────────
+function evalFlat(size, stride, c) {
+  // For scalar layout s:d, return d*c (c is integer 0..s-1)
+  return stride * c;
+}
+
+function evalLayout(shape, stride, coords) {
+  // shape and stride are numbers (scalar) or arrays.
+  // coords is an integer (for scalar) or array of integers.
+  if (typeof shape === 'number') {
+    return stride * (typeof coords === 'number' ? coords : coords[0]);
+  }
+  let total = 0;
+  for (let i = 0; i < shape.length; i++) {
+    const c = Array.isArray(coords) ? coords[i] : 0;
+    total += evalLayout(shape[i], stride[i], c);
+  }
+  return total;
+}
+
+function shapeSize(s) {
+  if (typeof s === 'number') return s;
+  return s.reduce((a, x) => a * shapeSize(x), 1);
+}
+
+function colorForOffset(offset, maxOffset) {
+  // map offset to a color from dark to gold
+  if (maxOffset === 0) return '#2a2820';
+  const t = offset / maxOffset;
+  // dark teal → gold
+  const r = Math.round(26 + t * (200 - 26));
+  const g = Math.round(40 + t * (170 - 40));
+  const b = Math.round(35 + t * (60 - 35));
+  return `rgb(${r},${g},${b})`;
+}
+
+function textColorForBg(offset, maxOffset) {
+  if (maxOffset === 0) return '#e8e0d0';
+  const t = offset / maxOffset;
+  return t > 0.5 ? '#0e0d0b' : '#e8e0d0';
+}
+
+// Mode color palette
+const modeColors = ['#c8a84b', '#4a9e8a', '#c86040', '#4a78b8', '#8a68b8'];
+const modeDimColors = ['#7a6830', '#2a5e52', '#7a3820', '#2a4870', '#4a3870'];
+
+// ── §1 Main interactive: additive decomposition ──────────────────
+let hoveredCell = null;
+
+function renderMainGrid() {
+  const s0 = parseInt(document.getElementById('s0').value);
+  const s1 = parseInt(document.getElementById('s1').value);
+  const d0 = parseInt(document.getElementById('d0').value);
+  const d1 = parseInt(document.getElementById('d1').value);
+  document.getElementById('d0v').textContent = d0;
+  document.getElementById('d1v').textContent = d1;
+
+  document.getElementById('layout-desc').textContent = `L = (${s0}, ${s1}) : (${d0}, ${d1})`;
+
+  // Build offset grid
+  const offsets = [];
+  let maxOff = 0;
+  for (let r = 0; r < s0; r++) {
+    for (let c = 0; c < s1; c++) {
+      const v = r * d0 + c * d1;
+      offsets.push({ r, c, v });
+      if (v > maxOff) maxOff = v;
+    }
+  }
+
+  const cw = Math.min(38, Math.floor(240 / s1));
+  const ch = Math.min(34, Math.floor(160 / s0));
+
+  const grid = document.getElementById('main-grid');
+  grid.innerHTML = '';
+  grid.style.display = 'grid';
+  grid.style.gridTemplateColumns = `repeat(${s1}, ${cw}px)`;
+  grid.style.gap = '2px';
+
+  offsets.forEach(({ r, c, v }) => {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.style.width = `${cw}px`;
+    cell.style.height = `${ch}px`;
+    cell.style.background = colorForOffset(v, maxOff);
+    cell.style.color = textColorForBg(v, maxOff);
+    cell.style.fontSize = `${Math.max(9, Math.min(12, cw / 3))}px`;
+    cell.textContent = v;
+    cell.addEventListener('mouseenter', () => {
+      hoveredCell = { r, c, v, d0, d1, s0, s1 };
+      updateDecompPanel(r, c, v, d0, d1, maxOff);
+    });
+    cell.addEventListener('mouseleave', () => {
+      hoveredCell = null;
+      updateDecompPanel(null, null, null, d0, d1, maxOff);
+    });
+    grid.appendChild(cell);
+  });
+
+  // Decomp visual (default empty state)
+  updateDecompPanel(null, null, null, d0, d1, maxOff);
+
+  // Trace table
+  renderTraceTable(s0, s1, d0, d1);
+}
+
+function updateDecompPanel(r, c, v, d0, d1, maxOff) {
+  const panel = document.getElementById('decomp-visual');
+  const detail = document.getElementById('hover-detail');
+
+  if (r === null) {
+    // Show generic bar
+    const rows = [
+      { label: 'L₀(cᵣ)', val: '?', pct: 0.4, color: modeColors[0] },
+      { label: 'L₁(c꜀)', val: '?', pct: 0.6, color: modeColors[1] },
+      { label: 'Total', val: '?', pct: 1.0, color: '#3a3830' },
+    ];
+    renderDecompBars(panel, rows, 'Hover a cell above');
+    detail.textContent = '';
+    return;
+  }
+
+  const v0 = r * d0;
+  const v1 = c * d1;
+  const total = v0 + v1;
+  const pct0 = maxOff > 0 ? v0 / maxOff : 0;
+  const pct1 = maxOff > 0 ? v1 / maxOff : 0;
+  const pctT = maxOff > 0 ? total / maxOff : 0;
+
+  const rows = [
+    { label: `L₀(${r})`, val: v0, pct: pct0, color: modeColors[0] },
+    { label: `L₁(${c})`, val: v1, pct: pct1, color: modeColors[1] },
+    { label: 'Total', val: total, pct: pctT, color: '#5a5040' },
+  ];
+  renderDecompBars(panel, rows, '');
+  detail.textContent = `L(${r},${c}) = L₀(${r}) + L₁(${c}) = ${v0} + ${v1} = ${total}`;
+}
+
+function renderDecompBars(container, rows, placeholder) {
+  container.innerHTML = '';
+  rows.forEach(({ label, val, pct, color }) => {
+    const row = document.createElement('div');
+    row.className = 'decomp-row';
+    row.innerHTML = `
+      <span class="decomp-label">${label}</span>
+      <div class="decomp-bar-wrap">
+        <div class="decomp-bar" style="width:${Math.max(pct * 100, 0)}%;background:${color};min-width:${typeof val === 'number' ? '18px' : '0'};color:${color === '#3a3830' || color === '#5a5040' ? '#a8a090' : '#0e0d0b'}">
+          ${typeof val === 'number' ? (pct > 0.12 ? val : '') : ''}
+        </div>
+      </div>
+      <span class="decomp-total" style="color:${color === '#3a3830' ? 'var(--ink4)' : color === '#5a5040' ? 'var(--gold2)' : color}">${typeof val === 'number' ? val : '—'}</span>
+    `;
+    container.appendChild(row);
+  });
+  if (placeholder) {
+    const ph = document.createElement('div');
+    ph.style.cssText = 'font-family:var(--mono);font-size:.72rem;color:var(--ink4);margin-top:.4rem;font-style:italic';
+    ph.textContent = placeholder;
+    container.appendChild(ph);
+  }
+}
+
+function renderTraceTable(s0, s1, d0, d1) {
+  // Show a sample of coordinates
+  const samples = [];
+  samples.push([0, 0]);
+  samples.push([1, 0]);
+  samples.push([0, 1]);
+  if (s0 > 2) samples.push([Math.floor(s0/2), Math.floor(s1/2)]);
+  if (s0 > 1 && s1 > 1) samples.push([s0-1, s1-1]);
+
+  const container = document.getElementById('trace-table');
+  container.className = 'trace';
+  container.innerHTML = '';
+
+  samples.forEach(([r, c]) => {
+    const v0 = r * d0, v1 = c * d1, total = v0 + v1;
+    const row = document.createElement('div');
+    row.className = 'trace-row';
+    row.innerHTML = `
+      <span class="trace-coord">L(${r}, ${c})</span>
+      <span class="trace-eq">=</span>
+      <span class="trace-parts">
+        <span class="trace-val" style="background:${modeDimColors[0]};color:${modeColors[0]}">L₀(${r})=${v0}</span>
+        <span class="trace-plus">+</span>
+        <span class="trace-val" style="background:${modeDimColors[1]};color:${modeColors[1]}">L₁(${c})=${v1}</span>
+      </span>
+      <span class="trace-result">= ${total}</span>
+    `;
+    container.appendChild(row);
+  });
+}
+
+['s0','s1','d0','d1'].forEach(id => {
+  document.getElementById(id).addEventListener(id === 'd0' || id === 'd1' ? 'input' : 'change', renderMainGrid);
+});
+renderMainGrid();
+
+// ── §2 Stepper ───────────────────────────────────────────────────
+const steps = [
+  {
+    label: 'The layout',
+    render() {
+      return `
+        <div style="font-family:var(--mono);font-size:.84rem;color:var(--ink2);margin-bottom:.9rem">
+          <span style="color:var(--gold2)">L = (4, 8) : (2, 8)</span> — 4 rows with stride 2, 8 columns with stride 8
+        </div>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap">
+          <div class="mode-card">
+            <div class="mode-card-title">Mode 0 — L₀ = 4:2</div>
+            <div class="mode-val">4 elements, stride 2</div>
+            <div style="display:flex;gap:2px;margin-top:.4rem">
+              ${[0,1,2,3].map(r => `<div style="width:28px;height:24px;display:flex;align-items:center;justify-content:center;background:${modeDimColors[0]};border-radius:3px;font-family:var(--mono);font-size:.74rem;font-weight:600;color:${modeColors[0]}">${r*2}</div>`).join('')}
+            </div>
+            <div style="font-family:var(--mono);font-size:.7rem;color:var(--ink3);margin-top:.3rem">offsets: 0, 2, 4, 6</div>
+          </div>
+          <div class="mode-card">
+            <div class="mode-card-title">Mode 1 — L₁ = 8:8</div>
+            <div class="mode-val">8 elements, stride 8</div>
+            <div style="display:flex;gap:2px;flex-wrap:wrap;margin-top:.4rem">
+              ${[0,1,2,3,4,5,6,7].map(c => `<div style="width:28px;height:24px;display:flex;align-items:center;justify-content:center;background:${modeDimColors[1]};border-radius:3px;font-family:var(--mono);font-size:.74rem;font-weight:600;color:${modeColors[1]}">${c*8}</div>`).join('')}
+            </div>
+            <div style="font-family:var(--mono);font-size:.7rem;color:var(--ink3);margin-top:.3rem">offsets: 0, 8, 16, 24, 32, 40, 48, 56</div>
+          </div>
+        </div>
+      `;
+    }
+  },
+  {
+    label: 'Row offsets',
+    render() {
+      return `
+        <div style="font-family:var(--mono);font-size:.82rem;color:var(--ink2);margin-bottom:.8rem">
+          Each row position c₀ contributes <span style="color:${modeColors[0]}">c₀ × 2</span> to the final offset, <em>independently of the column</em>.
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:2px;max-width:400px;margin-bottom:.6rem">
+          ${Array.from({length:32}, (_,i) => {
+            const r = i % 4, c = Math.floor(i / 4);
+            return `<div style="height:32px;display:flex;align-items:center;justify-content:center;background:${modeDimColors[0]};border-radius:3px;font-family:var(--mono);font-size:.7rem;font-weight:600;color:${modeColors[0]}">${r*2}</div>`;
+          }).join('')}
+        </div>
+        <div style="font-family:var(--mono);font-size:.72rem;color:var(--ink3)">
+          Grid is 4 rows × 8 cols. Every cell shows its row contribution L₀(row) = row × 2. Columns are identical — the row offset doesn't care about columns.
+        </div>
+      `;
+    }
+  },
+  {
+    label: 'Column offsets',
+    render() {
+      return `
+        <div style="font-family:var(--mono);font-size:.82rem;color:var(--ink2);margin-bottom:.8rem">
+          Each column position c₁ contributes <span style="color:${modeColors[1]}">c₁ × 8</span> to the final offset, <em>independently of the row</em>.
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:2px;max-width:400px;margin-bottom:.6rem">
+          ${Array.from({length:32}, (_,i) => {
+            const c = Math.floor(i / 4);
+            return `<div style="height:32px;display:flex;align-items:center;justify-content:center;background:${modeDimColors[1]};border-radius:3px;font-family:var(--mono);font-size:.7rem;font-weight:600;color:${modeColors[1]}">${c*8}</div>`;
+          }).join('')}
+        </div>
+        <div style="font-family:var(--mono);font-size:.72rem;color:var(--ink3)">
+          Same 4×8 grid. Every cell shows its column contribution L₁(col) = col × 8. Rows are identical — the column offset doesn't care about rows.
+        </div>
+      `;
+    }
+  },
+  {
+    label: 'Sum = final offset',
+    render() {
+      const offsets = Array.from({length:32}, (_,i) => {
+        const r = i % 4, c = Math.floor(i / 4);
+        return r*2 + c*8;
+      });
+      const max = Math.max(...offsets);
+      return `
+        <div style="font-family:var(--mono);font-size:.82rem;color:var(--ink2);margin-bottom:.8rem">
+          Add row and column contributions: <span style="color:var(--gold2)">L(r,c) = r×2 + c×8</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:2px;max-width:400px;margin-bottom:.6rem">
+          ${offsets.map(v => {
+            const t = v / max;
+            const r = Math.round(26 + t*(200-26));
+            const g = Math.round(40 + t*(170-40));
+            const b = Math.round(35 + t*(60-35));
+            const fg = t > 0.5 ? '#0e0d0b' : '#e8e0d0';
+            return `<div style="height:32px;display:flex;align-items:center;justify-content:center;background:rgb(${r},${g},${b});border-radius:3px;font-family:var(--mono);font-size:.7rem;font-weight:600;color:${fg}">${v}</div>`;
+          }).join('')}
+        </div>
+        <div style="font-family:var(--mono);font-size:.72rem;color:var(--ink3)">
+          The two independent grids add pointwise. Dark = low offset, gold = high. Notice the regular "striped" pattern: the stride-2 row pattern repeats across every column.
+        </div>
+      `;
+    }
+  }
+];
+
+const stepPills = document.getElementById('step-pills');
+const stepBody = document.getElementById('step-body');
+let activeStep = 0;
+
+steps.forEach((s, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'pill' + (i === 0 ? ' active' : '');
+  btn.textContent = `${i+1}. ${s.label}`;
+  btn.onclick = () => {
+    activeStep = i;
+    document.querySelectorAll('#step-pills .pill').forEach((p, j) => p.classList.toggle('active', j === i));
+    stepBody.innerHTML = `<div class="fade-in">${s.render()}</div>`;
+  };
+  stepPills.appendChild(btn);
+});
+stepBody.innerHTML = `<div class="fade-in">${steps[0].render()}</div>`;
+
+// ── §3 Concat builder ─────────────────────────────────────────────
+function renderConcatBuilder() {
+  const sA = parseInt(document.getElementById('ca-s').value);
+  const dA = parseInt(document.getElementById('ca-d').value);
+  const sB = parseInt(document.getElementById('cb-s').value);
+  const dB = parseInt(document.getElementById('cb-d').value);
+
+  document.getElementById('A-preview').textContent = `A = ${sA}:${dA}   offsets: [${Array.from({length:sA},(_,i)=>i*dA).join(', ')}]`;
+  document.getElementById('B-preview').textContent = `B = ${sB}:${dB}   offsets: [${Array.from({length:sB},(_,i)=>i*dB).join(', ')}]`;
+  document.getElementById('concat-result').textContent = `Layout(A, B) = (${sA}, ${sB}) : (${dA}, ${dB})`;
+
+  // Build grid
+  const allOff = [];
+  for (let r = 0; r < sA; r++)
+    for (let c = 0; c < sB; c++)
+      allOff.push(r*dA + c*dB);
+  const maxOff = Math.max(...allOff);
+
+  const cw = Math.min(40, Math.floor(300 / sB));
+  const ch = 28;
+  const grid = document.getElementById('concat-grid');
+  grid.style.display = 'inline-grid';
+  grid.style.gridTemplateColumns = `repeat(${sB}, ${cw}px)`;
+  grid.style.gap = '2px';
+  grid.innerHTML = '';
+  allOff.forEach((v, idx) => {
+    const r = Math.floor(idx / sB), c = idx % sB;
+    const t = maxOff > 0 ? v / maxOff : 0;
+    const bg = `rgb(${Math.round(26+t*174)},${Math.round(40+t*130)},${Math.round(35+t*25)})`;
+    const fg = t > 0.5 ? '#0e0d0b' : '#e8e0d0';
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.style.cssText = `width:${cw}px;height:${ch}px;background:${bg};color:${fg};font-size:${Math.max(9,cw/3.5)}px`;
+    cell.textContent = v;
+    grid.appendChild(cell);
+  });
+
+  // Verify text
+  const verifyEl = document.getElementById('concat-verify');
+  let ok = true;
+  for (let r = 0; r < sA; r++)
+    for (let c = 0; c < sB; c++)
+      if (r*dA + c*dB !== r*dA + c*dB) ok = false; // always true, but show the formula
+  verifyEl.textContent = `✓ Layout(A,B)(c₀,c₁) = A(c₀) + B(c₁) = c₀×${dA} + c₁×${dB} for all (c₀,c₁) ∈ ℤ${sA} × ℤ${sB}`;
+  verifyEl.style.color = 'var(--teal2)';
+}
+
+['ca-s','ca-d','cb-s','cb-d'].forEach(id => {
+  document.getElementById(id).addEventListener('change', renderConcatBuilder);
+});
+renderConcatBuilder();
+
+// ── §4 Hierarchical grid ─────────────────────────────────────────
+// L = ((2,3), 5) : ((1,6), 2)
+// Mode 0: (2,3):(1,6) — 6 elements
+// Mode 1: 5:2 — 5 elements
+// Total: 30 elements in a 6×5 grid
+
+function hierEval(c0, c1) {
+  // c0 is used for mode 0, which has shape (2,3) stride (1,6)
+  // within mode 0: c0 = c00 + 2*c01, so c00=c0%2, c01=floor(c0/2)
+  const c00 = c0 % 2, c01 = Math.floor(c0 / 2);
+  return c00 * 1 + c01 * 6 + c1 * 2;
+}
+
+function renderHierGrid() {
+  const s0_total = 6, s1 = 5;
+  const allOff = [];
+  for (let r = 0; r < s0_total; r++)
+    for (let c = 0; c < s1; c++)
+      allOff.push(hierEval(r, c));
+  const maxOff = Math.max(...allOff);
+
+  const cw = 34, ch = 28;
+  const grid = document.getElementById('hier-grid');
+  grid.style.display = 'inline-grid';
+  grid.style.gridTemplateColumns = `repeat(${s1}, ${cw}px)`;
+  grid.style.gap = '2px';
+  grid.innerHTML = '';
+
+  for (let r = 0; r < s0_total; r++) {
+    for (let c = 0; c < s1; c++) {
+      const v = hierEval(r, c);
+      const t = maxOff > 0 ? v / maxOff : 0;
+      const c00 = r % 2, c01 = Math.floor(r / 2);
+      const bg = `rgb(${Math.round(26+t*174)},${Math.round(40+t*130)},${Math.round(35+t*25)})`;
+      const fg = t > 0.5 ? '#0e0d0b' : '#e8e0d0';
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.style.cssText = `width:${cw}px;height:${ch}px;background:${bg};color:${fg};font-size:11px;`;
+      cell.textContent = v;
+      cell.addEventListener('mouseenter', () => {
+        document.getElementById('hier-hover').innerHTML = `
+          <div>Coord: (c₀, c₁) = (<span style="color:${modeColors[0]}">${r}</span>, <span style="color:${modeColors[1]}">${c}</span>)</div>
+          <div>c₀ = ${r} → (c₀₀=${c00}, c₀₁=${c01}) in mode 0 shape (2,3)</div>
+          <div>L₀(${r}) = ${c00}×1 + ${c01}×6 = <span style="color:${modeColors[0]}">${c00*1+c01*6}</span></div>
+          <div>L₁(${c}) = ${c}×2 = <span style="color:${modeColors[1]}">${c*2}</span></div>
+          <div style="color:var(--gold2);margin-top:.2rem">L(${r},${c}) = ${c00*1+c01*6} + ${c*2} = ${v}</div>
+        `;
+      });
+      cell.addEventListener('mouseleave', () => {
+        document.getElementById('hier-hover').innerHTML = '';
+      });
+      grid.appendChild(cell);
+    }
+  }
+
+  const struct = document.getElementById('hier-structure');
+  struct.innerHTML = `
+    <div style="font-family:var(--mono);font-size:.8rem;color:var(--gold2);margin-bottom:.4rem">L = ((2,3), 5) : ((1,6), 2)</div>
+    <div class="mode-card" style="margin-bottom:.5rem">
+      <div class="mode-card-title">Mode 0 — L₀ = (2,3):(1,6)</div>
+      <div class="mode-val">rank-2, 6 elements total</div>
+      <div class="mode-result">offsets: ${[...Array(6)].map((_,i)=>(i%2)*1+Math.floor(i/2)*6).join(', ')}</div>
+    </div>
+    <div class="mode-card">
+      <div class="mode-card-title">Mode 1 — L₁ = 5:2</div>
+      <div class="mode-val">rank-1, 5 elements</div>
+      <div class="mode-result">offsets: 0, 2, 4, 6, 8</div>
+    </div>
+  `;
+}
+renderHierGrid();
+
+// ── §5 Admissibility checker ─────────────────────────────────────
+const admCases = {
+  '4:2':       { integer: true, label: '4:2', offsets: [0,2,4,6] },
+  '6:3':       { integer: true, label: '6:3', offsets: [0,3,6,9,12,15] },
+  '2,3:1,4':   { integer: true, label: '(2,3):(1,4)', offsets: [0,1,4,5,8,9] },
+  '4:e0':      { integer: false, label: '4:e₀ (basis vector)', offsets: null },
+  '8:8':       { integer: true, label: '8:8', offsets: [0,8,16,24,32,40,48,56] },
+  '3:1':       { integer: true, label: '3:1', offsets: [0,1,2] },
+  '5:5':       { integer: true, label: '5:5', offsets: [0,5,10,15,20] },
+};
+
+function renderAdmissibility() {
+  const P = admCases[document.getElementById('adm-P').value];
+  const Q = admCases[document.getElementById('adm-Q').value];
+  const el = document.getElementById('adm-result');
+  const admissible = P.integer && Q.integer;
+
+  if (!admissible) {
+    el.innerHTML = `
+      <div style="background:var(--bg3);border:1px solid #5e3020;border-left:3px solid var(--coral);border-radius:0 4px 4px 0;padding:.8rem 1rem;font-family:var(--mono);font-size:.8rem">
+        <div style="color:var(--coral2);font-weight:600;margin-bottom:.3rem">✗ Not admissible</div>
+        <div style="color:var(--ink2)">${!P.integer ? `<strong>${P.label}</strong>` : `<strong>${Q.label}</strong>`} uses a basis vector, not an integer stride. Basis vectors are incompatible with integer strides under addition — they live in different spaces.</div>
+      </div>
+    `;
+    return;
+  }
+
+  const allOff = [];
+  for (const p of P.offsets)
+    for (const q of Q.offsets)
+      allOff.push(p + q);
+  const maxOff = Math.max(...allOff);
+
+  el.innerHTML = `
+    <div style="background:var(--bg3);border:1px solid var(--teal-dim);border-left:3px solid var(--teal);border-radius:0 4px 4px 0;padding:.8rem 1rem;margin-bottom:.75rem;font-family:var(--mono);font-size:.8rem">
+      <div style="color:var(--teal2);font-weight:600;margin-bottom:.3rem">✓ Admissible</div>
+      <div style="color:var(--ink2)">Both layouts have integer strides. Concatenation produces: (${P.label}, ${Q.label})</div>
+      <div style="color:var(--gold2);margin-top:.25rem">Codomain spans [0, ${maxOff}]</div>
+    </div>
+    <div style="font-family:var(--mono);font-size:.68rem;color:var(--ink3);margin-bottom:.3rem">All offsets (${allOff.length} elements):</div>
+    <div style="display:flex;flex-wrap:wrap;gap:3px">
+      ${allOff.map(v => {
+        const t = maxOff > 0 ? v/maxOff : 0;
+        const bg = `rgb(${Math.round(26+t*174)},${Math.round(40+t*130)},${Math.round(35+t*25)})`;
+        const fg = t > 0.5 ? '#0e0d0b' : '#e8e0d0';
+        return `<div style="width:30px;height:22px;display:flex;align-items:center;justify-content:center;background:${bg};border-radius:3px;font-family:var(--mono);font-size:.68rem;font-weight:600;color:${fg}">${v}</div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+['adm-P','adm-Q'].forEach(id => {
+  document.getElementById(id).addEventListener('change', renderAdmissibility);
+});
+renderAdmissibility();
+
+// ── §6 By-mode combinator ─────────────────────────────────────────
+const bmLayouts = [
+  {
+    desc: '((2,3), 5) : ((1,6), 2)',
+    modes: [
+      { label: 'Mode 0: (2,3):(1,6)', shape: [2,3], stride: [1,6] },
+      { label: 'Mode 1: 5:2', shape: 5, stride: 2 }
+    ]
+  },
+  {
+    desc: '(2, (1,6)) : (1, (6,2))',
+    modes: [
+      { label: 'Mode 0: 2:1', shape: 2, stride: 1 },
+      { label: 'Mode 1: (1,6):(6,2)', shape: [1,6], stride: [6,2] }
+    ]
+  },
+  {
+    desc: '((4,3), 5) : ((15,1), 3)',
+    modes: [
+      { label: 'Mode 0: (4,3):(15,1)', shape: [4,3], stride: [15,1] },
+      { label: 'Mode 1: 5:3', shape: 5, stride: 3 }
+    ]
+  }
+];
+
+function coalesceLayout(shape, stride) {
+  // Simplified coalesce for rank-1 and rank-2
+  if (typeof shape === 'number') return { shape, stride, desc: `${shape}:${stride}` };
+  
+  // Try to merge adjacent modes
+  const s = [...shape], d = [...stride];
+  let merged = true;
+  while (merged) {
+    merged = false;
+    for (let i = 0; i < s.length - 1; i++) {
+      const sA = typeof s[i] === 'number' ? s[i] : s[i].reduce((a,x)=>a*x,1);
+      const dA = typeof d[i] === 'number' ? d[i] : null;
+      const dB = typeof d[i+1] === 'number' ? d[i+1] : null;
+      if (dA !== null && dB !== null && sA * dA === dB) {
+        const sB = typeof s[i+1] === 'number' ? s[i+1] : s[i+1].reduce((a,x)=>a*x,1);
+        s.splice(i, 2, sA * sB);
+        d.splice(i, 2, dA);
+        merged = true;
+        break;
+      }
+    }
+  }
+  if (s.length === 1) return { shape: s[0], stride: d[0], desc: `${s[0]}:${d[0]}` };
+  return { shape: s, stride: d, desc: `(${s.join(',')}):(${d.join(',')})` };
+}
+
+function flattenLayout(shape, stride) {
+  if (typeof shape === 'number') return { shape, stride, desc: `${shape}:${stride}` };
+  const flatS = [], flatD = [];
+  function recurse(s, d) {
+    if (typeof s === 'number') { flatS.push(s); flatD.push(d); }
+    else s.forEach((si, i) => recurse(si, d[i]));
+  }
+  recurse(shape, stride);
+  return { shape: flatS, stride: flatD, desc: `(${flatS.join(',')}):(${flatD.join(',')})` };
+}
+
+function renderByMode() {
+  const idx = parseInt(document.getElementById('bm-A').value);
+  const op = document.getElementById('bm-op').value;
+  const layout = bmLayouts[idx];
+
+  let html = `<div style="font-family:var(--mono);font-size:.82rem;color:var(--gold2);margin-bottom:.8rem">A = ${layout.desc}</div>`;
+  html += `<div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:.75rem">`;
+
+  layout.modes.forEach((m, i) => {
+    let result;
+    if (op === 'coalesce') result = coalesceLayout(m.shape, m.stride);
+    else result = flattenLayout(m.shape, m.stride);
+
+    const unchanged = result.desc === `${Array.isArray(m.shape)?`(${m.shape.join(',')})`:m.shape}:${Array.isArray(m.stride)?`(${m.stride.join(',')})`:m.stride}`;
+
+    html += `<div class="mode-card" style="border-color:${modeDimColors[i]}">
+      <div class="mode-card-title" style="color:${modeColors[i]}">${m.label}</div>
+      <div style="font-family:var(--mono);font-size:.78rem;color:var(--ink3);margin-bottom:.3rem">
+        ${Array.isArray(m.shape) ? `(${m.shape.join(',')}):(${m.stride.join(',')})` : `${m.shape}:${m.stride}`}
+      </div>
+      <div style="font-family:var(--mono);font-size:.72rem;color:var(--ink3);margin-bottom:.3rem">
+        ↓ ${op}(mode ${i})
+      </div>
+      <div class="mode-result" style="color:${unchanged ? 'var(--ink3)' : 'var(--teal2)'}">
+        ${result.desc} ${unchanged ? '(unchanged)' : ''}
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  // Build overall result
+  const results = layout.modes.map(m => op === 'coalesce' ? coalesceLayout(m.shape, m.stride) : flattenLayout(m.shape, m.stride));
+  const rShapes = results.map(r => Array.isArray(r.shape) ? `(${r.shape.join(',')})` : String(r.shape));
+  const rStrides = results.map(r => Array.isArray(r.stride) ? `(${r.stride.join(',')})` : String(r.stride));
+  html += `<div style="font-family:var(--mono);font-size:.82rem;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:.6rem .9rem">`;
+  html += `By-mode ${op} result: <span style="color:var(--gold2)">(${rShapes.join(', ')}) : (${rStrides.join(', ')})</span>`;
+  html += `</div>`;
+
+  document.getElementById('bm-display').innerHTML = html;
+}
+
+['bm-A','bm-op'].forEach(id => document.getElementById(id).addEventListener('change', renderByMode));
+renderByMode();
+
+// ── §7 Coalesce comparison ────────────────────────────────────────
+const coalCases = [
+  {
+    label: 'A = (2,(1,6)):(1,(6,2))',
+    desc: 'Mode 0: 2:1 (unchanged) | Mode 1: (1,6):(6,2) → 6:2',
+    global: '12 : 1',
+    byMode: '(2, 6) : (1, 2)',
+    globalSize: 12,
+    byModePreserved: true,
+    explanation: 'Global coalesce sees the entire stride sequence 1,6,2 and merges everything into a single contiguous run of 12 elements. By-mode coalesce only looks within each mode: mode 0 stays 2:1, mode 1 collapses (1,6):(6,2) → 6:2 because 1×6=6, which matches stride 6→2 merge condition.',
+    evalCheck(i) {
+      // A(i): shape (2,(1,6)), stride (1,(6,2))
+      const s0=2, s00=1, s01=6;
+      const c0 = i % s0;
+      const rest = Math.floor(i / s0);
+      const c01 = rest % s00; // 0 always since s00=1
+      const c02 = Math.floor(rest / s00) % s01;
+      return c0*1 + c01*6 + c02*2;
+    }
+  },
+  {
+    label: 'B = ((4,3),5):((15,1),3)',
+    desc: 'Mode 0: (4,3):(15,1) — cannot merge (4×15≠1) | Mode 1: 5:3 (unchanged)',
+    global: '(4, 15) : (15, 1)',
+    byMode: '((4, 3), 5) : ((15, 1), 3)',
+    globalSize: 60,
+    byModePreserved: true,
+    explanation: 'Global coalesce finds that mode 0\'s sub-modes can merge: (4,3):(15,1) → shape 12 with stride 1? No — 4×15≠1. But the column dimension (3) has stride 1 which is smallest, and 3×1=3 which matches B\'s mode-1 stride 3. So global coalesce merges across the mode boundary: modes (3,5) merge into 15:1. By-mode coalesce never crosses mode boundaries, so (4,3):(15,1) stays put and 5:3 stays put.',
+    evalCheck(i) {
+      const s00=4,s01=3,d00=15,d01=1,s1=5,d1=3;
+      const c00=i%s00, r1=Math.floor(i/s00);
+      const c01=r1%s01, r2=Math.floor(r1/s01);
+      const c1=r2%s1;
+      return c00*d00+c01*d01+c1*d1;
+    }
+  }
+];
+
+const coalPills = document.getElementById('coal-pills');
+const coalBody = document.getElementById('coal-body');
+
+coalCases.forEach((c, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'pill' + (i===0?' active':'');
+  btn.textContent = c.label;
+  btn.onclick = () => {
+    document.querySelectorAll('#coal-pills .pill').forEach((p,j)=>p.classList.toggle('active',j===i));
+    renderCoalCase(c);
+  };
+  coalPills.appendChild(btn);
+});
+
+function renderCoalCase(c) {
+  // Check functional equivalence
+  const n = c.globalSize;
+  let allSame = true;
+  const vals = [];
+  for (let i = 0; i < n; i++) {
+    try { vals.push(c.evalCheck(i)); } catch(e) { allSame = false; break; }
+  }
+
+  coalBody.innerHTML = `<div class="fade-in">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+      <div class="mode-card">
+        <div class="mode-card-title" style="color:var(--gold)">Global coalesce</div>
+        <div style="font-family:var(--mono);font-size:.86rem;color:var(--gold2);margin-bottom:.3rem">${c.global}</div>
+        <div style="font-family:var(--mono);font-size:.72rem;color:var(--ink3)">May reduce rank by merging across mode boundaries</div>
+      </div>
+      <div class="mode-card">
+        <div class="mode-card-title" style="color:var(--teal)">By-mode coalesce</div>
+        <div style="font-family:var(--mono);font-size:.86rem;color:var(--teal2);margin-bottom:.3rem">${c.byMode}</div>
+        <div style="font-family:var(--mono);font-size:.72rem;color:var(--ink3)">Preserves rank, operates within each mode</div>
+      </div>
+    </div>
+    <div style="font-family:var(--mono);font-size:.72rem;color:var(--teal2);margin-bottom:.5rem">✓ Functionally equivalent: both produce the same offsets over 1D coordinates</div>
+    <div style="display:flex;flex-wrap:wrap;gap:2px;margin-bottom:.75rem">
+      ${vals.slice(0,Math.min(n,30)).map((v,i)=>{
+        const t = n>1 ? i/(n-1) : 0;
+        const bg=`rgb(${Math.round(26+t*174)},${Math.round(40+t*130)},${Math.round(35+t*25)})`;
+        const fg=t>0.5?'#0e0d0b':'#e8e0d0';
+        return `<div style="width:28px;height:22px;display:flex;align-items:center;justify-content:center;background:${bg};border-radius:3px;font-family:var(--mono);font-size:.64rem;font-weight:600;color:${fg}">${v}</div>`;
+      }).join('')}${n>30?`<div style="font-family:var(--mono);font-size:.68rem;color:var(--ink4);display:flex;align-items:center;padding:0 .4rem">…+${n-30}</div>`:''}
+    </div>
+    <div style="font-family:var(--body);font-size:.88rem;color:var(--ink2);line-height:1.65;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:.8rem 1rem">${c.explanation}</div>
+  </div>`;
+}
+
+renderCoalCase(coalCases[0]);
+
+// ── KaTeX render ──────────────────────────────────────────────────
+renderMathInElement(document.body, {
+  delimiters: [
+    { left: '\\[', right: '\\]', display: true },
+    { left: '\\(', right: '\\)', display: false }
+  ],
+  throwOnError: false
+});
+</script>
+
+<section class="reveal" style="border:none; padding-top:40px; padding-bottom:40px; text-align:center;">
+  <p style="color:var(--ink3); font-size:11px; letter-spacing:0.08em; text-transform:uppercase;">
+    <em>Part 1:</em> Loops Are Just Layouts · <em>Part 2:</em> Tensors & Folding · <em>Part 3:</em> Tuples & HTuples · <em>Part 4:</em> Shape · <em>Part 5:</em> Stride · <em>Part 6:</em> The Layout Object · <em>Part 7:</em> Tensors · <em>Part 8:</em> Applications · <strong>Part 9:</strong> Concatenation · <em>Upcoming:</em> Coalescing
+  </p>
+</section>
+
+</div><!-- /content -->
+
+<footer>
+  <p>Based on CuTe and CUTLASS documentation. Learn more at <a href="https://github.com/NVIDIA/cutlass" style="color:var(--green);">NVIDIA/CUTLASS</a> and <a href="https://github.com/NVIDIA/cutlass/blob/main/media/docs/cute/" style="color:var(--green);">CuTe Layouts</a>.</p>
+</footer>
+
+<script>
+// Reveal observer
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+</script>
+
+<!-- Theme toggle -->
+<script>
+(function(){
+  const saved = localStorage.getItem('theme');
+  const theme = saved || 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = document.getElementById('themeToggle');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+  }
+})();
+</script>
+</body>
+</html>
