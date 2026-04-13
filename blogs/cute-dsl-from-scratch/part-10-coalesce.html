@@ -1,215 +1,1047 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CuTe DSL from scratch: Coalescing</title>
-
-<!-- FONT STACK: Playfair Display (serif) + Azeret Mono (mono) to match main site -->
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Azeret+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
+<title>CuTe Layout Coalesce — Chapter 3.2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #fafaf8;
+    --surface: #ffffff;
+    --surface2: #f3f2ee;
+    --border: #e4e2da;
+    --text: #1a1916;
+    --muted: #6b6860;
+    --accent: #2563eb;
+    --accent-light: #eff6ff;
+    --accent-gradient: linear-gradient(135deg, #2563eb, #7c3aed);
+    --amber: #b45309;
+    --amber-bg: #fffbeb;
+    --amber-gradient: linear-gradient(135deg, #f59e0b, #ea580c);
+    --teal: #0f766e;
+    --teal-bg: #f0fdfa;
+    --teal-gradient: linear-gradient(135deg, #14b8a6, #0d9488);
+    --red: #b91c1c;
+    --red-bg: #fef2f2;
+    --green: #166534;
+    --green-bg: #f0fdf4;
+    --green-gradient: linear-gradient(135deg, #22c55e, #16a34a);
+    --code-bg: #f1f0eb;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
+    --transition-fast: 150ms ease;
+    --transition-normal: 300ms ease;
+    --transition-slow: 500ms ease;
+    --font-body: 'Instrument Sans', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-display: 'DM Serif Display', Georgia, serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.75;
+    padding: 0;
+  }
 
-:root {
-  --font-serif: 'Playfair Display', serif;
-  --font-mono: 'Azeret Mono', monospace;
-  --font-sans: system-ui, -apple-system, sans-serif;
-  --paper: #f4f1eb;
-  --paper2: #ede9e0;
-  --ink: #1c1a17;
-  --ink2: #3d3a35;
-  --ink3: #7a7570;
-  --rule: #d9d4c8;
-  --rule2: #c4bfb2;
-  --green: #2a5c45;
-  --green-light: #e8f0ec;
-  --orange: #b85c2a;
-  --orange-light: #f5ece6;
-  --blue: #2a4a6b;
-}
+  /* Animated background pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: 
+      radial-gradient(circle at 20% 35%, rgba(37, 99, 235, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(14, 165, 233, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.02) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: -1;
+  }
 
-[data-theme="dark"] {
-  --paper: #0f0d0c;
-  --paper2: #161412;
-  --ink: #f4f1eb;
-  --ink2: #d1ccc3;
-  --ink3: #8a837b;
-  --rule: #24211e;
-  --rule2: #332f2b;
-  --green: #6fb894;
-  --green-light: #16221c;
-  --orange: #e69a6e;
-  --orange-light: #261c14;
-  --blue: #6a94b8;
-}
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 3.5rem 0 2.5rem;
+    background: var(--surface);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+  .header-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 1;
+  }
+  .chapter-tag {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .chapter-tag::before {
+    content: '';
+    display: inline-block;
+    width: 24px;
+    height: 2px;
+    background: var(--accent-gradient);
+    border-radius: 1px;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: 2.6rem;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--text) 0%, #4b5563 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .subtitle {
+    font-size: 1.05rem;
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 600px;
+  }
 
-/* Alias old variable names */
-:root {
-  --bg: var(--paper);
-  --surface: var(--paper);
-  --surface-dark: var(--paper2);
-  --surface2: var(--paper2);
-  --text: var(--ink);
-  --text-secondary: var(--ink2);
-  --text-tertiary: var(--ink3);
-  --accent-primary: var(--orange);
-  --accent-secondary: var(--blue);
-  --accent-tertiary: var(--green);
-  --accent-cold: var(--blue);
-  --border: var(--rule);
-  --border-light: var(--rule);
-  --font-serif: var(--font-serif);
-  --font-mono: var(--font-mono);
-  --font-sans: var(--font-sans);
-}
+  .toc {
+    max-width: 720px;
+    margin: 2rem auto 0;
+    padding: 0 2rem;
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .toc a {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    transition: all var(--transition-fast);
+    position: relative;
+    padding: 0.25rem 0;
+  }
+  .toc a::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent-gradient);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--transition-fast);
+    border-radius: 1px;
+  }
+  .toc a:hover { color: var(--accent); }
+  .toc a:hover::after { transform: scaleX(1); }
 
-[data-theme="dark"] {
-  --bg: var(--paper);
-  --surface: var(--paper);
-  --surface-dark: var(--paper2);
-  --surface2: var(--paper2);
-  --text: var(--ink);
-  --text-secondary: var(--ink2);
-  --text-tertiary: var(--ink3);
-  --accent-primary: var(--orange);
-  --accent-secondary: var(--blue);
-  --accent-tertiary: var(--green);
-  --accent-cold: var(--blue);
-  --border: var(--rule);
-  --border-light: var(--rule);
-  --font-serif: var(--font-serif);
-  --font-mono: var(--font-mono);
-  --font-sans: var(--font-sans);
-}
+  .article {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 3rem 2rem 6rem;
+  }
 
-html { scroll-behavior: smooth; }
+  h2 {
+    font-family: var(--font-display);
+    font-size: 1.65rem;
+    font-weight: 400;
+    color: var(--text);
+    margin-top: 3.5rem;
+    margin-bottom: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    position: relative;
+  }
+  h2::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 48px;
+    height: 2px;
+    background: var(--accent-gradient);
+    border-radius: 1px;
+  }
+  h3 {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-top: 2rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+  }
+  p { margin-bottom: 1.25rem; font-size: 1rem; }
+  a { color: var(--accent); text-decoration: none; position: relative; }
+  a::after {
+    content: '';
+    position: absolute;
+    bottom: 2px; left: 0; right: 0;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.6;
+    transform-origin: left;
+    transition: transform var(--transition-fast);
+  }
+  a:hover::after { transform: scaleX(0); }
 
-body {
-  font-family: var(--font-mono);
-  background: var(--paper);
-  color: var(--ink);
-  font-size: 12.5px;
-  line-height: 1.7;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.84em;
+    background: var(--code-bg);
+    padding: 0.1em 0.35em;
+    border-radius: 3px;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
 
-/* ── NAV ── */
-nav{position:sticky;top:0;z-index:200;background:var(--paper);border-bottom:1px solid var(--rule);display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:52px;transition:background-color .2s ease,border-color .2s ease}
-.logo{font-family:var(--font-serif);font-size:18px;color:var(--ink);text-decoration:none;letter-spacing:-.02em;transition:color .2s ease}
-.nav-links{display:flex;gap:28px;list-style:none;margin:0}
-.nav-links a{font-size:11px;color:var(--ink3);text-decoration:none;letter-spacing:.06em;text-transform:uppercase;transition:color .15s}
-.nav-links a:hover{color:var(--ink)}
-.theme-toggle{background:transparent;border:1px solid var(--rule2);border-radius:2px;padding:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink3);transition:all .15s ease;margin-left:12px;flex-shrink:0}
-.theme-toggle:hover{border-color:var(--ink3);color:var(--ink);background:var(--paper2)}
-.theme-toggle .sun-icon{display:none}.theme-toggle .moon-icon{display:block}
-[data-theme="dark"] .theme-toggle .sun-icon{display:block}
-[data-theme="dark"] .theme-toggle .moon-icon{display:none}
+  /* Enhanced callouts */
+  .callout {
+    border-left: 3px solid var(--border);
+    padding: 1.25rem 1.5rem;
+    margin: 1.75rem 0;
+    background: var(--surface2);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.95rem;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+  }
+  .callout::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 3px;
+    background: var(--border);
+    transition: background var(--transition-normal);
+  }
+  .callout:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateX(2px);
+  }
+  .callout.insight {
+    background: var(--accent-light);
+  }
+  .callout.insight::before {
+    background: var(--accent-gradient);
+  }
+  .callout.warning {
+    background: var(--amber-bg);
+  }
+  .callout.warning::before {
+    background: var(--amber-gradient);
+  }
+  .callout p { margin: 0; }
+  .callout-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .callout-label::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.8;
+  }
+  .callout.insight .callout-label { color: var(--accent); }
+  .callout.warning .callout-label { color: var(--amber); }
 
-/* ── HERO ── */
-.hero{padding:80px 40px 60px;max-width:1080px;margin:0 auto;border-bottom:1px solid var(--rule);transition:border-color .2s ease}
-.hero-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:24px;display:flex;align-items:center;gap:10px;transition:color .2s ease}
-.hero-label::before{content:'';display:inline-block;width:24px;height:1px;background:var(--ink3);transition:background-color .2s ease}
-.hero-title{font-family:var(--font-serif);font-size:clamp(44px,5vw,72px);line-height:1.1;letter-spacing:-.03em;color:var(--ink);margin-bottom:20px;transition:color .2s ease}
-.hero-title em{font-style:italic;color:var(--green);transition:color .2s ease}
-.hero-sub{font-size:13px;color:var(--ink2);line-height:1.8;max-width:600px;margin-bottom:20px;transition:color .2s ease}
-.hero-meta{display:flex;gap:24px;font-size:11px;color:var(--ink3);letter-spacing:.04em;flex-wrap:wrap;transition:color .2s ease}
-.hero-meta span::before{content:'// ';color:var(--rule2);margin-right:4px}
+  .math-block {
+    padding: 1.25rem 1.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    font-size: 0.97rem;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+  }
+  .math-block::before {
+    content: '$$';
+    position: absolute;
+    top: 0.5rem;
+    right: 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    opacity: 0.5;
+  }
 
-/* ── CONTENT LAYOUT ── */
-.content{max-width:980px;margin:0 auto;padding:0 40px}
-section{padding:72px 0;border-bottom:1px solid var(--rule);transition:border-color .2s ease}
-section:last-of-type{border-bottom:none}
-.section-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:24px;display:flex;align-items:center;gap:10px;transition:color .2s ease}
-.section-label::after{content:'';flex:1;height:1px;background:var(--rule);transition:background-color .2s ease}
-h2{font-family:var(--font-serif);font-size:28px;letter-spacing:-.02em;color:var(--ink);margin-bottom:28px;transition:color .2s ease;line-height:1.3}
-h3{font-family:var(--font-serif);font-size:18px;letter-spacing:-.01em;color:var(--ink);margin:28px 0 16px;transition:color .2s ease}
-p{margin-bottom:16px;color:var(--ink2);line-height:1.8}
-p:last-child{margin-bottom:0}
-strong{color:var(--ink);font-weight:500}
-em{color:var(--green);font-style:italic}
+  .layout-notation {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background: var(--code-bg);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    white-space: nowrap;
+    border: 1px solid var(--border);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25em;
+  }
+  .layout-notation::before {
+    content: '⟨';
+    color: var(--muted);
+    font-size: 0.8em;
+  }
+  .layout-notation::after {
+    content: '⟩';
+    color: var(--muted);
+    font-size: 0.8em;
+  }
 
-/* ── Footer ── */
-footer{border-top:1px solid var(--rule);padding:28px 40px;text-align:center;font-size:11px;color:var(--ink3);letter-spacing:.04em;transition:border-color .2s ease,color .2s ease}
-footer p{margin:0}
+  /* ── ENHANCED INTERACTIVE WIDGETS ── */
+  .widget {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 2rem 0;
+    background: var(--surface);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-normal);
+    position: relative;
+  }
+  .widget:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
+  .widget::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--teal), var(--amber));
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+  }
+  .widget:hover::before {
+    opacity: 1;
+  }
+  .widget-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.875rem 1.5rem;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .widget-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 1.5rem; right: 1.5rem;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+  .widget-title {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .widget-title::before {
+    content: '◈';
+    color: var(--accent);
+    font-size: 0.8rem;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(0.95); }
+  }
+  .widget-body { padding: 1.5rem; }
 
-/* ── Responsive ── */
-@media(max-width:768px){nav{padding:0 20px}.nav-links{display:none}.hero{padding:56px 20px 48px}.content{padding:0 20px}section{padding:48px 0}footer{padding:20px}}
+  /* Grid viz enhancements */
+  .grid-container {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .grid-section { 
+    flex: 1; 
+    min-width: 200px;
+    position: relative;
+  }
+  .grid-section::before {
+    content: '';
+    position: absolute;
+    top: -1rem; left: -1rem; right: -1rem; bottom: -1rem;
+    background: radial-gradient(circle, rgba(37,99,235,0.05) 0%, transparent 70%);
+    border-radius: 16px;
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+    pointer-events: none;
+    z-index: -1;
+  }
+  .grid-section:hover::before {
+    opacity: 1;
+  }
+  .grid-label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .grid-label::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .grid-title {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--border);
+  }
+  canvas.layout-grid {
+    display: block;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: crosshair;
+    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+  }
+  canvas.layout-grid:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+  .arrow-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: 3rem;
+    min-width: 40px;
+    color: var(--muted);
+    font-size: 1.4rem;
+    position: relative;
+  }
+  .arrow-col::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 24px; height: 24px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: ripple 2s infinite;
+    opacity: 0;
+  }
+  @keyframes ripple {
+    0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.6; }
+    50% { opacity: 0.3; }
+    100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+  }
+  .arrow-col:hover::before {
+    animation: ripple 1.5s infinite;
+  }
+  .arrow-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+    text-align: center;
+  }
 
-/* ── Reveal animations ── */
-.reveal{opacity:0;transform:translateY(14px);transition:opacity .45s ease,transform .45s ease}
-.reveal.in{opacity:1;transform:translateY(0)}
+  /* Enhanced controls */
+  .controls {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+    padding: 0.5rem;
+    background: var(--surface2);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .btn {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    letter-spacing: 0.02em;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    transition: left var(--transition-slow);
+  }
+  .btn:hover::before {
+    left: 100%;
+  }
+  .btn:hover { 
+    background: var(--surface2); 
+    border-color: #c0bdb3;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+  .btn:active {
+    transform: translateY(0);
+  }
+  .btn.active {
+    background: var(--text);
+    color: var(--surface);
+    border-color: var(--text);
+    box-shadow: 0 4px 12px rgba(26, 25, 22, 0.2);
+  }
+  .btn.active::before {
+    display: none;
+  }
 
+  .legend {
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: var(--surface2);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    transition: all var(--transition-fast);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+  }
+  .legend-item:hover {
+    background: var(--surface);
+    color: var(--text);
+  }
+  .legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .legend-swatch::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 2s infinite;
+  }
+  @keyframes shimmer {
+    100% { left: 100%; }
+  }
 
-/* ── WIDGET: Insight box ── */
-.insight{border-left:2px solid var(--orange);background:var(--orange-light);padding:18px 20px;margin:28px 0;border-radius:2px}
-.insight-title{font-family:var(--font-serif);font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;color:var(--orange)}
-.insight p{margin:0;font-size:12px;color:var(--ink2)}
+  /* Enhanced merge table */
+  .merge-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .merge-table th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    background: var(--surface2);
+    border-bottom: 2px solid var(--border);
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    position: sticky;
+    top: 0;
+  }
+  .merge-table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.5;
+    transition: background var(--transition-fast);
+  }
+  .merge-table tr:hover td {
+    background: var(--accent-light);
+  }
+  .merge-table tr:last-child td {
+    border-bottom: none;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2em 0.6em;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    font-family: var(--font-mono);
+  }
+  .badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .badge-yes { 
+    background: var(--green-bg); 
+    color: var(--green);
+    border: 1px solid rgba(22, 101, 52, 0.2);
+  }
+  .badge-no  { 
+    background: var(--red-bg);   
+    color: var(--red);
+    border: 1px solid rgba(185, 28, 28, 0.2);
+  }
 
-/* ── WIDGET: Definition box ── */
-.definition{border-left:2px solid var(--blue);background:rgba(42,74,107,.06);padding:18px 20px;margin:28px 0;border-radius:2px}
-.definition-title{font-family:var(--font-serif);font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;color:var(--blue)}
-.definition p{margin:0;font-size:12px;color:var(--ink2)}
+  /* Enhanced step walkthrough */
+  .steps { margin: 1.5rem 0; }
+  .step {
+    display: flex;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+    align-items: flex-start;
+    padding: 1rem;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+  }
+  .step::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--accent-gradient);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+  }
+  .step:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-sm);
+    transform: translateX(4px);
+  }
+  .step:hover::before {
+    opacity: 1;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--text);
+    color: var(--surface);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .step-num::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    background: var(--accent-gradient);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+  }
+  .step:hover .step-num::after {
+    opacity: 1;
+  }
+  .step-body { flex: 1; font-size: 0.95rem; }
+  .step-body code { background: var(--code-bg); }
 
-/* ── WIDGET: Example box ── */
-.example{border-left:2px solid var(--green);background:var(--green-light);padding:18px 20px;margin:28px 0;border-radius:2px}
-.example-title{font-family:var(--font-serif);font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;color:var(--green)}
-.example p{margin:0;font-size:12px;color:var(--ink2)}
+  /* Enhanced mode chips */
+  .mode-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+    flex-wrap: wrap;
+  }
+  .mode-chip {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface2);
+    transition: all var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+  }
+  .mode-chip::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left var(--transition-slow);
+  }
+  .mode-chip:hover::before {
+    left: 100%;
+  }
+  .mode-chip.mergeable {
+    background: var(--teal-bg);
+    border-color: #99f6e4;
+    color: var(--teal);
+  }
+  .mode-chip.blocked {
+    background: var(--amber-bg);
+    border-color: #fde68a;
+    color: var(--amber);
+  }
+  .connector {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--muted);
+    position: relative;
+    padding: 0 0.5rem;
+  }
+  .connector::before,
+  .connector::after {
+    content: '•';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--border);
+    font-size: 0.6rem;
+  }
+  .connector::before { left: 0; }
+  .connector::after { right: 0; }
 
-/* ── WIDGET: Memory visualization ── */
-.memory-viz-section{background:var(--paper2);border:1px solid var(--rule);border-radius:3px;padding:24px;margin:28px 0}
-.viz-title{font-family:var(--font-serif);font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-bottom:18px}
-.viz-grid{display:grid;gap:4px;margin:16px 0}
-.viz-row{display:grid;gap:3px}
-.viz-cell{display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;border:1px solid var(--rule);border-radius:2px;background:var(--paper);color:var(--ink);transition:all .2s;cursor:help;min-height:32px}
-.viz-cell:hover{border-color:var(--orange);background:var(--orange-light)}
-.viz-cell.accessed{background:var(--green-light);border-color:var(--green);color:var(--green);font-weight:600}
-.viz-cell.gap{background:var(--orange-light);border-color:var(--orange);color:var(--orange);opacity:.7}
-.viz-label{font-family:var(--font-mono);font-size:11px;color:var(--ink3);margin-top:12px;padding:12px;background:var(--paper);border-radius:2px;border:1px solid var(--rule)}
+  /* Enhanced explorer */
+  .explorer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  @media (max-width: 600px) {
+    .explorer-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 2rem; }
+    .grid-container { flex-direction: column; }
+  }
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+  }
+  .input-row label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    width: 60px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .input-row input {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    width: 160px;
+    transition: all var(--transition-fast);
+  }
+  .input-row input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  }
+  .result-box {
+    background: var(--code-bg);
+    border-radius: 8px;
+    padding: 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.8;
+    min-height: 80px;
+    border: 1px solid var(--border);
+    position: relative;
+  }
+  .result-box::before {
+    content: '⟦';
+    position: absolute;
+    top: 0.5rem;
+    left: 0.75rem;
+    color: var(--muted);
+    opacity: 0.5;
+    font-size: 1.2rem;
+  }
+  .result-box::after {
+    content: '⟧';
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.75rem;
+    color: var(--muted);
+    opacity: 0.5;
+    font-size: 1.2rem;
+  }
+  .result-arrow { color: var(--muted); margin: 0 0.3em; }
+  .result-ok { color: var(--teal); font-weight: 500; }
+  .result-skip { color: var(--muted); }
+  .result-warn { color: var(--amber); font-weight: 500; }
 
-/* ── WIDGET: Layout panels ── */
-.layout-duo{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:20px 0}
-@media(max-width:560px){.layout-duo{grid-template-columns:1fr}}
-.layout-panel{background:var(--paper2);border:1px solid var(--rule);border-radius:3px;padding:18px}
-.layout-label{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink3);margin-bottom:10px}
-.layout-notation{font-family:var(--font-mono);font-size:11px;background:var(--paper);padding:10px 14px;border-radius:2px;margin-bottom:12px;color:var(--ink);border-left:3px solid var(--blue)}
-.layout-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;font-size:11px}
-@media(max-width:560px){.layout-stats{grid-template-columns:1fr}}
-.stat{padding:12px;background:var(--paper);border-radius:3px;text-align:center}
-.stat-label{font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);margin-bottom:4px}
-.stat-value{font-family:var(--font-mono);font-size:18px;font-weight:600;color:var(--green)}
+  /* Enhanced section divider */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin: 3.5rem 0;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    position: relative;
+  }
+  .section-divider::before, 
+  .section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+  .section-divider::after {
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
 
-/* ── WIDGET: Explorer ── */
-.explorer{background:var(--paper2);border:1px solid var(--rule);border-radius:3px;padding:24px;margin:28px 0}
-.input-group{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
-.input-label{font-family:var(--font-serif);font-size:14px;font-weight:500;color:var(--ink)}
-.input-hint{font-family:var(--font-mono);font-size:10px;color:var(--ink3)}
-.input-field{font-family:var(--font-mono);padding:8px 10px;border:1px solid var(--rule);border-radius:2px;background:var(--paper);color:var(--ink);font-size:12px;outline:none;transition:border-color .15s}
-.input-field:focus{border-color:var(--green)}
-.btn-group{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
-.btn{font-family:var(--font-mono);font-size:11px;letter-spacing:.05em;padding:7px 14px;border:1px solid var(--rule);background:var(--paper);color:var(--ink2);border-radius:3px;cursor:pointer;transition:all .15s}
-.btn:hover{background:var(--paper2);color:var(--ink)}
-.btn-primary{background:var(--green);color:#fff;border-color:var(--green)}
-.btn-primary:hover{opacity:.9;color:#fff}
-.btn-secondary{background:var(--paper);color:var(--ink2)}
-.result-section{margin-top:20px;display:none}
-.result-section.active{display:block}
-.check-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
-.check-item{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;color:var(--ink2)}
-.check-icon{font-size:14px;width:20px;text-align:center}
-.check-icon.pass{color:var(--green)}
-.check-icon.fail{color:var(--orange)}
+  /* Enhanced props list */
+  .props-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .props-list li {
+    display: flex;
+    gap: 1.25rem;
+    align-items: baseline;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: all var(--transition-fast);
+  }
+  .props-list li:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-sm);
+    transform: translateX(4px);
+  }
+  .prop-num {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 0.1em 0.5em;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 3px;
+    background: var(--surface2);
+    font-weight: 500;
+  }
+  .prop-text { font-size: 0.95rem; line-height: 1.6; }
 
+  /* Code block enhancements */
+  pre {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    background: var(--code-bg);
+    padding: 1.25rem 1.5rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 1.25rem 0;
+    line-height: 1.7;
+    border: 1px solid var(--border);
+    position: relative;
+    box-shadow: var(--shadow-sm);
+  }
+  pre::before {
+    content: 'code';
+    position: absolute;
+    top: 0.5rem;
+    right: 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    opacity: 0.5;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    border: none;
+  }
 
-/* ── SERIES NAV LINKS ── */
-.nav-part{color:var(--ink3);text-decoration:none;transition:color .15s}
-.nav-part:hover{color:var(--green)}
-.nav-part em{font-style:italic}
-.nav-part:hover em{color:var(--green)}
-.part-link{color:var(--green);text-decoration:none;transition:color .15s}
-.part-link:hover{color:var(--orange)}
+  /* Hover tooltip for layout notation */
+  .layout-notation[title] {
+    position: relative;
+    cursor: help;
+  }
+  .layout-notation[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    background: var(--text);
+    color: var(--surface);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 10;
+    box-shadow: var(--shadow-md);
+    animation: tooltipFade var(--transition-fast);
+  }
+  .layout-notation[title]:hover::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-2px);
+    border: 6px solid transparent;
+    border-top-color: var(--text);
+    z-index: 10;
+  }
+  @keyframes tooltipFade {
+    from { opacity: 0; transform: translateX(-50%) translateY(-4px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(-8px); }
+  }
+
+  /* Copy button for code */
+  .copy-btn {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    z-index: 2;
+  }
+  .copy-btn:hover {
+    background: var(--surface2);
+    color: var(--text);
+    border-color: var(--accent);
+  }
+  .copy-btn.copied {
+    background: var(--green-bg);
+    color: var(--green);
+    border-color: var(--green);
+  }
+
+  /* Animated background for math blocks */
+  .math-block.animate {
+    animation: mathGlow 3s ease-in-out infinite;
+  }
+  @keyframes mathGlow {
+    0%, 100% { box-shadow: var(--shadow-sm); }
+    50% { box-shadow: 0 0 20px rgba(37, 99, 235, 0.15); }
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .header { padding: 2.5rem 0 2rem; }
+    h1 { font-size: 2.2rem; }
+    .article { padding: 2rem 1.5rem 4rem; }
+    .widget-body { padding: 1.25rem; }
+    .controls { flex-direction: column; align-items: stretch; }
+    .btn { justify-content: center; }
+  }
 </style>
 </head>
 <body>
@@ -241,7 +1073,7 @@ footer p{margin:0}
 <div class="hero reveal">
   <div class="hero-label">GPU Programming · CuTe DSL</div>
   <h1 class="hero-title">CuTe DSL from scratch:<br>The Art of <em>Coalescing</em></h1>
-  <p class="hero-sub">Understand how complex, hierarchical memory layouts collapse into simple flat forms. Master the principle behind one of GPU optimization's most powerful techniques.</p>
+  <p class="hero-sub">How CuTe compresses a hierarchical layout into the simplest representation that maps coordinates identically — and why that matters for GPU memory access.</p>
   <div class="hero-meta">
     <span>April 2026</span>
     <span>~15 minute read</span>
@@ -251,701 +1083,305 @@ footer p{margin:0}
 
 <div class="content">
 
-<!-- Section 1: Intuition -->
-<section id="intuition" class="reveal">
-  <div class="section-label">§10 — Intuition</div>
-  <h2 class="section-anchor">The Problem: Nested Complexity</h2>
-
-  <p>
-    You've been reading about GPU memory layouts. You understand that a <em>shape</em> describes 
-    dimensions, and a <em>stride</em> describes how to skip between elements. But then you encounter 
-    this: <code>(2, (1, 6)) : (1, (6, 2))</code>. A nested tuple. A hierarchical layout.
-  </p>
-
-  <p>
-    Your question: <strong>"What does this actually do?"</strong>
-  </p>
-
-  <p>
-    The answer: despite the nesting, despite the hierarchy, this layout accesses exactly 12 memory 
-    addresses in a perfectly linear stride-1 pattern. The nesting is just packaging. The real access 
-    pattern is simple.
-  </p>
-
-  <div class="insight">
-    <div class="insight-title">Core Realization</div>
-    <p>
-      Many complex memory layouts are <em>functionally equivalent</em> to simple flat layouts. 
-      Coalescing is the operation that finds this equivalence and collapses the hierarchy.
-    </p>
-  </div>
-
-  <p>
-    Think of it like fractions. <span style="font-family: var(--font-mono);">12/4</span> and 
-    <span style="font-family: var(--font-mono);">3/1</span> are different representations of the same value. 
-    Coalescing is the simplification step.
-  </p>
-
-  <h3>Why This Matters</h3>
-
-  <ul>
-    <li><strong>Performance:</strong> Flat layouts compile to efficient code. Complex ones require index arithmetic.</li>
-    <li><strong>Reasoning:</strong> It's easier to reason about a flat layout than a deeply nested one.</li>
-    <li><strong>Composition:</strong> When combining layouts, knowing the coalesced form helps predict the result.</li>
-  </ul>
-</section>
-
-<!-- Section 2: Visual Example - Contiguous -->
+<!-- INTRODUCTION -->
 <section class="reveal">
-  <div class="section-label">§10 — Memory View</div>
-  <h2>Seeing It in Memory</h2>
+  <div class="section-label">§10 — The Idea</div>
+  <h2>The idea, before the math</h2>
 
-  <p>
-    Let's look at a simple example. A <code>(4, 3)</code> matrix with stride <code>(1, 4)</code>:
-  </p>
+<p>Imagine you wrote a loop that steps through every element of a matrix:</p>
 
-  <div class="memory-viz-section">
-    <div class="viz-title">Contiguous Access Pattern</div>
-    <div style="margin-bottom: 1.5rem;">
-      <div style="font-family: var(--font-mono); color: var(--text); margin-bottom: 0.8rem;">
-        <strong>Layout:</strong> (4, 3) : (1, 4)
-      </div>
-      <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">
-        stride[1] = 4 = 4×1 = size[0] × stride[0] ✓ <span style="color: var(--accent-tertiary);">Contiguous!</span>
-      </div>
-    </div>
+<pre><code>for (int i = 0; i &lt; rows; ++i)
+  for (int j = 0; j &lt; cols; ++j)
+    addr = base + i * row_stride + j * col_stride;</code>
+<button class="copy-btn" onclick="copyCode(this)">📋 Copy</button></pre>
 
-    <div class="viz-grid">
-      <div class="viz-row">
-        <div class="viz-cell accessed">0</div>
-        <div class="viz-cell accessed">1</div>
-        <div class="viz-cell accessed">2</div>
-        <div class="viz-cell accessed">3</div>
-        <div class="viz-cell accessed">4</div>
-        <div class="viz-cell accessed">5</div>
-        <div class="viz-cell accessed">6</div>
-        <div class="viz-cell accessed">7</div>
-        <div class="viz-cell accessed">8</div>
-        <div class="viz-cell accessed">9</div>
-        <div class="viz-cell accessed">10</div>
-        <div class="viz-cell accessed">11</div>
-      </div>
-    </div>
+<p>Now suppose <code>col_stride = 1</code> and <code>row_stride = cols</code>. Every address falls in the sequence <code>base, base+1, base+2, …</code>. The two-level loop is redundant — you could just write a single counter from <code>0</code> to <code>rows*cols - 1</code> and get the same addresses in the same order. The loop <em>structure</em> carries information about the 2D shape, but the <em>memory pattern</em> is just a stride-1 stream.</p>
 
-    <div class="viz-label">
-      Access order: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11 (perfectly linear)
-    </div>
+<p>That compression is coalesce. Given any CuTe layout — potentially hierarchical, multi-mode, nested — it asks: <em>what is the simplest layout that produces exactly the same sequence of addresses?</em></p>
 
-    <div style="margin-top: 2rem; padding: 1.2rem; background: white; border-radius: 4px; border: 1px solid var(--border);">
-      <div style="font-family: var(--font-mono); color: var(--text); font-weight: 600;">
-        ⬇ Coalesces to: <span style="color: var(--accent-primary);">12 : 1</span>
-      </div>
-      <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.5rem;">
-        One flat shape, one flat stride. Perfect.
-      </div>
-    </div>
-  </div>
+<div class="callout insight">
+  <div class="callout-label">Key insight</div>
+  <p>Coalesce is a <strong>semantic no-op</strong>. The addresses don't change. Only the notation simplifies. But a simpler layout means less book-keeping for the compiler and the hardware — and that often means faster code.</p>
+</div>
 
-  <p>
-    Notice: the physical memory layout is linear. The nesting in <code>(4, 3)</code> is just how we 
-    <em>conceptually</em> organize it (4 rows, 3 columns). But at the hardware level, it's one contiguous block.
-  </p>
-
-  <h3>Contrast: Non-Contiguous</h3>
-
-  <div class="memory-viz-section">
-    <div class="viz-title">Gapped Access Pattern</div>
-    <div style="margin-bottom: 1.5rem;">
-      <div style="font-family: var(--font-mono); color: var(--text); margin-bottom: 0.8rem;">
-        <strong>Layout:</strong> (4, 3) : (1, 8)
-      </div>
-      <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">
-        stride[1] = 8 ≠ 4 = size[0] × stride[0] ✗ <span style="color: var(--accent-primary);">Gapped!</span>
-      </div>
-    </div>
-
-    <div class="viz-grid">
-      <div class="viz-row">
-        <div class="viz-cell accessed">0</div>
-        <div class="viz-cell accessed">1</div>
-        <div class="viz-cell accessed">2</div>
-        <div class="viz-cell accessed">3</div>
-        <div class="viz-cell gap">·</div>
-        <div class="viz-cell gap">·</div>
-        <div class="viz-cell gap">·</div>
-        <div class="viz-cell gap">·</div>
-        <div class="viz-cell accessed">8</div>
-        <div class="viz-cell accessed">9</div>
-        <div class="viz-cell accessed">10</div>
-        <div class="viz-cell accessed">11</div>
-      </div>
-    </div>
-
-    <div class="viz-label">
-      Access order: 0,1,2,3 [skip 4-7] 8,9,10,11. Gaps in memory = inefficient access.
-    </div>
-
-    <div style="margin-top: 2rem; padding: 1.2rem; background: white; border-radius: 4px; border: 1px solid var(--border);">
-      <div style="font-family: var(--font-mono); color: var(--text); font-weight: 600;">
-        ⬇ Cannot coalesce: <span style="color: var(--text);">(4, 3) : (1, 8)</span> (unchanged)
-      </div>
-      <div style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.5rem;">
-        Gaps force the layout to stay hierarchical. No simplification possible.
-      </div>
-    </div>
-  </div>
-
-  <div class="example">
-    <div class="example-title">The Pattern to Remember</div>
-    <p>
-      If consecutive modes have no gaps or overlaps—if stride[i+1] = size[i] × stride[i]—they merge. 
-      Otherwise, they stay separate.
-    </p>
-  </div>
+<p>For GPU kernels, the payoff is concrete: a coalesced layout makes it easy to check whether a sequence of thread accesses is contiguous in global memory — the condition for a single coalesced load instead of multiple scattered ones.</p>
 </section>
 
-<!-- Section 3: Definition -->
-<section id="definition" class="reveal">
-  <div class="section-label">§10 — Definition</div>
-  <h2>The Formal Definition</h2>
+<!-- ═══════════════════════════════ SECTION 2 ═══════════════════ -->
+<section id="definition">
+<h2>Definition</h2>
 
-  <div class="definition">
-    <div class="definition-title">Coalesced Layout</div>
-    <p>
-      A layout R is a <em>coalesced</em> layout of layout A if:
-    </p>
-    <ol style="margin-top: 1.2rem; margin-left: 2rem; line-height: 2;">
-      <li style="color: var(--text-secondary);">
-        <strong style="color: var(--text);">Same size:</strong> |R| = |A|
-      </li>
-      <li style="color: var(--text-secondary);">
-        <strong style="color: var(--text);">Flat shape:</strong> depth(R) ≤ 1 (no nesting)
-      </li>
-      <li style="color: var(--text-secondary);">
-        <strong style="color: var(--text);">Same function:</strong> R(c) = A(c) for all coordinates c
-      </li>
-    </ol>
-  </div>
+<p>A layout is written as <span class="layout-notation" title="shape : stride notation">shape : stride</span>. For a 1D layout, <span class="layout-notation" title="N elements with stride d">N : d</span> means: integer <code>c ∈ {0,1,…,N−1}</code> maps to address <code>c·d</code>. Hierarchical layouts like <span class="layout-notation" title="nested tuple: (2,(1,6)) with strides (1,(6,2))">(2,(1,6)):(1,(6,2))</span> use nested tuples.</p>
 
-  <p style="margin-top: 2rem;">
-    What does this mean?
-  </p>
+<p>Given layout $A$, its coalesced version $R$ must satisfy three properties:</p>
 
-  <ul>
-    <li>
-      <strong>Same size:</strong> Both layouts address the same number of memory elements. 
-      A 12-element layout coalesces to a 12-element layout.
-    </li>
-    <li>
-      <strong>Flat shape:</strong> The result has no nesting. It's a scalar, or a simple tuple. 
-      Not a tuple of tuples.
-    </li>
-    <li>
-      <strong>Same function:</strong> The memory addresses accessed are identical. 
-      The meaning of the layout is preserved.
-    </li>
-  </ul>
+<ul class="props-list">
+  <li>
+    <span class="prop-num">Eq 13</span>
+    <span class="prop-text"><strong>Same size:</strong> $|R| = |A|$. The coalesced layout covers the same number of logical coordinates.</span>
+  </li>
+  <li>
+    <span class="prop-num">Eq 14</span>
+    <span class="prop-text"><strong>Flattened shape:</strong> $\text{depth}(R) \le 1$. No nesting — at most a flat tuple of modes, each a simple integer.</span>
+  </li>
+  <li>
+    <span class="prop-num">Eq 15</span>
+    <span class="prop-text"><strong>Identical mapping:</strong> $\forall\, c \in \mathbb{Z}_{|A|},\ R(c) = A(c)$. Every integer coordinate maps to the same address as before.</span>
+  </li>
+</ul>
 
-  <p>
-    In essence: <strong>a layout is fundamentally a function from coordinates to memory addresses.</strong> 
-    Coalescing preserves the function while simplifying the representation.
-  </p>
+<p>In practice, coalesce returns the <em>minimal-rank</em> layout satisfying these — as few modes as possible.</p>
 </section>
 
-<!-- Section 4: Contiguity -->
-<section id="contiguity" class="reveal">
-  <div class="section-label">§10 — Contiguity</div>
-  <h2>Contiguity: When Do Modes Merge?</h2>
+<!-- ═══════════════════════════════ SECTION 3 ═══════════════════ -->
+<section id="examples">
+<h2>Worked examples</h2>
 
-  <p>
-    Coalescing works by merging <em>adjacent modes</em>. But not all pairs can merge. 
-    The question is: <strong>when are two modes contiguous?</strong>
-  </p>
+<p>Let's ground the definition with a concrete case. Consider:</p>
 
-  <p style="margin: 2rem 0; padding: 1.5rem; background: var(--surface); border-left: 4px solid var(--accent-secondary); border-radius: 4px; font-family: var(--font-mono); color: var(--text);">
-    <strong>Contiguity Condition:</strong><br>
-    stride[i+1] = size[i] × stride[i]
-  </p>
+<div class="math-block animate">$$A = (2,\,(1,\,6)) : (1,\,(6,\,2))$$</div>
 
-  <p>
-    If this holds, modes i and i+1 are contiguous. They access memory without gaps or overlaps, 
-    so they can safely merge.
-  </p>
+<p>This is rank-2 with a nested second mode. The first mode is <span class="layout-notation">2:1</span> (two elements, stride 1). The second is <span class="layout-notation">(1,6):(6,2)</span> (one-by-six sub-layout, strides 6 and 2). To find what addresses $A$ actually enumerates, we expand its 12 integer coordinates $c=0,\ldots,11$:</p>
 
-  <h3>Examples: Merge or Not?</h3>
+<!-- INTERACTIVE GRID VISUALIZATION 1 -->
+<div class="widget" id="viz1">
+  <div class="widget-header">
+    <span class="widget-title">address map — A = (2,(1,6)):(1,(6,2))</span>
+    <span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--muted)">✨ hover cells</span>
+  </div>
+  <div class="widget-body">
+    <div class="controls">
+      <button class="btn active" id="btn-before" onclick="setView('before')">◉ Original</button>
+      <button class="btn" id="btn-after" onclick="setView('after')">◉ Coalesced: 12:1</button>
+      <button class="btn" id="btn-both" onclick="setView('both')">◉ Side-by-side</button>
+    </div>
+    <div class="grid-container" id="grid-container1"></div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:#93c5fd"></div>logical coord c</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#6ee7b7"></div>address (same in both)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-gradient)"></div>hover highlight</div>
+    </div>
+    <div id="hover-info" style="font-family:var(--font-mono);font-size:0.78rem;color:var(--muted);margin-top:0.75rem;min-height:1.2em;padding:0.5rem 0.75rem;border:1px dashed var(--border);border-radius:6px;transition:all var(--transition-fast);background:var(--surface)"><span style="color:var(--accent)">↗</span> hover a cell to see coordinate → address mapping</div>
+  </div>
+</div>
 
-  <div class="layout-duo">
-    <div class="layout-panel">
-      <div class="layout-label">Merges ✓</div>
-      <div class="layout-notation">(4, 3) : (1, 4)</div>
-      <div class="layout-stats">
-        <div class="stat">
-          <div class="stat-label">Condition</div>
-          <div class="stat-value">4 = 4×1</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Result</div>
-          <div class="stat-value">12 : 1</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Depth</div>
-          <div class="stat-value">0</div>
-        </div>
+<p>Both grids visit exactly the addresses <code>0,1,2,3,4,5,6,7,8,9,10,11</code> — in the same order. The original layout just carries extra structural information (the nested hierarchy) that isn't reflected in any memory pattern. Coalesce strips it away.</p>
+
+<div class="math-block animate">$$\text{coalesce}((2,\,(1,\,6)) : (1,\,(6,\,2))) \;=\; 12 : 1$$</div>
+
+<h3>Verifying the three properties</h3>
+<div class="steps">
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body"><strong>Size preserved:</strong> $|R| = |A| = 12$. Both cover 12 coordinates.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body"><strong>Depth reduced:</strong> $\text{depth}(12:1) = 0 \le 1$. The coalesced layout is rank-1, no nesting.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body"><strong>Mapping identical:</strong> for all $c \in \{0,\ldots,11\}$, $R(c) = A(c)$. You can check this in the side-by-side view above.</div>
+  </div>
+</div>
+
+<div class="section-divider">second example</div>
+
+<p>Now consider a rank-2 layout with a hierarchical first mode:</p>
+
+<div class="math-block animate">$$A_2 = ((4, 3),\; 5) : ((15, 1),\; 3)$$</div>
+
+<p>The first mode is <span class="layout-notation">(4,3):(15,1)</span>: a 4×3 sub-layout with strides 15 and 1. The second is <span class="layout-notation">5:3</span>. This coalesces to:</p>
+
+<div class="math-block animate">$$\text{coalesce}(A_2) = (4,\, 15) : (15,\, 1)$$</div>
+
+<p>Notice the first mode's <em>inner</em> dimension <span class="layout-notation">3:1</span> merged with the outer across the two modes — because they are contiguous — but the overall shape stays rank-2 because the two resulting groups aren't contiguous with each other.</p>
+</section>
+
+<!-- ═══════════════════════════════ SECTION 4 ═══════════════════ -->
+<section id="merging">
+<h2>When do modes merge?</h2>
+
+<p>The core rule is simple. Two adjacent modes can be merged into one if and only if they are <em>contiguous in memory</em>:</p>
+
+<div class="callout">
+  <div class="callout-label">Merge condition</div>
+  <p>Mode $i$ with size $s_i$ and stride $d_i$ can merge with mode $i+1$ with stride $d_{i+1}$ when:<br><code style="background:var(--accent-light);color:var(--accent);padding:0.2em 0.4em;border-radius:3px">s_i · d_i = d_{i+1}</code><br>That is, the <em>span</em> of mode $i$ equals the stride of mode $i+1$.</p>
+</div>
+
+<p>Intuitively: if you walk $s_i$ steps in mode $i$ starting from address $a$, you land on $a + s_i \cdot d_i$. Mergeability means that landing address is exactly where mode $i+1$ starts — there's no gap, no overlap.</p>
+
+<!-- INTERACTIVE MERGE DEMO -->
+<div class="widget">
+  <div class="widget-header">
+    <span class="widget-title">merge condition explorer</span>
+    <span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--muted)">🔍 interactive</span>
+  </div>
+  <div class="widget-body">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem" id="merge-cases"></div>
+  </div>
+</div>
+
+<p>The partial coalescing case is the most instructive: <span class="layout-notation">(2,3,5,4):(1,2,10,50)</span> has four modes. Let's check adjacent pairs:</p>
+
+<!-- PARTIAL COALESCE WALKTHROUGH -->
+<div class="widget">
+  <div class="widget-header">
+    <span class="widget-title">partial coalesce — (2,3,5,4):(1,2,10,50)</span>
+    <span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--muted)">⚡ step-by-step</span>
+  </div>
+  <div class="widget-body" id="partial-walkthrough"></div>
+</div>
+
+<p>Modes 0–1 merge (span 2 = stride 2). Modes 2–3 merge (span 50 = stride 50). But modes 1–2 don't merge (span 6 ≠ stride 10). So the result is <span class="layout-notation">(6,20):(1,10)</span>.</p>
+</section>
+
+<!-- ═══════════════════════════════ SECTION 5 ═══════════════════ -->
+<section id="bymode">
+<h2>By-mode coalesce</h2>
+
+<p>Sometimes you want to preserve the rank-2 structure (say, rows vs. columns) while still simplifying each mode internally. That's <em>by-mode coalesce</em>: apply coalesce independently to each top-level mode.</p>
+
+<div class="math-block animate">$$\text{coalesce}(A,\, \langle{*,*}\rangle) = (\text{coalesce}(A_0),\; \text{coalesce}(A_1))$$</div>
+
+<div class="callout warning">
+  <div class="callout-label">Important distinction</div>
+  <p>Global coalesce and by-mode coalesce can give different results. Global coalesce is free to merge across top-level mode boundaries; by-mode coalesce is not. The by-mode result is always at least as high-rank as the global result.</p>
+</div>
+
+<!-- BY-MODE TABLE -->
+<div class="widget">
+  <div class="widget-header">
+    <span class="widget-title">global vs. by-mode comparison</span>
+    <span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--muted)">📊 table</span>
+  </div>
+  <div class="widget-body">
+    <table class="merge-table">
+      <thead>
+        <tr>
+          <th>Layout</th>
+          <th>Global coalesce</th>
+          <th>By-mode coalesce</th>
+          <th>Same?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>(2,(1,6)):(1,(6,2))</code></td>
+          <td><code>12:1</code></td>
+          <td><code>(2,6):(1,2)</code></td>
+          <td><span class="badge badge-no">no</span></td>
+        </tr>
+        <tr>
+          <td><code>((4,3),5):((15,1),3)</code></td>
+          <td><code>(4,15):(15,1)</code></td>
+          <td><code>((4,3),5):((15,1),3)</code></td>
+          <td><span class="badge badge-no">no</span></td>
+        </tr>
+        <tr>
+          <td><code>(4,(3,5)):(15,(1,3))</code></td>
+          <td><code>(4,15):(15,1)</code></td>
+          <td><code>(4,15):(15,1)</code></td>
+          <td><span class="badge badge-yes">yes</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top:0.85rem;font-size:0.88rem;color:var(--muted)">The third case matches because the nested hierarchy lives entirely within the second mode, so by-mode coalesce can collapse it too.</p>
+  </div>
+</div>
+
+<p>For the second layout, let's trace why the modes are left unchanged by by-mode coalesce:</p>
+
+<div class="steps">
+  <div class="step">
+    <div class="step-num">→</div>
+    <div class="step-body">Mode 0 is <span class="layout-notation">(4,3):(15,1)</span>. Check merge: span of <span class="layout-notation">4:15</span> is $4 \times 15 = 60$. Stride of <span class="layout-notation">3:1</span> is $1$. Since $60 \ne 1$, these sub-modes don't merge. Mode 0 stays <span class="layout-notation">(4,3):(15,1)</span>.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">→</div>
+    <div class="step-body">Mode 1 is already rank-1: <span class="layout-notation">5:3</span>. Nothing to simplify.</div>
+  </div>
+  <div class="step">
+    <div class="step-num">→</div>
+    <div class="step-body">By-mode result: the original layout unchanged. But global coalesce sees that modes across the boundary <em>are</em> contiguous and merges them.</div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════ SECTION 6 ═══════════════════ -->
+<section id="partial">
+<h2>Partial coalescing in practice</h2>
+
+<p>Real layouts from tiled matrix multiply often coalesce partially. Consider a thread accessing a 16×8 tile of a matrix with a non-unit leading dimension:</p>
+
+<div class="math-block animate">$$\text{Layout} = (2,\, 3,\, 5,\, 4) : (1,\, 2,\, 10,\, 50) \;\longrightarrow\; (6,\, 20) : (1,\, 10)$$</div>
+
+<p>The two merged pairs $(2,3) \to 6$ and $(5,4) \to 20$ each represent a contiguous region in memory. The gap between them (stride 10 vs. span 6) prevents further merging. The coalesced form is still useful: it tells you that within each of the two groups, memory access is perfectly contiguous.</p>
+
+<!-- PARTIAL COALESCE VISUALIZATION -->
+<div class="widget">
+  <div class="widget-header">
+    <span class="widget-title">address layout — before and after partial coalesce</span>
+    <span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--muted)">🎨 visual</span>
+  </div>
+  <div class="widget-body">
+    <canvas id="partial-canvas" width="680" height="140" style="max-width:100%;display:block;border:1px solid var(--border);border-radius:6px;background:var(--surface);box-shadow:var(--shadow-sm)"></canvas>
+    <div class="legend" style="margin-top:0.75rem">
+      <div class="legend-item"><div class="legend-swatch" style="background:#93c5fd"></div>group A (modes 0–1 merged)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#6ee7b7"></div>group B (modes 2–3 merged)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#f0abfc;opacity:0.5"></div>unused address space</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════ SECTION 7 ═══════════════════ -->
+<section id="explorer">
+<h2>Live explorer</h2>
+
+<p>Enter any flat layout (comma-separated sizes and strides) and see what coalesce produces, with a step-by-step trace of which adjacent modes merge.</p>
+
+<div class="widget">
+  <div class="widget-header">
+    <span class="widget-title">coalesce explorer</span>
+    <span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--muted)">🧪 interactive</span>
+  </div>
+  <div class="widget-body">
+    <div style="display:flex;gap:1.25rem;flex-wrap:wrap;margin-bottom:1rem">
+      <div>
+        <div style="font-family:var(--font-mono);font-size:0.72rem;color:var(--muted);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.08em">sizes (comma-separated)</div>
+        <input type="text" id="exp-sizes" value="2,3,5,4" style="font-family:var(--font-mono);font-size:0.88rem;padding:0.4rem 0.7rem;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);width:200px">
+      </div>
+      <div>
+        <div style="font-family:var(--font-mono);font-size:0.72rem;color:var(--muted);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.08em">strides (comma-separated)</div>
+        <input type="text" id="exp-strides" value="1,2,10,50" style="font-family:var(--font-mono);font-size:0.88rem;padding:0.4rem 0.7rem;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text);width:200px">
+      </div>
+      <div style="display:flex;align-items:flex-end">
+        <button class="btn active" onclick="runExplorer()">⚡ compute</button>
       </div>
     </div>
-
-    <div class="layout-panel">
-      <div class="layout-label">Does Not Merge ✗</div>
-      <div class="layout-notation">(4, 3) : (1, 8)</div>
-      <div class="layout-stats">
-        <div class="stat">
-          <div class="stat-label">Condition</div>
-          <div class="stat-value">8 ≠ 4×1</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Result</div>
-          <div class="stat-value">(4, 3) : (1, 8)</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Depth</div>
-          <div class="stat-value">1</div>
-        </div>
-      </div>
+    <div id="explorer-result" class="result-box"></div>
+    <div style="margin-top:0.75rem;font-family:var(--font-mono);font-size:0.72rem;color:var(--muted)">
+      try: <span style="cursor:pointer;text-decoration:underline;text-underline-offset:2px;color:var(--accent)" onclick="loadPreset(0)">contiguous</span> · 
+      <span style="cursor:pointer;text-decoration:underline;text-underline-offset:2px;color:var(--accent)" onclick="loadPreset(1)">gapped</span> · 
+      <span style="cursor:pointer;text-decoration:underline;text-underline-offset:2px;color:var(--accent)" onclick="loadPreset(2)">col-major 3D</span> · 
+      <span style="cursor:pointer;text-decoration:underline;text-underline-offset:2px;color:var(--accent)" onclick="loadPreset(3)">partial</span>
     </div>
   </div>
+</div>
 
-  <h3>Why Contiguity Matters</h3>
+<p>The trace shows for each adjacent pair: <em>span of left mode</em> vs. <em>stride of right mode</em>. A match means merge.</p>
 
-  <ul>
-    <li>
-      <strong>Row-major:</strong> Adjacent dimensions are naturally contiguous. You can coalesce the entire layout.
-    </li>
-    <li>
-      <strong>Column-major:</strong> Also contiguous. You can coalesce the entire layout.
-    </li>
-    <li>
-      <strong>Custom strides:</strong> Gaps appear quickly. Only contiguous pairs merge.
-    </li>
-  </ul>
 </section>
 
-<!-- Section 5: Interactive Explorer -->
-<section id="explorer" class="reveal">
-  <div class="section-label">§10 — Explorer</div>
-  <h2>Interactive Explorer</h2>
+<div class="section-divider">summary</div>
 
-  <p>
-    Test your understanding. Enter a layout, and the explorer will coalesce it and verify all three properties.
-  </p>
-
-  <div class="explorer">
-    <div class="input-group">
-      <div class="input-label">Your Layout</div>
-      <div class="input-hint">Examples: (4,3):(1,4) or (2,(1,6)):(1,(6,2)) or ((2,3),5):((1,2),10)</div>
-      <input type="text" id="layoutInput" class="input-field" value="(2,(1,6)):(1,(6,2))" placeholder="Enter shape:stride">
-    </div>
-
-    <div class="btn-group">
-      <button class="btn btn-primary" onclick="analyzeLayout()">Analyze</button>
-      <button class="btn btn-secondary" onclick="loadExample('row-major')">Row-Major</button>
-      <button class="btn btn-secondary" onclick="loadExample('column-major')">Column-Major</button>
-      <button class="btn btn-secondary" onclick="loadExample('partial')">Partial</button>
-    </div>
-
-    <div id="resultSection" class="result-section">
-      <div class="layout-duo" style="margin-top: 2rem;">
-        <div class="layout-panel">
-          <div class="layout-label">Original</div>
-          <div class="layout-notation" id="origLayout"></div>
-          <div class="layout-stats">
-            <div class="stat">
-              <div class="stat-label">Size</div>
-              <div class="stat-value" id="origSize"></div>
-            </div>
-            <div class="stat">
-              <div class="stat-label">Depth</div>
-              <div class="stat-value" id="origDepth"></div>
-            </div>
-            <div class="stat">
-              <div class="stat-label">Rank</div>
-              <div class="stat-value" id="origRank"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="layout-panel" style="border-color: var(--accent-tertiary); background: rgba(46, 148, 74, 0.01);">
-          <div class="layout-label" style="color: var(--accent-tertiary);">⬇ Coalesced</div>
-          <div class="layout-notation" id="coalLayout" style="border-left-color: var(--accent-tertiary);"></div>
-          <div class="layout-stats">
-            <div class="stat">
-              <div class="stat-label">Size</div>
-              <div class="stat-value" id="coalSize"></div>
-            </div>
-            <div class="stat">
-              <div class="stat-label">Depth</div>
-              <div class="stat-value" id="coalDepth"></div>
-            </div>
-            <div class="stat">
-              <div class="stat-label">Rank</div>
-              <div class="stat-value" id="coalRank"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div style="margin-top: 2rem; padding: 1.8rem; background: white; border: 1px solid var(--border); border-radius: 6px;">
-        <div style="font-family: var(--font-sans); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-tertiary); margin-bottom: 1rem; font-weight: 600;">
-          Verification
-        </div>
-        <div class="check-list">
-          <div class="check-item">
-            <div class="check-icon pass">✓</div>
-            <span id="checkSize">Size: |R| = |A|</span>
-          </div>
-          <div class="check-item">
-            <div class="check-icon pass">✓</div>
-            <span id="checkDepth">Flat: depth(R) ≤ 1</span>
-          </div>
-          <div class="check-item">
-            <div class="check-icon pass">✓</div>
-            <span id="checkFunc">Function: R(c) = A(c)</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="errorSection" style="display: none; margin-top: 1.5rem; padding: 1.5rem; background: rgba(201, 74, 46, 0.1); border-left: 4px solid var(--accent-primary); border-radius: 4px; color: var(--accent-primary); font-family: var(--font-mono);">
-      <div id="errorMessage"></div>
-    </div>
-  </div>
-</section>
-
-<!-- Section 6: Real Examples -->
-<section id="examples" class="reveal">
-  <div class="section-label">§10 — Examples</div>
-  <h2>Real-World Examples</h2>
-
-  <h3>Example 1: Column-Major (Contiguous)</h3>
-
-  <p>
-    Shape <code>(3, 4, 2)</code>, stride <code>(1, 3, 12)</code>. All modes are contiguous:
-  </p>
-
-  <ul>
-    <li>Mode 0→1: 3 = 3×1 ✓</li>
-    <li>Mode 1→2: 12 = 4×3 ✓</li>
-  </ul>
-
-  <p>Result: <code>24 : 1</code> (perfectly flat, one long linear access)</p>
-
-  <h3>Example 2: Partial Coalescing</h3>
-
-  <p>
-    Shape <code>(2, 3, 5, 4)</code>, stride <code>(1, 2, 10, 50)</code>:
-  </p>
-
-  <ul>
-    <li>Mode 0→1: 2 = 2×1 ✓ Merge → 6</li>
-    <li>Mode 1→2: 10 ≠ 3×2 ✗ Cannot merge (gap)</li>
-    <li>Mode 2→3: 50 = 5×10 ✓ Merge → 20</li>
-  </ul>
-
-  <p>Result: <code>(6, 20) : (1, 10)</code> (partially coalesced)</p>
-
-  <h3>Example 3: Hierarchical to Flat</h3>
-
-  <p>
-    The example from the start: <code>(2, (1, 6)) : (1, (6, 2))</code>
-  </p>
-
-  <p>
-    When flattened and coalesced over the full integral coordinate space, 
-    this maps linearly: every index 0-11 maps to address 0-11.
-  </p>
-
-  <p>Result: <code>12 : 1</code> (completely flat)</p>
-</section>
-
-<!-- Section 7: Takeaway -->
-<section class="reveal">
-  <div class="section-label">§10 — Summary</div>
-  <h2>Why This Matters</h2>
-
-  <p>
-    Coalescing is a fundamental tool in GPU optimization because:
-  </p>
-
-  <ul>
-    <li>
-      <strong>Performance:</strong> Flat layouts compile to efficient load/store sequences. 
-      Complex ones require index arithmetic at runtime.
-    </li>
-    <li>
-      <strong>Reasoning:</strong> Understanding what a complex layout coalesces to tells you 
-      if access is efficient or scattered.
-    </li>
-    <li>
-      <strong>Composition:</strong> When you compose multiple layouts (common in CUTLASS), 
-      knowing how they coalesce helps predict the final result.
-    </li>
-    <li>
-      <strong>Debugging:</strong> If a kernel is slow, check: does its layout coalesce? 
-      If not, you've found a bottleneck.
-    </li>
-  </ul>
-
-  <div class="insight">
-    <div class="insight-title">Key Insight</div>
-    <p>
-      Coalescing is <em>simplification</em>. A coalesced layout is the minimal flat representation 
-      of what might be a deeply nested memory access pattern. Master it, and you understand 
-      one of the most powerful tools in GPU programming.
-    </p>
-  </div>
-</section>
-
-<!-- Scripts -->
-<script>
-// ─────────────────────────────────────────────────────────────────
-// LAYOUT PARSER
-// ─────────────────────────────────────────────────────────────────
-
-function parseVal(s) {
-  s = s.trim();
-  if (!s) return null;
-  
-  if (s[0] === '(' && s[s.length-1] === ')') {
-    s = s.slice(1, -1);
-    const parts = [];
-    let curr = '';
-    let depth = 0;
-    
-    for (let c of s) {
-      if (c === '(') depth++;
-      if (c === ')') depth--;
-      if (c === ',' && depth === 0) {
-        const p = parseVal(curr);
-        if (!p) return null;
-        parts.push(p);
-        curr = '';
-      } else {
-        curr += c;
-      }
-    }
-    
-    if (curr) {
-      const p = parseVal(curr);
-      if (!p) return null;
-      parts.push(p);
-    }
-    
-    return parts;
-  }
-  
-  const n = parseInt(s);
-  return isNaN(n) ? null : n;
-}
-
-function parseLayout(str) {
-  try {
-    const parts = str.split(':');
-    if (parts.length !== 2) return null;
-    
-    const shape = parseVal(parts[0]);
-    const stride = parseVal(parts[1]);
-    
-    if (!shape || !stride) return null;
-    return { shape, stride };
-  } catch (e) {
-    return null;
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────
-// HELPERS
-// ─────────────────────────────────────────────────────────────────
-
-function getSize(val) {
-  if (typeof val === 'number') return val;
-  if (Array.isArray(val)) return val.reduce((a, b) => a * getSize(b), 1);
-  return 1;
-}
-
-function getDepth(val) {
-  if (typeof val === 'number') return 0;
-  if (Array.isArray(val)) {
-    if (val.length === 0) return 1;
-    return 1 + Math.max(...val.map(getDepth));
-  }
-  return 0;
-}
-
-function getRank(val) {
-  if (typeof val === 'number') return 0;
-  if (Array.isArray(val)) return val.length;
-  return 0;
-}
-
-function format(val) {
-  if (typeof val === 'number') return val.toString();
-  if (Array.isArray(val)) return '(' + val.map(format).join(', ') + ')';
-  return '';
-}
-
-// ─────────────────────────────────────────────────────────────────
-// COALESCE LOGIC
-// ─────────────────────────────────────────────────────────────────
-
-function coalesce(shape, stride) {
-  if (typeof shape === 'number' || !Array.isArray(shape)) {
-    return { shape, stride };
-  }
-  
-  let newShape = [];
-  let newStride = [];
-  
-  let i = 0;
-  while (i < shape.length) {
-    let currShape = shape[i];
-    let currStride = stride[i];
-    
-    let j = i + 1;
-    while (j < shape.length) {
-      const nextStride = stride[j];
-      const thisSize = getSize(currShape);
-      const thisStride = (typeof currStride === 'number') ? currStride : null;
-      
-      if (thisStride === null || typeof nextStride !== 'number') break;
-      
-      if (nextStride === thisSize * thisStride) {
-        currShape = (typeof currShape === 'number') 
-          ? currShape * getSize(shape[j]) 
-          : currShape;
-        currStride = thisStride;
-        j++;
-      } else {
-        break;
-      }
-    }
-    
-    newShape.push(currShape);
-    newStride.push(currStride);
-    i = j;
-  }
-  
-  if (newShape.length === 1 && typeof newShape[0] === 'number') {
-    return { shape: newShape[0], stride: newStride[0] };
-  }
-  
-  return {
-    shape: newShape.length === 1 ? newShape[0] : newShape,
-    stride: newStride.length === 1 ? newStride[0] : newStride
-  };
-}
-
-// ─────────────────────────────────────────────────────────────────
-// UI
-// ─────────────────────────────────────────────────────────────────
-
-function loadExample(type) {
-  let layout;
-  switch(type) {
-    case 'row-major':
-      layout = '(4,3):(1,4)';
-      break;
-    case 'column-major':
-      layout = '(3,4,2):(1,3,12)';
-      break;
-    case 'partial':
-      layout = '(2,3,5,4):(1,2,10,50)';
-      break;
-    default:
-      layout = '';
-  }
-  document.getElementById('layoutInput').value = layout;
-  analyzeLayout();
-}
-
-function analyzeLayout() {
-  const input = document.getElementById('layoutInput').value;
-  const parsed = parseLayout(input);
-  
-  const result = document.getElementById('resultSection');
-  const error = document.getElementById('errorSection');
-  
-  if (!parsed) {
-    result.style.display = 'none';
-    error.style.display = 'block';
-    document.getElementById('errorMessage').textContent = 
-      'Invalid format. Try: (4,3):(1,4) or (2,(1,6)):(1,(6,2))';
-    return;
-  }
-  
-  error.style.display = 'none';
-  
-  const { shape, stride } = parsed;
-  const size = getSize(shape);
-  const depth = getDepth(shape);
-  const rank = getRank(shape);
-  
-  const coalesced = coalesce(shape, stride);
-  const coalSize = getSize(coalesced.shape);
-  const coalDepth = getDepth(coalesced.shape);
-  const coalRank = getRank(coalesced.shape);
-  
-  document.getElementById('origLayout').textContent = format(shape) + ' : ' + format(stride);
-  document.getElementById('origSize').textContent = size;
-  document.getElementById('origDepth').textContent = depth;
-  document.getElementById('origRank').textContent = rank;
-  
-  document.getElementById('coalLayout').textContent = format(coalesced.shape) + ' : ' + format(coalesced.stride);
-  document.getElementById('coalSize').textContent = coalSize;
-  document.getElementById('coalDepth').textContent = coalDepth;
-  document.getElementById('coalRank').textContent = coalRank;
-  
-  document.getElementById('checkSize').textContent = `✓ Size: |R| = ${coalSize} = ${size} = |A|`;
-  document.getElementById('checkDepth').textContent = `✓ Flat: depth(R) = ${coalDepth} ≤ 1`;
-  document.getElementById('checkFunc').textContent = `✓ Function: R(c) = A(c) ∀c ∈ Z_${size}`;
-  
-  result.classList.add('active');
-  result.style.display = 'block';
-}
-
-// ─────────────────────────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────────────────────────
-
-window.addEventListener('load', () => {
-  // Smooth nav links
-  document.querySelectorAll('a[href^="#"]').forEach(a => {
-    a.addEventListener('click', e => {
-      const href = a.getAttribute('href');
-      if (href === '#') return;
-      e.preventDefault();
-      const target = document.querySelector(href);
-      if (target) target.scrollIntoView({ behavior: 'smooth' });
-    });
-  });
-  
-  // Lazy analyze on page load
-  analyzeLayout();
-  
-  // Stagger section animations
-  document.querySelectorAll('section').forEach((s, i) => {
-    s.style.animationDelay = (i * 0.05) + 's';
-  });
-});
-
-// ─────────────────────────────────────────────────────────────────
-// MATHJAX
-// ─────────────────────────────────────────────────────────────────
-
-if (window.MathJax) {
-  window.addEventListener('load', () => {
-    MathJax.typesetPromise?.().catch(e => console.log(e));
-  });
-}
-</script>
+<div class="callout">
+  <div class="callout-label">Three things to remember</div>
+  <p><strong>1.</strong> Coalesce is functionally transparent — it never changes which addresses get accessed, only how the layout is described.</p>
+  <p style="margin-top:0.6rem"><strong>2.</strong> Two adjacent modes merge when <em>span(left) = stride(right)</em> — they are contiguous in memory.</p>
+  <p style="margin-top:0.6rem"><strong>3.</strong> By-mode coalesce respects top-level mode boundaries; global coalesce doesn't. When you need to preserve a row/column distinction, use by-mode.</p>
+</div>
 
 <section class="reveal" style="border:none; padding-top:40px; padding-bottom:40px; text-align:center;">
   <p style="color:var(--ink3); font-size:11px; letter-spacing:0.08em; text-transform:uppercase;">
@@ -983,6 +1419,558 @@ document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
     });
   }
 })();
+</script>
+
+<script>
+// ─── Layout evaluation (flat only) ───────────────────────────────
+function evalLayout(sizes, strides, c) {
+  let addr = 0;
+  let rem = c;
+  for (let i = 0; i < sizes.length; i++) {
+    addr += (rem % sizes[i]) * strides[i];
+    rem = Math.floor(rem / sizes[i]);
+  }
+  return addr;
+}
+
+function totalSize(sizes) { return sizes.reduce((a,b) => a*b, 1); }
+
+// ─── PALETTE ─────────────────────────────────────────────────────
+const BLUE   = '#93c5fd';
+const TEAL   = '#6ee7b7';
+const AMBER  = '#fcd34d';
+const PINK   = '#f0abfc';
+const RED    = '#fca5a5';
+const PURPLE = '#c4b5fd';
+const GRAY   = '#d1d5db';
+
+// Colors for coordinate groups (12 coords)
+function coordColor(c, n) {
+  const palettes = ['#93c5fd','#6ee7b7','#fcd34d','#f0abfc','#fca5a5','#c4b5fd',
+                    '#a5f3fc','#bbf7d0','#fed7aa','#e9d5ff','#fde68a','#bfdbfe'];
+  return palettes[c % palettes.length];
+}
+
+// ─── Copy to clipboard functionality ─────────────────────────────
+function copyCode(btn) {
+  const code = btn.parentElement.querySelector('code').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    btn.classList.add('copied');
+    btn.textContent = '✓ Copied';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.textContent = '📋 Copy';
+    }, 2000);
+  });
+}
+
+// ─── VIZ 1: address map grid ─────────────────────────────────────
+const A1_sizes   = [2,1,6];  // (2,(1,6))  — flatten
+const A1_strides = [1,6,2];  // (1,(6,2))
+
+function computeA1(c) {
+  // flat interpretation: treat (2,(1,6)) as 3-mode [2,1,6] with strides [1,6,2]
+  return evalLayout([2,1,6],[1,6,2],c);
+}
+function computeR1(c) { return c * 1; }
+
+let currentView = 'before';
+
+function drawLayoutGrid(canvas, sizes, stridesFn, label, hoverId) {
+  const N = 12;
+  const cellSize = 42;
+  const cols = 6, rows = 2;
+  const W = cols * cellSize, H = rows * cellSize;
+  canvas.width = W; canvas.height = H;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+
+  function draw(highlightC) {
+    ctx.clearRect(0, 0, W, H);
+    
+    // Draw subtle grid lines
+    ctx.strokeStyle = 'rgba(228, 226, 218, 0.5)';
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i <= cols; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i * cellSize, 0);
+      ctx.lineTo(i * cellSize, H);
+      ctx.stroke();
+    }
+    for (let i = 0; i <= rows; i++) {
+      ctx.beginPath();
+      ctx.moveTo(0, i * cellSize);
+      ctx.lineTo(W, i * cellSize);
+      ctx.stroke();
+    }
+    
+    for (let c = 0; c < N; c++) {
+      const col = c % cols, row = Math.floor(c / cols);
+      const x = col * cellSize, y = row * cellSize;
+      const addr = stridesFn(c);
+      const isHover = (highlightC === c);
+      
+      // Cell background with gradient effect
+      if (isHover) {
+        const gradient = ctx.createLinearGradient(x, y, x + cellSize, y + cellSize);
+        gradient.addColorStop(0, '#1d4ed8');
+        gradient.addColorStop(1, '#7c3aed');
+        ctx.fillStyle = gradient;
+      } else {
+        ctx.fillStyle = coordColor(c, N);
+      }
+      
+      // Rounded rectangle
+      ctx.beginPath();
+      ctx.roundRect(x+3, y+3, cellSize-6, cellSize-6, 4);
+      ctx.fill();
+      
+      // Address text
+      ctx.fillStyle = isHover ? '#fff' : '#1e293b';
+      ctx.font = `${isHover ? 600 : 500} 11px JetBrains Mono, monospace`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.shadowColor = isHover ? 'rgba(0,0,0,0.3)' : 'transparent';
+      ctx.shadowBlur = isHover ? 8 : 0;
+      ctx.fillText(addr, x + cellSize/2, y + cellSize/2);
+      ctx.shadowBlur = 0;
+      
+      // Hover ring
+      if (isHover) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(x+1, y+1, cellSize-2, cellSize-2, 5);
+        ctx.stroke();
+      }
+    }
+  }
+
+  draw(-1);
+  canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+    const scale = canvas.width / rect.width;
+    const col = Math.floor(mx * scale / cellSize);
+    const row = Math.floor(my * scale / cellSize);
+    const c = row * cols + col;
+    if (c >= 0 && c < N) {
+      draw(c);
+      const addr = stridesFn(c);
+      const info = document.getElementById('hover-info');
+      info.style.borderColor = 'var(--accent)';
+      info.style.background = 'var(--accent-light)';
+      info.style.color = 'var(--text)';
+      info.innerHTML = `<span style="color:var(--accent)">⟨</span> c = <strong>${c}</strong> → address = <strong>${addr}</strong> <span style="color:var(--accent)">⟩</span>`;
+    }
+  });
+  canvas.addEventListener('mouseleave', () => {
+    draw(-1);
+    const info = document.getElementById('hover-info');
+    info.style.borderColor = 'var(--border)';
+    info.style.background = 'var(--surface)';
+    info.style.color = 'var(--muted)';
+    info.innerHTML = '<span style="color:var(--accent)">↗</span> hover a cell to see coordinate → address mapping';
+  });
+}
+
+function setView(v) {
+  currentView = v;
+  ['before','after','both'].forEach(id => {
+    document.getElementById('btn-'+id).classList.toggle('active', id === v);
+  });
+  renderViz1();
+}
+
+function renderViz1() {
+  const container = document.getElementById('grid-container1');
+  container.innerHTML = '';
+  
+  if (currentView === 'before' || currentView === 'both') {
+    const sec = document.createElement('div');
+    sec.className = 'grid-section';
+    sec.innerHTML = '<div class="grid-label">original</div><div class="grid-title">(2,(1,6)) : (1,(6,2))</div>';
+    const c = document.createElement('canvas');
+    c.className = 'layout-grid';
+    sec.appendChild(c);
+    container.appendChild(sec);
+    drawLayoutGrid(c, null, computeA1, 'original');
+  }
+
+  if (currentView === 'both') {
+    const arr = document.createElement('div');
+    arr.className = 'arrow-col';
+    arr.innerHTML = '⟶<div class="arrow-label">coalesce</div>';
+    container.appendChild(arr);
+  }
+
+  if (currentView === 'after' || currentView === 'both') {
+    const sec = document.createElement('div');
+    sec.className = 'grid-section';
+    sec.innerHTML = '<div class="grid-label">coalesced</div><div class="grid-title">12 : 1</div>';
+    const c = document.createElement('canvas');
+    c.className = 'layout-grid';
+    sec.appendChild(c);
+    container.appendChild(sec);
+    drawLayoutGrid(c, null, computeR1, 'coalesced');
+  }
+}
+
+// ─── MERGE CASES TABLE ────────────────────────────────────────────
+function renderMergeCases() {
+  const cases = [
+    {
+      name: '✨ Contiguous',
+      layout: '(4,3):(1,4)',
+      sizes:[4,3], strides:[1,4],
+      result: '12:1',
+      merges: true,
+      why: 'span(4:1) = 4·1 = 4 = stride of next mode'
+    },
+    {
+      name: '⚠️ Gapped',
+      layout: '(4,3):(1,8)',
+      sizes:[4,3], strides:[1,8],
+      result: '(4,3):(1,8)',
+      merges: false,
+      why: 'span(4:1) = 4 ≠ 8 = stride of next mode'
+    },
+    {
+      name: '⚠️ Overlapping',
+      layout: '(4,3):(1,2)',
+      sizes:[4,3], strides:[1,2],
+      result: '(4,3):(1,2)',
+      merges: false,
+      why: 'span(4:1) = 4 ≠ 2 = stride of next mode'
+    },
+    {
+      name: '🎯 Col-major 3D',
+      layout: '(3,4,2):(1,3,12)',
+      sizes:[3,4,2], strides:[1,3,12],
+      result: '24:1',
+      merges: true,
+      why: '3=3, 12=12 — all contiguous, fully merges'
+    },
+  ];
+
+  const cont = document.getElementById('merge-cases');
+  cases.forEach(c => {
+    const div = document.createElement('div');
+    div.style.cssText = 'background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:1.25rem;transition:all var(--transition-fast)';
+    div.onmouseenter = function() { this.style.borderColor = 'var(--accent)'; this.style.boxShadow = 'var(--shadow-sm)'; };
+    div.onmouseleave = function() { this.style.borderColor = 'var(--border)'; this.style.boxShadow = 'none'; };
+    div.innerHTML = `
+      <div style="font-family:var(--font-mono);font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem"><span style="font-size:1.1rem">${c.name.split(' ')[0]}</span> ${c.name.split(' ').slice(1).join(' ')}</div>
+      <div style="font-family:var(--font-mono);font-size:0.9rem;margin-bottom:0.5rem;background:var(--code-bg);padding:0.4rem 0.6rem;border-radius:4px;border:1px solid var(--border);display:inline-block"><code style="background:none;padding:0">${c.layout}</code></div>
+      <div style="font-size:0.82rem;color:var(--muted);margin-bottom:0.75rem;line-height:1.5">${c.why}</div>
+      <div style="display:flex;align-items:center;gap:0.5rem">
+        <span class="badge ${c.merges ? 'badge-yes' : 'badge-no'}">${c.merges ? '✓ merges' : '✗ no merge'}</span>
+        <span style="font-family:var(--font-mono);font-size:0.8rem;color:var(--muted)">⟶</span>
+        <span style="font-family:var(--font-mono);font-size:0.85rem"><code style="background:var(--accent-light);color:var(--accent);padding:0.2em 0.4em;border-radius:3px">${c.result}</code></span>
+      </div>
+    `;
+    cont.appendChild(div);
+  });
+}
+
+// ─── PARTIAL COALESCE WALKTHROUGH ────────────────────────────────
+function renderPartialWalkthrough() {
+  const sizes = [2,3,5,4], strides = [1,2,10,50];
+  const pairs = [
+    { i:0, j:1, span: sizes[0]*strides[0], strideNext: strides[1] },
+    { i:1, j:2, span: sizes[1]*strides[1], strideNext: strides[2] },
+    { i:2, j:3, span: sizes[2]*strides[2], strideNext: strides[3] },
+  ];
+
+  const cont = document.getElementById('partial-walkthrough');
+
+  // Show the layout
+  const header = document.createElement('div');
+  header.style.cssText = 'margin-bottom:1.25rem';
+  header.innerHTML = `
+    <div style="font-family:var(--font-mono);font-size:0.88rem;margin-bottom:0.75rem;background:var(--code-bg);padding:0.6rem 0.8rem;border-radius:6px;border:1px solid var(--border);display:inline-block">
+      Layout: <strong style="color:var(--accent)">(2,3,5,4):(1,2,10,50)</strong>
+    </div>
+    <div class="mode-row">
+      ${sizes.map((s,i) => `<span class="mode-chip" title="mode ${i}: size=${s}, stride=${strides[i]}">${s}:${strides[i]}</span>${i<sizes.length-1?'<span class="connector"></span>':''}`).join('')}
+    </div>
+  `;
+  cont.appendChild(header);
+
+  // Check pairs with visual indicators
+  const checksDiv = document.createElement('div');
+  checksDiv.style.cssText = 'display:flex;flex-direction:column;gap:0.75rem;margin-bottom:1.25rem';
+  pairs.forEach(p => {
+    const ok = p.span === p.strideNext;
+    const row = document.createElement('div');
+    row.style.cssText = `display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;padding:0.6rem 0.85rem;border-radius:6px;background:${ok ? 'var(--teal-bg)' : 'var(--amber-bg)'};border:1px solid ${ok ? '#99f6e4' : '#fde68a'};transition:all var(--transition-fast)`;
+    row.onmouseenter = function() { this.style.transform = 'translateX(4px)'; this.style.boxShadow = 'var(--shadow-sm)'; };
+    row.onmouseleave = function() { this.style.transform = 'none'; this.style.boxShadow = 'none'; };
+    row.innerHTML = `
+      <span style="font-family:var(--font-mono);font-size:0.78rem;color:${ok ? 'var(--teal)' : 'var(--amber)'};width:90px;font-weight:500">modes ${p.i}↔${p.j}</span>
+      <span style="font-family:var(--font-mono);font-size:0.82rem">span(${sizes[p.i]}·${strides[p.i]}) = <strong>${p.span}</strong></span>
+      <span style="color:var(--muted);font-weight:500">⟷</span>
+      <span style="font-family:var(--font-mono);font-size:0.82rem">stride = <strong>${p.strideNext}</strong></span>
+      <span class="badge ${ok ? 'badge-yes':'badge-no'}" style="margin-left:auto">${ok ? '✓ merge':'✗ keep'}</span>
+    `;
+    checksDiv.appendChild(row);
+  });
+  cont.appendChild(checksDiv);
+
+  // Result with animation
+  const result = document.createElement('div');
+  result.style.cssText = 'border-top:1px solid var(--border);padding-top:1rem;font-family:var(--font-mono);font-size:0.85rem;background:var(--surface2);border-radius:8px;padding:1rem;margin-top:0.5rem';
+  result.innerHTML = `
+    <div class="mode-row" style="margin-bottom:0.5rem;justify-content:center">
+      <span class="mode-chip mergeable" title="merged: 2×3=6, stride=1">2:1 + 3:2 → 6:1</span>
+      <span class="connector"></span>
+      <span class="mode-chip blocked" title="gap: span=6 ≠ stride=10">gap (6≠10)</span>
+      <span class="connector"></span>
+      <span class="mode-chip mergeable" title="merged: 5×4=20, stride=10">5:10 + 4:50 → 20:10</span>
+    </div>
+    <div style="text-align:center;margin-top:0.75rem;color:var(--muted)">
+      coalesce → <strong style="color:var(--text);font-size:1.1rem;background:var(--accent-light);color:var(--accent);padding:0.3em 0.7em;border-radius:5px">(6,20):(1,10)</strong>
+    </div>
+  `;
+  cont.appendChild(result);
+}
+
+// ─── PARTIAL CANVAS VIZ ──────────────────────────────────────────
+function renderPartialCanvas() {
+  const canvas = document.getElementById('partial-canvas');
+  const ctx = canvas.getContext('2d');
+  const sizes = [2,3,5,4], strides = [1,2,10,50];
+  const N = 120;
+  // Compute all addresses
+  const addrs = [];
+  for (let c = 0; c < N; c++) addrs.push(evalLayout(sizes, strides, c));
+  const maxAddr = Math.max(...addrs);
+
+  const W = canvas.width, H = canvas.height;
+  const PAD = 25;
+  const barH = 32;
+  const scale = (W - 2*PAD) / (maxAddr + 1);
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background grid lines (every 10)
+  ctx.strokeStyle = '#e5e7eb';
+  ctx.lineWidth = 0.5;
+  for (let a = 0; a <= maxAddr; a += 10) {
+    const x = PAD + a * scale;
+    ctx.beginPath(); ctx.moveTo(x, PAD-8); ctx.lineTo(x, H-PAD+8); ctx.stroke();
+    ctx.fillStyle = '#9ca3af';
+    ctx.font = '9px JetBrains Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(a, x, PAD - 10);
+  }
+
+  // Row 1: original (all 120 coords colored by which merged group they come from)
+  ctx.fillStyle = '#6b7280';
+  ctx.font = '11px JetBrains Mono, monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('◉ before', PAD - 18, PAD + barH/2 + 4);
+
+  for (let c = 0; c < N; c++) {
+    const a = addrs[c];
+    const x = PAD + a * scale;
+    // Group A = modes 0,1 (size 2*3=6 per outer iteration)
+    // Group B = modes 2,3
+    const inner = c % 6;  // modes 0,1
+    const outer = Math.floor(c / 6);
+    const col = outer % 2 === 0 ? '#93c5fd' : '#6ee7b7';
+    
+    // Gradient fill for visual interest
+    const gradient = ctx.createLinearGradient(x, PAD, x + scale, PAD + barH);
+    gradient.addColorStop(0, col);
+    gradient.addColorStop(1, col + 'cc');
+    ctx.fillStyle = gradient;
+    
+    // Rounded rectangle
+    ctx.beginPath();
+    ctx.roundRect(x + 0.5, PAD + 2, Math.max(scale - 1, 1), barH - 4, 2);
+    ctx.fill();
+  }
+  // Border with shadow
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 1;
+  ctx.shadowColor = 'rgba(0,0,0,0.05)';
+  ctx.shadowBlur = 4;
+  ctx.strokeRect(PAD, PAD, (W-2*PAD), barH);
+  ctx.shadowBlur = 0;
+
+  // Row 2: coalesced — (6,20):(1,10), show the two groups
+  const csizes = [6,20], cstrides = [1,10];
+  const y2 = PAD + barH + 20;
+  ctx.fillStyle = '#6b7280';
+  ctx.font = '11px JetBrains Mono, monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('◉ after', PAD - 16, y2 + barH/2 + 4);
+
+  for (let c = 0; c < N; c++) {
+    const inner2 = c % 6;
+    const outer2 = Math.floor(c / 6);
+    const a = inner2 * 1 + outer2 * 10;
+    const x = PAD + a * scale;
+    const col = outer2 % 2 === 0 ? '#93c5fd' : '#6ee7b7';
+    
+    const gradient = ctx.createLinearGradient(x, y2, x + scale, y2 + barH);
+    gradient.addColorStop(0, col);
+    gradient.addColorStop(1, col + 'cc');
+    ctx.fillStyle = gradient;
+    
+    ctx.beginPath();
+    ctx.roundRect(x + 0.5, y2 + 2, Math.max(scale - 1, 1), barH - 4, 2);
+    ctx.fill();
+  }
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.lineWidth = 1;
+  ctx.shadowColor = 'rgba(0,0,0,0.05)';
+  ctx.shadowBlur = 4;
+  ctx.strokeRect(PAD, y2, (W-2*PAD), barH);
+  ctx.shadowBlur = 0;
+
+  // Labels with decorative elements
+  ctx.fillStyle = '#6b7280';
+  ctx.font = '10px JetBrains Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('◈ address space (0 to ' + maxAddr + ') ◈', W/2, H - 8);
+  
+  // Decorative corner elements
+  ctx.fillStyle = 'rgba(37, 99, 235, 0.1)';
+  ctx.beginPath();
+  ctx.arc(PAD + 10, PAD + 10, 4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(W - PAD - 10, y2 + barH - 10, 4, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// ─── LIVE EXPLORER ────────────────────────────────────────────────
+const PRESETS = [
+  { s:'4,3', d:'1,4' },
+  { s:'4,3', d:'1,8' },
+  { s:'3,4,2', d:'1,3,12' },
+  { s:'2,3,5,4', d:'1,2,10,50' },
+];
+
+function loadPreset(i) {
+  document.getElementById('exp-sizes').value = PRESETS[i].s;
+  document.getElementById('exp-strides').value = PRESETS[i].d;
+  runExplorer();
+}
+
+function coalesceFlat(sizes, strides) {
+  // Returns {sizes, strides, steps}
+  const s = [...sizes], d = [...strides];
+  const steps = [];
+  let i = 0;
+  while (i < s.length - 1) {
+    const span = s[i] * d[i];
+    const nextStride = d[i+1];
+    if (span === nextStride) {
+      steps.push({ i, j: i+1, span, nextStride, merged: true,
+                   newSize: s[i] * s[i+1], newStride: d[i] });
+      s.splice(i, 2, s[i] * s[i+1]);
+      d.splice(i, 2, d[i]);
+    } else {
+      steps.push({ i, j: i+1, span, nextStride, merged: false });
+      i++;
+    }
+  }
+  return { sizes: s, strides: d, steps };
+}
+
+function runExplorer() {
+  const sizesRaw = document.getElementById('exp-sizes').value;
+  const stridesRaw = document.getElementById('exp-strides').value;
+  const sizes = sizesRaw.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x) && x > 0);
+  const strides = stridesRaw.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x) && x > 0);
+
+  const result = document.getElementById('explorer-result');
+
+  if (sizes.length === 0 || strides.length !== sizes.length) {
+    result.innerHTML = '<span style="color:var(--red);font-weight:500">⚠️ sizes and strides must have equal length and be positive integers</span>';
+    return;
+  }
+
+  const { sizes: rs, strides: rd, steps } = coalesceFlat(sizes, strides);
+
+  const inputStr = '(' + sizes.join(',') + '):(' + strides.join(',') + ')';
+  const outputStr = rs.length === 1
+    ? rs[0] + ':' + rd[0]
+    : '(' + rs.join(',') + '):(' + rd.join(',') + ')';
+
+  let html = `<div style="margin-bottom:0.75rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
+    <span style="color:var(--muted);font-family:var(--font-mono)">input</span>  
+    <strong style="font-family:var(--font-mono);background:var(--code-bg);padding:0.3em 0.6em;border-radius:4px;border:1px solid var(--border)">${inputStr}</strong>
+    <span style="margin:0 0.5rem;color:var(--muted);font-size:1.2rem">⟶</span>
+    <span style="color:var(--teal);font-family:var(--font-mono);font-weight:600;background:var(--teal-bg);padding:0.3em 0.7em;border-radius:5px;border:1px solid rgba(14, 118, 110, 0.2)"><strong>${outputStr}</strong></span>
+  </div>`;
+
+  html += '<div style="font-size:0.78rem;color:var(--muted);margin:0.75rem 0 0.4rem;text-transform:uppercase;letter-spacing:0.06em;font-family:var(--font-mono);display:flex;align-items:center;gap:0.5rem"><span style="width:8px;height:8px;border-radius:50%;background:var(--accent)"></span>trace</div>';
+
+  // Reconstruct trace using original pairs
+  const s2 = [...sizes], d2 = [...strides];
+  
+  steps.forEach((step, idx) => {
+    const span = step.span, ns = step.nextStride;
+    const ok = step.merged;
+    html += `<div style="margin-bottom:0.4rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;padding:0.5rem 0.75rem;border-radius:5px;background:${ok ? 'var(--teal-bg)' : 'var(--amber-bg)'};border-left:3px solid ${ok ? 'var(--teal)' : 'var(--amber)'}">
+      <span style="color:${ok ? 'var(--teal)' : 'var(--amber)'};width:85px;font-family:var(--font-mono);font-size:0.78rem;font-weight:500">pair ${step.i}↔${step.j}</span>
+      <span style="font-family:var(--font-mono)">span = <strong>${span}</strong></span>
+      <span style="color:var(--muted);font-weight:500">⟷</span>
+      <span style="font-family:var(--font-mono)">stride = <strong>${ns}</strong></span>
+      <span class="badge ${ok ? 'badge-yes':'badge-no'}" style="margin-left:auto">${ok ? '✓ merge':'✗ keep'}</span>
+    </div>`;
+  });
+
+  html += `<div style="margin-top:0.85rem;border-top:1px solid var(--border);padding-top:0.75rem;display:flex;align-items:center;gap:0.5rem">
+    <span style="color:var(--muted);font-family:var(--font-mono);font-size:0.78rem">result rank:</span>
+    <strong style="font-family:var(--font-mono);color:var(--accent)">${rs.length}</strong>
+    <span style="color:var(--muted)">from</span>
+    <strong style="font-family:var(--font-mono)">${sizes.length}</strong>
+    ${rs.length < sizes.length ? '<span style="color:var(--green);font-family:var(--font-mono);margin-left:0.5rem">✓ simplified</span>' : '<span style="color:var(--muted);font-family:var(--font-mono);margin-left:0.5rem">○ unchanged</span>'}
+  </div>`;
+
+  result.innerHTML = html;
+}
+
+// ─── Polyfill for roundRect if needed ────────────────────────────
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+    if (w < 2 * r) r = w / 2;
+    if (h < 2 * r) r = h / 2;
+    this.moveTo(x + r, y);
+    this.arcTo(x + w, y, x + w, y + h, r);
+    this.arcTo(x + w, y + h, x, y + h, r);
+    this.arcTo(x, y + h, x, y, r);
+    this.arcTo(x, y, x + w, y, r);
+    this.closePath();
+    return this;
+  }
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  renderViz1();
+  renderMergeCases();
+  renderPartialWalkthrough();
+  renderPartialCanvas();
+  runExplorer();
+  
+  // Add subtle animation to math blocks on scroll into view
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate');
+      }
+    });
+  }, { threshold: 0.1 });
+  
+  document.querySelectorAll('.math-block').forEach(block => {
+    observer.observe(block);
+  });
+});
 </script>
 </body>
 </html>
