@@ -25,6 +25,19 @@
   --orange: #b85c2a;
   --orange-light: #f5ece6;
   --blue: #2a4a6b;
+  --blue-pale: rgba(42,74,107,0.1);
+  --bg: var(--paper);
+  --bg-card: var(--paper2);
+  --bg-deep: var(--paper);
+  --red: var(--orange);
+  --red-pale: var(--orange-light);
+  --teal: var(--green);
+  --teal-pale: var(--green-light);
+  --gold: var(--orange);
+  --gold-pale: var(--orange-light);
+  --serif: var(--font-serif);
+  --sans: var(--font-sans);
+  --mono: var(--font-mono);
 }
 
 [data-theme="dark"] {
@@ -40,50 +53,25 @@
   --orange: #e69a6e;
   --orange-light: #261c14;
   --blue: #6a94b8;
+  --blue-pale: rgba(106,148,184,0.1);
+  --bg: var(--paper);
+  --bg-card: var(--paper2);
+  --bg-deep: var(--paper);
+  --red: var(--orange);
+  --red-pale: var(--orange-light);
+  --teal: var(--green);
+  --teal-pale: var(--green-light);
+  --gold: var(--orange);
+  --gold-pale: var(--orange-light);
+  --serif: var(--font-serif);
+  --sans: var(--font-sans);
+  --mono: var(--font-mono);
 }
 
 /* Alias old variable names */
-:root {
-  --bg: var(--paper);
-  --bg-card: var(--paper2);
-  --bg-deep: var(--paper);
-  --rule: var(--rule);
-  --ink: var(--ink);
-  --ink-2: var(--ink2);
-  --ink-3: var(--ink3);
-  --red: var(--orange);
-  --red-pale: var(--orange-light);
-  --teal: var(--green);
-  --teal-pale: var(--green-light);
-  --gold: var(--orange);
-  --gold-pale: var(--orange-light);
-  --blue: var(--blue);
-  --blue-pale: rgba(42,74,107,0.1);
-  --serif: var(--font-serif);
-  --sans: var(--font-sans);
-  --mono: var(--font-mono);
-}
 
-[data-theme="dark"] {
-  --bg: var(--paper);
-  --bg-card: var(--paper2);
-  --bg-deep: var(--paper);
-  --rule: var(--rule);
-  --ink: var(--ink);
-  --ink-2: var(--ink2);
-  --ink-3: var(--ink3);
-  --red: var(--orange);
-  --red-pale: var(--orange-light);
-  --teal: var(--green);
-  --teal-pale: var(--green-light);
-  --gold: var(--orange);
-  --gold-pale: var(--orange-light);
-  --blue: var(--blue);
-  --blue-pale: rgba(42,74,107,0.1);
-  --serif: var(--font-serif);
-  --sans: var(--font-sans);
-  --mono: var(--font-mono);
-}
+
+
 
 html { scroll-behavior: smooth; }
 
@@ -118,8 +106,6 @@ nav{position:sticky;top:0;z-index:200;background:var(--paper);border-bottom:1px 
 .hero-meta{display:flex;gap:24px;font-size:11px;color:var(--ink3);letter-spacing:.04em;flex-wrap:wrap;transition:color .2s ease}
 .hero-meta span::before{content:'// ';color:var(--rule2);margin-right:4px}
 
-/* ── CONTENT LAYOUT ── */
-.content{max-width:980px;margin:0 auto;padding:0 40px}
 section{padding:72px 0;border-bottom:1px solid var(--rule);transition:border-color .2s ease}
 section:last-of-type{border-bottom:none}
 .section-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:24px;display:flex;align-items:center;gap:10px;transition:color .2s ease}
@@ -136,7 +122,7 @@ footer{border-top:1px solid var(--rule);padding:28px 40px;text-align:center;font
 footer p{margin:0}
 
 /* ── Responsive ── */
-@media(max-width:768px){nav{padding:0 20px}.nav-links{display:none}.hero{padding:56px 20px 48px}.content{padding:0 20px}section{padding:48px 0}footer{padding:20px}}
+@media(max-width:768px){nav{padding:0 20px}.nav-links{display:none}.hero{padding:56px 20px 48px}section{padding:48px 0}footer{padding:20px}}
 
 /* ── Reveal animations ── */
 .reveal{opacity:0;transform:translateY(14px);transition:opacity .45s ease,transform .45s ease}
@@ -154,7 +140,7 @@ footer p{margin:0}
   font-size: 0.68rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--red);
+  color: var(--orange);
   margin-bottom: 0.9rem;
 }
 .masthead h1 {
@@ -167,24 +153,17 @@ footer p{margin:0}
 .masthead .lead {
   font-style: italic;
   font-size: 1.08rem;
-  color: var(--ink-2);
+  color: var(--ink2);
   max-width: 640px;
   margin-bottom: 1.4rem;
 }
 .meta-row {
   font-family: var(--mono);
   font-size: 0.68rem;
-  color: var(--ink-3);
+  color: var(--ink3);
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem;
-}
-
-/* ─── Content ─── */
-.content {
-  max-width: 860px;
-  margin: 0 auto;
-  padding: 2rem 2rem 6rem;
 }
 
 /* ─── Typography ─── */
@@ -201,7 +180,7 @@ h3 {
   font-style: italic;
   font-weight: 600;
   font-size: 1.15rem;
-  color: var(--red);
+  color: var(--orange);
   margin: 2.5rem 0 0.6rem;
 }
 p { margin-bottom: 1.1rem; }
@@ -216,7 +195,7 @@ code, .mono {
   border: 1px solid var(--rule);
   padding: 0.1em 0.38em;
   border-radius: 3px;
-  color: var(--ink-2);
+  color: var(--ink2);
 }
 
 .math {
@@ -242,21 +221,21 @@ code, .mono {
 
 /* ─── Callouts ─── */
 .callout {
-  border-left: 3px solid var(--red);
+  border-left: 3px solid var(--orange);
   background: var(--red-pale);
   padding: 0.9rem 1.2rem;
   margin: 1.5rem 0;
   font-size: 0.95rem;
 }
-.callout.teal { border-color: var(--teal); background: var(--teal-pale); }
-.callout.gold  { border-color: var(--gold); background: var(--gold-pale); }
+.callout.teal { border-color: var(--green); background: var(--teal-pale); }
+.callout.gold  { border-color: var(--orange); background: var(--gold-pale); }
 .callout.blue  { border-color: var(--blue); background: var(--blue-pale); }
 .callout-label {
   font-family: var(--mono);
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--ink-3);
+  color: var(--ink3);
   display: block;
   margin-bottom: 0.3rem;
 }
@@ -279,7 +258,7 @@ code, .mono {
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--ink-3);
+  color: var(--ink3);
 }
 
 /* ─── Demo shells ─── */
@@ -295,7 +274,7 @@ code, .mono {
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: var(--red);
+  color: var(--orange);
   margin-bottom: 0.9rem;
 }
 .demo-row {
@@ -328,7 +307,7 @@ label.ctrl {
   font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--ink-3);
+  color: var(--ink3);
 }
 select {
   font-family: var(--mono);
@@ -366,13 +345,13 @@ input[type=range]::-webkit-slider-thumb {
   white-space: pre-wrap;
   min-height: 2rem;
 }
-.t-dim   { color: var(--ink-3); }
-.t-val   { color: var(--red); font-weight: 500; }
-.t-key   { color: var(--teal); }
-.t-gold  { color: var(--gold); font-weight: 500; }
+.t-dim   { color: var(--ink3); }
+.t-val   { color: var(--orange); font-weight: 500; }
+.t-key   { color: var(--green); }
+.t-gold  { color: var(--orange); font-weight: 500; }
 .t-blue  { color: var(--blue); }
-.t-ok    { color: var(--teal); font-weight: 600; }
-.t-bad   { color: var(--red);  font-weight: 600; }
+.t-ok    { color: var(--green); font-weight: 600; }
+.t-bad   { color: var(--orange);  font-weight: 600; }
 
 /* ─── Canvas ─── */
 canvas { display: block; max-width: 100%; margin: 0 auto; }
@@ -396,9 +375,9 @@ canvas { display: block; max-width: 100%; margin: 0 auto; }
   transition: all 0.25s;
   background: var(--bg);
 }
-.pipe-box.hi { border-color: var(--red); background: var(--red-pale); transform: translateY(-2px); box-shadow: 0 3px 0 var(--red); }
-.pipe-box .sub { font-size: 0.6rem; color: var(--ink-3); display: block; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.1rem; }
-.pipe-arrow { color: var(--ink-3); font-size: 1.1rem; flex-shrink: 0; }
+.pipe-box.hi { border-color: var(--orange); background: var(--red-pale); transform: translateY(-2px); box-shadow: 0 3px 0 var(--orange); }
+.pipe-box .sub { font-size: 0.6rem; color: var(--ink3); display: block; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.1rem; }
+.pipe-arrow { color: var(--ink3); font-size: 1.1rem; flex-shrink: 0; }
 
 /* ─── Table ─── */
 table {
@@ -415,7 +394,7 @@ th {
   font-size: 0.68rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ink-3);
+  color: var(--ink3);
 }
 td {
   border-bottom: 1px solid var(--rule);
@@ -424,15 +403,7 @@ td {
 }
 tr:hover td { background: var(--bg-deep); }
 
-/* ─── Footer ─── */
-.foot {
-  border-top: 1px solid var(--rule);
-  margin-top: 4rem;
-  padding-top: 1.4rem;
-  font-size: 0.82rem;
-  color: var(--ink-3);
-  font-family: var(--sans);
-}
+
 
 /* ─── TOC ─── */
 .toc {
@@ -451,12 +422,12 @@ tr:hover td { background: var(--bg-deep); }
   font-size: 0.63rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--ink-3);
+  color: var(--ink3);
   margin-bottom: 0.55rem;
 }
-.toc ol { padding-left: 1.1rem; line-height: 1.95; color: var(--ink-2); }
+.toc ol { padding-left: 1.1rem; line-height: 1.95; color: var(--ink2); }
 .toc a { color: inherit; text-decoration: none; }
-.toc a:hover { color: var(--red); }
+.toc a:hover { color: var(--orange); }
 @media (max-width: 640px) {
   .toc { float: none; max-width: 100%; margin: 0 0 1.5rem; }
   body { font-size: 16px; }
@@ -517,23 +488,7 @@ tr:hover td { background: var(--bg-deep); }
   </div>
 </div>
 
-<div class="content">
-
 <main>
-
-<nav class="toc">
-  <h4>Contents</h4>
-  <ol>
-    <li><a href="#s-intuition">Function composition, visually</a></li>
-    <li><a href="#s-def">Definition</a></li>
-    <li><a href="#s-properties">Properties: identity &amp; associativity</a></li>
-    <li><a href="#s-eval">How composition is computed</a></li>
-    <li><a href="#s-divisibility">Divisibility &amp; when it fails</a></li>
-    <li><a href="#s-appere">Apparent violations &amp; coalescing</a></li>
-    <li><a href="#s-tv">Application: thread-value partitioning</a></li>
-    <li><a href="#s-tiler">By-mode composition &amp; tilers</a></li>
-  </ol>
-</nav>
 
 <!-- ══════════════ §1 INTUITION ══════════════ -->
 <h2 id="s-intuition">Function composition, visually</h2>
@@ -549,7 +504,7 @@ tr:hover td { background: var(--bg-deep); }
   <div class="pipe-arrow">→</div>
   <div class="pipe-box" id="p-a"><span class="sub">A</span>A(B(c))</div>
   <div class="pipe-arrow">=</div>
-  <div class="pipe-box" id="p-r" style="border-color:var(--teal);background:var(--teal-pale)"><span class="sub">R = A∘B</span>R(c)</div>
+  <div class="pipe-box" id="p-r" style="border-color:var(--green);background:var(--teal-pale)"><span class="sub">R = A∘B</span>R(c)</div>
 </div>
 
 <div class="demo">
@@ -558,7 +513,7 @@ tr:hover td { background: var(--bg-deep); }
     <label class="ctrl">c =</label>
     <input type="range" id="intro-slider" min="0" max="5" value="2">
     <span id="intro-cval" style="font-family:var(--mono);font-size:0.88rem;min-width:1.2rem">2</span>
-    <span style="font-family:var(--mono);font-size:0.75rem;color:var(--ink-3);margin-left:0.5rem">A = (4,8):(1,4) &nbsp;&nbsp; B = 6:2</span>
+    <span style="font-family:var(--mono);font-size:0.75rem;color:var(--ink3);margin-left:0.5rem">A = (4,8):(1,4) &nbsp;&nbsp; B = 6:2</span>
   </div>
   <div class="pipe" id="pipe-live" style="justify-content:flex-start;gap:0.3rem;flex-wrap:wrap"></div>
   <div class="trace" id="intro-trace" style="margin-top:0.7rem"></div>
@@ -678,7 +633,7 @@ A ∘ (s:d)  =  s : (D₀ · d)
   <li><strong>Keep:</strong> take only the first <em>s</em> elements of what remains.</li>
 </ol>
 
-<p>Concretely, for A = (4,6,8,10):(2,3,5,7) and B = 6:12:</p>
+<p>Concretely, for A=(4,6):(1,4) ∘ B=6:4:</p>
 
 <div class="math-block">
 A ∘ 6:12  =  "skip 12 into A, then keep 6"
@@ -695,7 +650,6 @@ Result: (2,3):(9,5)  — verified below
   <div class="demo-row">
     <label class="ctrl">Preset:</label>
     <select id="keep-preset" onchange="updateKeep()">
-      <option value="a">A=(4,6,8,10):(2,3,5,7) ∘ B=6:12</option>
       <option value="b">A=(4,6):(1,4) ∘ B=6:4</option>
       <option value="c">A=(4,8):(1,4) ∘ B=6:2</option>
       <option value="d">A=(4,3):(2,8) ∘ B=6:2</option>
@@ -790,10 +744,10 @@ Codomain: ℤ₆₄  (the 64 elements of an 8×8 matrix)
 <div class="callout gold">
   <span class="callout-label">The pattern, in code</span>
   <code style="font-size:0.78rem;background:none;border:none;padding:0;display:block;line-height:2">
-smem_data = Tensor(accessor, MyLayout8x8)   <span style="color:var(--ink-3)">// Coord → Offset</span><br>
-tv_layout = Layout(((4,8),2), ((16,1),8))   <span style="color:var(--ink-3)">// (Thr,Val) → Coord</span><br>
-smem_tv   = compose(smem_data, tv_layout)   <span style="color:var(--ink-3)">// (Thr,Val) → Offset</span><br>
-smem_v    = smem_tv[thr_id, :]              <span style="color:var(--ink-3)">// Slice: Val → Offset (this thread)</span>
+smem_data = Tensor(accessor, MyLayout8x8)   <span style="color:var(--ink3)">// Coord → Offset</span><br>
+tv_layout = Layout(((4,8),2), ((16,1),8))   <span style="color:var(--ink3)">// (Thr,Val) → Coord</span><br>
+smem_tv   = compose(smem_data, tv_layout)   <span style="color:var(--ink3)">// (Thr,Val) → Offset</span><br>
+smem_v    = smem_tv[thr_id, :]              <span style="color:var(--ink3)">// Slice: Val → Offset (this thread)</span>
   </code>
 </div>
 
@@ -805,15 +759,15 @@ smem_v    = smem_tv[thr_id, :]              <span style="color:var(--ink-3)">// 
   </div>
   <div style="display:flex;flex-wrap:wrap;gap:1.2rem;align-items:flex-start">
     <div>
-      <div style="font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-3);margin-bottom:0.3rem">8×8 Matrix — colored by thread</div>
+      <div style="font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink3);margin-bottom:0.3rem">8×8 Matrix — colored by thread</div>
       <canvas id="tv-canvas" width="320" height="320" style="cursor:crosshair"></canvas>
     </div>
     <div style="flex:1;min-width:220px">
-      <div style="font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-3);margin-bottom:0.3rem">Result layout R = DataLayout ∘ TV</div>
+      <div style="font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink3);margin-bottom:0.3rem">Result layout R = DataLayout ∘ TV</div>
       <div class="trace" id="tv-result" style="min-height:4rem"></div>
-      <div style="font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-3);margin:0.7rem 0 0.3rem">Hover info</div>
+      <div style="font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink3);margin:0.7rem 0 0.3rem">Hover info</div>
       <div class="trace" id="tv-hover" style="min-height:3rem">Hover a cell in the matrix to inspect ownership.</div>
-      <div style="font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-3);margin:0.7rem 0 0.3rem">Thread ownership (click thread id)</div>
+      <div style="font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink3);margin:0.7rem 0 0.3rem">Thread ownership (click thread id)</div>
       <div id="tv-thread-btns" class="btn-row" style="flex-wrap:wrap;gap:0.3rem;max-height:6rem;overflow-y:auto"></div>
     </div>
   </div>
@@ -853,11 +807,11 @@ smem_v    = smem_tv[thr_id, :]              <span style="color:var(--ink-3)">// 
   </div>
   <div style="display:flex;flex-wrap:wrap;gap:1.2rem;align-items:flex-start">
     <div>
-      <div style="font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-3);margin-bottom:0.3rem">Base matrix (8 rows × 16 cols)</div>
+      <div style="font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink3);margin-bottom:0.3rem">Base matrix (8 rows × 16 cols)</div>
       <canvas id="tiler-base-canvas" width="400" height="200"></canvas>
     </div>
     <div>
-      <div style="font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-3);margin-bottom:0.3rem">After tiler (selected elements highlighted)</div>
+      <div style="font-family:var(--mono);font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink3);margin-bottom:0.3rem">After tiler (selected elements highlighted)</div>
       <canvas id="tiler-result-canvas" width="400" height="200"></canvas>
     </div>
   </div>
@@ -868,15 +822,14 @@ smem_v    = smem_tv[thr_id, :]              <span style="color:var(--ink-3)">// 
 
 <hr style="border:none;border-top:3px double var(--rule);margin:3rem 0">
 
-<p><strong>What comes next.</strong> Composition is the workhorse operation, but CuTe needs two more for a complete tiling algebra: <em>complement</em> (finding the layout that covers what this layout <em>doesn't</em>) and <em>logical divide</em> (splitting a layout into a grid-of-tiles layout). Both are defined in terms of composition, so everything you've learned here carries forward directly.</p>
-
-<div class="foot">
-  Source: <em>CuTe DSL Notebook, Chapter 3.3 — Composition</em>. Interactive implementations by Pi Majhi. Formal definitions follow Thakkar et al. (2023) and the CUTLASS 3.x source.
-</div>
 </main>
 
 <script>
-// ═══════════════════════════════════════════
+// Helper to get CSS variable values for canvas
+function getCssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+// ═════════════════════════════════════════
 // Core layout arithmetic
 // ═══════════════════════════════════════════
 function flattenArr(a) {
@@ -930,7 +883,7 @@ function updateIntro(){
     <div class="pipe-arrow">→</div>
     <div class="pipe-box hi"><span class="sub">A = (4,8):(1,4)</span>A(${Bc}) = <strong>${Rc}</strong></div>
     <div class="pipe-arrow">=</div>
-    <div class="pipe-box" style="border-color:var(--teal);background:var(--teal-pale)"><span class="sub">R = A∘B = 6:2</span>R(${c}) = <strong>${Rc}</strong></div>`;
+    <div class="pipe-box" style="border-color:var(--green);background:var(--teal-pale)"><span class="sub">R = A∘B = 6:2</span>R(${c}) = <strong>${Rc}</strong></div>`;
   document.getElementById('intro-trace').innerHTML=
     `<span class="t-dim">c = </span><span class="t-val">${c}</span>
 <span class="t-dim">B(c) = </span><span class="t-val">${Bc}</span>  <span class="t-dim">(stride 2: every other element of A's domain)</span>
@@ -963,7 +916,7 @@ function drawIdCanvas(idx){
     const x=10+i*cw+cw/2;
     ctx.beginPath(); ctx.arc(x,cy,r,0,2*Math.PI);
     const ok=(v===i);
-    ctx.fillStyle=ok?'var(--teal)':'var(--red)';
+    ctx.fillStyle=ok?getCssVar('--teal'):getCssVar('--red');
     ctx.fill();
     ctx.fillStyle='white';
     ctx.font=`${r>10?10:8}px Fira Code, monospace`;
@@ -1126,17 +1079,17 @@ ${verify.slice(0,Math.min(6,verify.length)).map(v=>`<span class="t-dim">  c=${v.
   for(let i=0;i<nA && i*cw<W-20;i++){
     const off=evalLayout(i,A.shape,A.stride);
     const x=ox+i*cw;
-    ctx.fillStyle=selectedOffsets.has(i)?'var(--teal)':'var(--bg-deep)';
+    ctx.fillStyle=selectedOffsets.has(i)?getCssVar('--teal'):getCssVar('--bg-deep');
     ctx.fillRect(x,oy,cw-1,ch);
-    ctx.strokeStyle=selectedOffsets.has(i)?'var(--teal)':'var(--rule)';
+    ctx.strokeStyle=selectedOffsets.has(i)?getCssVar('--teal'):getCssVar('--rule');
     ctx.strokeRect(x,oy,cw-1,ch);
-    ctx.fillStyle=selectedOffsets.has(i)?'white':'var(--ink-3)';
+    ctx.fillStyle=selectedOffsets.has(i)?'white':getCssVar('--ink-3');
     ctx.font='9px Fira Code, monospace';
     ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.fillText(off,x+cw/2-0.5,oy+ch/2);
   }
   // Label
-  ctx.fillStyle='var(--ink-3)';
+   ctx.fillStyle=getCssVar('--ink-3');
   ctx.font='9px DM Sans, sans-serif';
   ctx.textAlign='left'; ctx.textBaseline='top';
   ctx.fillText(`A's ${nA} elements (teal = selected by B = ${B.shape}:${B.stride})`,ox,oy+ch+4);
@@ -1492,8 +1445,6 @@ function drawTilerCanvases(){
   </p>
 </section>
 
-</div><!-- /content -->
-
 <footer>
   <p>© 2026 Bikram Majhi · <a href="https://bikrammajhi.github.io/" style="color:var(--green);text-decoration:none">Back to main</a></p>
 </footer>
@@ -1509,17 +1460,24 @@ document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
 <!-- Theme toggle -->
 <script>
 (function(){
-  const saved = localStorage.getItem('theme');
-  const theme = saved || 'light';
-  document.documentElement.setAttribute('data-theme', theme);
-  const btn = document.getElementById('themeToggle');
-  if (btn) {
-    btn.addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('data-theme');
-      const next = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('theme', next);
-    });
+  function initTheme() {
+    const saved = localStorage.getItem('theme');
+    const theme = saved || 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+      });
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTheme);
+  } else {
+    initTheme();
   }
 })();
 </script>

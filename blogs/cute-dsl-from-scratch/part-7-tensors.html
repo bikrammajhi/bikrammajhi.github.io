@@ -26,8 +26,8 @@
   --serif: var(--font-serif);
   --sans: var(--font-sans);
 }
-[data-theme="dark"]{
-  :root{
+[data-theme="dark"] {
+
     --paper: #0f0d0c;--paper2: #161412;--paper3: #1e1c18;
     --ink: #f4f1eb;--ink2: #d1ccc3;--ink3: #8a837b;
     --rule: #24211e;--rule2: #332f2b;
@@ -37,7 +37,6 @@
     --accent: var(--blue);--accent2: var(--green);--accent3: var(--orange);
     --border: var(--rule);
     --surface: var(--paper);--surface2: var(--paper2);--surface3: var(--paper2);
-  }
 }
 
 html{scroll-behavior:smooth}
@@ -646,25 +645,32 @@ thr_data = my_data[thr_id*TILE_SIZE : (thr_id+<span class="nu">1</span>)*TILE_SI
 <!-- Theme toggle script -->
 <script>
 (function(){
-  const saved = localStorage.getItem('theme');
-  const theme = saved || 'light';
-  document.documentElement.setAttribute('data-theme', theme);
+  function initTheme() {
+    const saved = localStorage.getItem('theme');
+    const theme = saved || 'light';
+    document.documentElement.setAttribute('data-theme', theme);
 
-  const btn = document.getElementById('themeToggle');
-  if (btn) {
-    btn.addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('data-theme');
-      const next = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('theme', next);
-    });
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+      });
+    }
+
+    // Reveal observer
+    const revealObs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
   }
-
-  // Reveal observer
-  const revealObs = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
-  }, { threshold: 0.08 });
-  document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTheme);
+  } else {
+    initTheme();
+  }
 })();
 </script>
 </body>

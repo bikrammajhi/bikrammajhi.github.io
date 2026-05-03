@@ -273,9 +273,9 @@ a { color: var(--accent2); }
 }
 .callout .icon { font-size: 18px; flex-shrink: 0; padding-top: 2px; }
 .callout p { font-size: 15px; margin: 0; color: var(--ink2); }
-.callout.warn { border-color: #e59866; background: #fdf6ee; }
-.callout.good { border-color: #82c9a0; background: #f0faf4; }
-.callout.bad  { border-color: #e59866; background: #fef9f5; }
+.callout.warn { border-color: var(--orange); background: var(--orange-light); }
+.callout.good { border-color: var(--green); background: var(--green-light); }
+.callout.bad  { border-color: var(--orange); background: var(--orange-light); }
 .callout.info { border-color: var(--border2); }
 
 /* ── widget ── */
@@ -481,7 +481,7 @@ a { color: var(--accent2); }
 
 /* ── output block ── */
 .out {
-  background: #fafafa; border: 1px solid var(--border);
+  background: var(--surface2); border: 1px solid var(--border);
   border-radius: 4px; padding: 14px 18px;
   font-family: var(--mono); font-size: 12.5px;
   line-height: 1.9; color: var(--ink2); margin: 8px 0 20px;
@@ -915,17 +915,24 @@ document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
 <!-- Theme toggle -->
 <script>
 (function(){
-  const saved = localStorage.getItem('theme');
-  const theme = saved || 'light';
-  document.documentElement.setAttribute('data-theme', theme);
-  const btn = document.getElementById('themeToggle');
-  if (btn) {
-    btn.addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('data-theme');
-      const next = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('theme', next);
-    });
+  function initTheme() {
+    const saved = localStorage.getItem('theme');
+    const theme = saved || 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const current = document.documentElement.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+      });
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTheme);
+  } else {
+    initTheme();
   }
 })();
 </script>

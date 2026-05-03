@@ -30,6 +30,21 @@
   --orange: #b85c2a;
   --orange-light: #f5ece6;
   --blue: #2a4a6b;
+  --red: var(--orange);
+  --text: var(--ink);
+  --muted: var(--ink3);
+  --surface: var(--paper);
+  --border: var(--rule);
+  --accent: var(--orange);
+  --accent-light: var(--orange-light);
+  --accent-gradient: linear-gradient(135deg, var(--orange), var(--green));
+  --teal: var(--green);
+  --teal-bg: var(--green-light);
+  --code-bg: var(--paper2);
+  --amber: #b88a2a;
+  --amber-bg: #f5f0e6;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+  --transition-fast: 0.15s ease;
 }
 
 [data-theme="dark"] {
@@ -45,6 +60,21 @@
   --orange: #e69a6e;
   --orange-light: #261c14;
   --blue: #6a94b8;
+  --red: var(--orange);
+  --text: var(--ink);
+  --muted: var(--ink3);
+  --surface: var(--paper);
+  --border: var(--rule);
+  --accent: var(--orange);
+  --accent-light: var(--orange-light);
+  --accent-gradient: linear-gradient(135deg, var(--orange), var(--green));
+  --teal: var(--green);
+  --teal-bg: var(--green-light);
+  --code-bg: var(--paper2);
+  --amber: #e6b88a;
+  --amber-bg: #261c14;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --transition-fast: 0.15s ease;
 }
 
 html { scroll-behavior: smooth; }
@@ -537,6 +567,13 @@ footer p { margin: 0; }
 }
 
 .reveal.in { opacity: 1; transform: translateY(0); }
+
+.nav-part{color:var(--ink3);text-decoration:none;transition:color .15s}
+.nav-part:hover{color:var(--green)}
+.nav-part em{font-style:italic}
+.nav-part:hover em{color:var(--green)}
+.part-link{color:var(--green);text-decoration:none;transition:color .15s}
+.part-link:hover{color:var(--orange)}
 </style>
 </head>
 <body>
@@ -820,7 +857,7 @@ footer p { margin: 0; }
     <span style="font-family:var(--font-mono);font-size:0.72rem;color:var(--muted)">🎨 visual</span>
   </div>
   <div class="widget-body">
-    <canvas id="partial-canvas" width="680" height="140" style="max-width:100%;display:block;border:1px solid var(--border);border-radius:6px;background:var(--surface);box-shadow:var(--shadow-sm)"></canvas>
+    <canvas id="partial-canvas" width="680" height="160" style="max-width:100%;display:block;border:1px solid var(--border);border-radius:6px;background:var(--surface);box-shadow:var(--shadow-sm)"></canvas>
     <div class="legend" style="margin-top:0.75rem">
       <div class="legend-item"><div class="legend-swatch" style="background:#93c5fd"></div>group A (modes 0–1 merged)</div>
       <div class="legend-item"><div class="legend-swatch" style="background:#6ee7b7"></div>group B (modes 2–3 merged)</div>
@@ -869,15 +906,6 @@ footer p { margin: 0; }
 
 </section>
 
-<div class="section-divider">summary</div>
-
-<div class="callout">
-  <div class="callout-label">Three things to remember</div>
-  <p><strong>1.</strong> Coalesce is functionally transparent — it never changes which addresses get accessed, only how the layout is described.</p>
-  <p style="margin-top:0.6rem"><strong>2.</strong> Two adjacent modes merge when <em>span(left) = stride(right)</em> — they are contiguous in memory.</p>
-  <p style="margin-top:0.6rem"><strong>3.</strong> By-mode coalesce respects top-level mode boundaries; global coalesce doesn't. When you need to preserve a row/column distinction, use by-mode.</p>
-</div>
-
 <section class="reveal" style="border:none; padding-top:40px; padding-bottom:40px; text-align:center;">
   <p style="color:var(--ink3); font-size:11px; letter-spacing:0.08em; text-transform:uppercase;">
     <a href="part-1-loops-are-just-layouts.html" class="nav-part"><em>Part 1:</em> Loops Are Just Layouts</a> &middot; <a href="part-2-tensors-and-folding.html" class="nav-part"><em>Part 2:</em> Tensors &amp; Folding</a> &middot; <a href="part-3-tuples-and-htuples.html" class="nav-part"><em>Part 3:</em> Tuples &amp; HTuples</a> &middot; <a href="part-4-shape.html" class="nav-part"><em>Part 4:</em> Shape</a> &middot; <a href="part-5-stride.html" class="nav-part"><em>Part 5:</em> Stride</a> &middot; <a href="part-6-layout-object.html" class="nav-part"><em>Part 6:</em> The Layout Object</a> &middot; <a href="part-7-tensors.html" class="nav-part"><em>Part 7:</em> Tensors</a> &middot; <a href="part-8-applications.html" class="nav-part"><em>Part 8:</em> Applications</a> &middot; <a href="part-9-concatenate.html" class="nav-part"><em>Part 9:</em> Concatenate</a> &middot; <a href="part-10-coalesce.html" class="nav-part"><em>Part 10:</em> Coalesce</a> &middot; <a href="part-11-composition.html" class="nav-part"><em>Part 11:</em> Composition</a> &middot; <a href="part-12-layout-inverses.html" class="nav-part"><em>Part 12:</em> Layout Inverses</a> &middot; <a href="part-13-complements.html" class="nav-part"><em>Part 13:</em> Complements</a>
@@ -916,7 +944,6 @@ document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
 })();
 </script>
 
-// Scripts
 <script>
 // Reveal observer backup(entries => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
@@ -957,8 +984,8 @@ function evalLayout(sizes, strides, c) {
 function totalSize(sizes) { return sizes.reduce((a,b) => a*b, 1); }
 
 // ─── PALETTE ─────────────────────────────────────────────────────
-const BLUE   = '#93c5fd';
-const TEAL   = '#6ee7b7';
+const BLUE   = '#3b82f6';
+const TEAL   = '#10b981';
 const AMBER  = '#fcd34d';
 const PINK   = '#f0abfc';
 const RED    = '#fca5a5';
@@ -967,7 +994,7 @@ const GRAY   = '#d1d5db';
 
 // Colors for coordinate groups (12 coords)
 function coordColor(c, n) {
-  const palettes = ['#93c5fd','#6ee7b7','#fcd34d','#f0abfc','#fca5a5','#c4b5fd',
+  const palettes = ['#3b82f6','#10b981','#fcd34d','#f0abfc','#fca5a5','#c4b5fd',
                     '#a5f3fc','#bbf7d0','#fed7aa','#e9d5ff','#fde68a','#bfdbfe'];
   return palettes[c % palettes.length];
 }
@@ -1255,7 +1282,7 @@ function renderPartialWalkthrough() {
   cont.appendChild(result);
 }
 
-// ─── PARTIAL CANVAS VIZ ──────────────────────────────────────────
+// ─── PARTIAL CANVAS VIZ ──────────────────────────────────
 function renderPartialCanvas() {
   const canvas = document.getElementById('partial-canvas');
   const ctx = canvas.getContext('2d');
@@ -1267,9 +1294,11 @@ function renderPartialCanvas() {
   const maxAddr = Math.max(...addrs);
 
   const W = canvas.width, H = canvas.height;
-  const PAD = 25;
-  const barH = 32;
-  const scale = (W - 2*PAD) / (maxAddr + 1);
+  const PAD = 30;
+  const barH = 28;
+  const gap = 16;
+  const labelW = 70;
+  const scale = (W - 2*PAD - labelW) / (maxAddr + 1);
 
   ctx.clearRect(0, 0, W, H);
 
@@ -1277,7 +1306,7 @@ function renderPartialCanvas() {
   ctx.strokeStyle = '#e5e7eb';
   ctx.lineWidth = 0.5;
   for (let a = 0; a <= maxAddr; a += 10) {
-    const x = PAD + a * scale;
+    const x = PAD + labelW + a * scale;
     ctx.beginPath(); ctx.moveTo(x, PAD-8); ctx.lineTo(x, H-PAD+8); ctx.stroke();
     ctx.fillStyle = '#9ca3af';
     ctx.font = '9px JetBrains Mono, monospace';
@@ -1286,85 +1315,66 @@ function renderPartialCanvas() {
   }
 
   // Row 1: original (all 120 coords colored by which merged group they come from)
+  const y1 = PAD + 12;
   ctx.fillStyle = '#6b7280';
   ctx.font = '11px JetBrains Mono, monospace';
   ctx.textAlign = 'left';
-  ctx.fillText('◉ before', PAD - 18, PAD + barH/2 + 4);
+  ctx.fillText('◉ before', 8, y1 + barH/2 + 4);
 
   for (let c = 0; c < N; c++) {
     const a = addrs[c];
-    const x = PAD + a * scale;
-    // Group A = modes 0,1 (size 2*3=6 per outer iteration)
-    // Group B = modes 2,3
-    const inner = c % 6;  // modes 0,1
+    const x = PAD + labelW + a * scale;
     const outer = Math.floor(c / 6);
-    const col = outer % 2 === 0 ? '#93c5fd' : '#6ee7b7';
-    
-    // Gradient fill for visual interest
-    const gradient = ctx.createLinearGradient(x, PAD, x + scale, PAD + barH);
+    const col = outer % 2 === 0 ? '#3b82f6' : '#10b981';
+
+    const gradient = ctx.createLinearGradient(x, y1, x + scale, y1 + barH);
     gradient.addColorStop(0, col);
     gradient.addColorStop(1, col + 'cc');
     ctx.fillStyle = gradient;
-    
-    // Rounded rectangle
+
     ctx.beginPath();
-    ctx.roundRect(x + 0.5, PAD + 2, Math.max(scale - 1, 1), barH - 4, 2);
+    ctx.roundRect(x + 0.5, y1 + 2, Math.max(scale - 1, 1), barH - 4, 2);
     ctx.fill();
   }
-  // Border with shadow
+  // Border
   ctx.strokeStyle = '#cbd5e1';
   ctx.lineWidth = 1;
-  ctx.shadowColor = 'rgba(0,0,0,0.05)';
-  ctx.shadowBlur = 4;
-  ctx.strokeRect(PAD, PAD, (W-2*PAD), barH);
-  ctx.shadowBlur = 0;
+  ctx.strokeRect(PAD + labelW, y1, (W - 2*PAD - labelW), barH);
 
-  // Row 2: coalesced — (6,20):(1,10), show the two groups
-  const csizes = [6,20], cstrides = [1,10];
-  const y2 = PAD + barH + 20;
+  // Row 2: coalesced — (6,20):(1,10)
+  const y2 = y1 + barH + gap;
   ctx.fillStyle = '#6b7280';
   ctx.font = '11px JetBrains Mono, monospace';
   ctx.textAlign = 'left';
-  ctx.fillText('◉ after', PAD - 16, y2 + barH/2 + 4);
+  ctx.fillText('◉ after', 8, y2 + barH/2 + 4);
 
   for (let c = 0; c < N; c++) {
     const inner2 = c % 6;
     const outer2 = Math.floor(c / 6);
     const a = inner2 * 1 + outer2 * 10;
-    const x = PAD + a * scale;
-    const col = outer2 % 2 === 0 ? '#93c5fd' : '#6ee7b7';
-    
+    const x = PAD + labelW + a * scale;
+    const col = outer2 % 2 === 0 ? '#3b82f6' : '#10b981';
+
     const gradient = ctx.createLinearGradient(x, y2, x + scale, y2 + barH);
     gradient.addColorStop(0, col);
     gradient.addColorStop(1, col + 'cc');
     ctx.fillStyle = gradient;
-    
+
     ctx.beginPath();
     ctx.roundRect(x + 0.5, y2 + 2, Math.max(scale - 1, 1), barH - 4, 2);
     ctx.fill();
   }
   ctx.strokeStyle = '#cbd5e1';
   ctx.lineWidth = 1;
-  ctx.shadowColor = 'rgba(0,0,0,0.05)';
-  ctx.shadowBlur = 4;
-  ctx.strokeRect(PAD, y2, (W-2*PAD), barH);
-  ctx.shadowBlur = 0;
+  ctx.strokeRect(PAD + labelW, y2, (W - 2*PAD - labelW), barH);
 
-  // Labels with decorative elements
-  ctx.fillStyle = '#6b7280';
+  // Bottom label
+  ctx.fillStyle = '#9ca3af';
   ctx.font = '10px JetBrains Mono, monospace';
   ctx.textAlign = 'center';
-  ctx.fillText('◈ address space (0 to ' + maxAddr + ') ◈', W/2, H - 8);
-  
-  // Decorative corner elements
-  ctx.fillStyle = 'rgba(37, 99, 235, 0.1)';
-  ctx.beginPath();
-  ctx.arc(PAD + 10, PAD + 10, 4, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(W - PAD - 10, y2 + barH - 10, 4, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.fillText('◈ address space (0 → ' + maxAddr + ') ◈', W/2, H - 10);
 }
+
 
 // ─── LIVE EXPLORER ────────────────────────────────────────────────
 const PRESETS = [
