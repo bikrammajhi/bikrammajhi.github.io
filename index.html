@@ -428,7 +428,7 @@ nav {
 /* ── RESULTS ── */
 .results-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1px;
   background: var(--rule);
   border: 1px solid var(--rule);
@@ -1021,6 +1021,7 @@ footer {
     <li><a href="#about">About</a></li>
     <li><a href="#ladder">GEMM</a></li>
     <li><a href="#results">Results</a></li>
+    <li><a href="#a100">A100</a></li>
     <li><a href="#projects">Projects</a></li>
     <li><a href="#writing">Writing</a></li>
     <li><a href="#journal">Journal</a></li>
@@ -1046,32 +1047,33 @@ footer {
     <div class="hero-label">GPU Systems Engineer</div>
     <div class="hero-name">Bikram<br><em>Majhi</em></div>
     <p class="hero-sub">
-      I write CUDA kernels from scratch and benchmark them against cuBLAS. 
-      Right now I'm deep in <strong>Blackwell B200</strong> — sm_100 native kernels, 
-      FP4/FP8 data paths, CuTe DSL. Every day is a commit.
+      I write CUDA kernels from scratch and benchmark them against cuBLAS.
+      <strong>259 TFLOPS</strong> on A100 (83% of cuBLAS) across 11 CUDA + 8 CuTe
+      optimization stages. Right now I'm deep in <strong>Blackwell B200</strong> —
+      sm_100 native kernels, FP4/FP8 data paths, CuTe DSL.
     </p>
     <div class="hero-cta">
-      <a href="#results" class="btn btn-solid">View Results</a>
-      <a href="https://github.com/bikrammajhi/100-days-of-GPU" target="_blank" class="btn btn-outline">100 Days of GPU →</a>
+      <a href="#a100" class="btn btn-solid">A100 Results</a>
+      <a href="https://github.com/bikrammajhi/fast-gpu-kernels" target="_blank" class="btn btn-outline">fast-gpu-kernels →</a>
     </div>
   </div>
   <div class="hero-aside">
     <div class="stat-block">
       <div class="stat-row">
-        <span class="stat-key">vs cuBLAS · T4</span>
-        <span class="stat-val" style="color:var(--green)">121%</span>
+        <span class="stat-key">A100 · CUDA GEMM</span>
+        <span class="stat-val" style="color:var(--green)">259</span>
       </div>
       <div class="stat-row">
-        <span class="stat-key">vs cuBLAS · P100</span>
-        <span class="stat-val" style="color:var(--orange)">96%</span>
+        <span class="stat-key">A100 · CuTe GEMM</span>
+        <span class="stat-val" style="color:var(--orange)">211</span>
       </div>
       <div class="stat-row">
-        <span class="stat-key">Days logged</span>
-        <span class="stat-val">57+</span>
+        <span class="stat-key">TFLOPS peak</span>
+        <span class="stat-val">312</span>
       </div>
       <div class="stat-row">
-        <span class="stat-key">Current hw</span>
-        <span class="stat-val" style="font-size:14px;">B200</span>
+        <span class="stat-key">Arch</span>
+        <span class="stat-val" style="font-size:14px;">sm_80 + sm_100</span>
       </div>
     </div>
     <div class="stack-row">
@@ -1187,10 +1189,19 @@ footer {
       </div>
       <p class="rung-desc">Three-level composition: threadblock → warp → 16×16 MMA. composition() chains layouts without pointer arithmetic.</p>
     </div>
-    <div class="rung current">
+    <div class="rung done">
       <div class="rung-dot"></div>
       <div class="rung-meta">
         <span class="rung-n">06</span>
+        <span class="rung-name">A100 Tensor Core GEMM</span>
+        <span class="rung-gain g">259 TFLOPS</span>
+      </div>
+      <p class="rung-desc">11 CUDA + 8 CuTe optimization stages on A100. cp.async, ldmatrix.x4, 3-stage pipeline, XOR swizzle, lambda-local registers. 83% of cuBLAS at 16384×16384×16384 bf16.</p>
+    </div>
+    <div class="rung current">
+      <div class="rung-dot"></div>
+      <div class="rung-meta">
+        <span class="rung-n">07</span>
         <span class="rung-name">Tensor Core MMA · sm_100</span>
         <span class="rung-gain o">target: 75 TFLOPS</span>
       </div>
@@ -1222,6 +1233,20 @@ footer {
       <a href="https://gist.github.com/bikrammajhi/372864a2a8abbed01fc977b4b0c125ed" target="_blank" class="res-link">View gist →</a>
     </div>
     <div class="res-card">
+      <div class="res-hw">A100 · CUDA GEMM</div>
+      <div class="res-num g">259</div>
+      <div class="res-label">TFLOPS · 82.9% of cuBLAS</div>
+      <p class="res-desc">11 CUDA optimization stages on A100-SXM4-40GB. cp.async, ldmatrix.x4, XOR swizzle, 3-stage pipeline, lambda-local regs. 16384×16384×16384 bf16.</p>
+      <a href="https://github.com/bikrammajhi/fast-gpu-kernels/tree/main/kernels/cuda/A100" target="_blank" class="res-link">View kernels →</a>
+    </div>
+    <div class="res-card">
+      <div class="res-hw">A100 · CuTe GEMM</div>
+      <div class="res-num o">211</div>
+      <div class="res-label">TFLOPS · 80.1% of cuBLAS</div>
+      <p class="res-desc">8 CuTe + inline PTX optimization stages. UniversalCopy, SMEM padding, Swizzle, cp.async CACHEALWAYS, multi-stage pipeline.</p>
+      <a href="https://github.com/bikrammajhi/fast-gpu-kernels/tree/main/kernels/cute/A100" target="_blank" class="res-link">View kernels →</a>
+    </div>
+    <div class="res-card">
       <div class="res-hw">100 Days of GPU · GitHub</div>
       <div class="res-num b">36★</div>
       <div class="res-label">272 commits · 5 forks</div>
@@ -1231,14 +1256,80 @@ footer {
   </div>
 </section>
 
+<!-- A100 GEMM LAB -->
+<section class="section" id="a100">
+  <div class="sec-head reveal">
+    <span class="sec-num">04</span>
+    <h2 class="sec-title">A100 BF16 GEMM Lab</h2>
+    <div class="sec-rule"></div>
+  </div>
+  <p style="font-size:12px; color:var(--ink3); line-height:1.8; margin-bottom:28px;" class="reveal">
+    Hand-optimized BF16 GEMM on NVIDIA A100-SXM4-40GB across two approaches: raw CUDA and CuTe DSL.
+    108 SMs · 312 TFLOPS BF16 peak · 1.5 TB/s HBM2e · Target: M=N=K=16384, bf16
+  </p>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;" class="reveal">
+    <div style="border:1px solid var(--rule); border-radius:3px; overflow:hidden;">
+      <div style="font-size:10px; letter-spacing:0.08em; text-transform:uppercase; padding:10px 14px; background:var(--paper2); color:var(--ink3); border-bottom:1px solid var(--rule);">CUDA Kernels</div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:11px;">
+          <thead style="background:var(--paper2);">
+            <tr><th style="padding:8px 10px; text-align:left; border-bottom:1px solid var(--rule); color:var(--ink3);">#</th><th style="padding:8px 10px; text-align:left; border-bottom:1px solid var(--rule); color:var(--ink3);">Technique</th><th style="padding:8px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink3);">TFLOPS</th><th style="padding:8px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink3);">% Peak</th><th style="padding:8px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink3);">Δ</th></tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">v1</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">Baseline (sync loads, 2×2 warps)</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">64.2</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">20.6%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink3);">—</td></tr>
+            <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">v2</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">+ cp.async + 2-stage pipeline</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">73.2</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">23.5%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green);">+14%</td></tr>
+            <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">v3</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">+ SMEM padding (+8)</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">152.1</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">48.7%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green);">+108%</td></tr>
+            <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">v4</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">+ XOR swizzle</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">153.9</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">49.3%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green);">+1%</td></tr>
+            <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">v7s3</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">+ ldmatrix.x4 + 3-stage</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">219.5</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">70.3%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green);">+43%</td></tr>
+            <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">v10</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">+ lambda-local registers</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">252.6</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">81.0%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green);">+15%</td></tr>
+            <tr style="background:var(--green-light);"><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--green); font-weight:500;">v11a</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--green); font-weight:500;">+ 4×2 warps (256 threads)</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green); font-weight:500;">258.7</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green); font-weight:500;">82.9%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green);">+2%</td></tr>
+            <tr><td style="padding:7px 10px; border-bottom:none; color:var(--ink3);">cuBLAS</td><td style="padding:7px 10px; border-bottom:none; color:var(--ink3);">Reference</td><td style="padding:7px 10px; text-align:right; border-bottom:none; color:var(--ink3);">300.4</td><td style="padding:7px 10px; text-align:right; border-bottom:none; color:var(--ink3);">96.3%</td><td style="padding:7px 10px; text-align:right; border-bottom:none; color:var(--ink3);">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div style="border:1px solid var(--rule); border-radius:3px; overflow:hidden;">
+      <div style="font-size:10px; letter-spacing:0.08em; text-transform:uppercase; padding:10px 14px; background:var(--paper2); color:var(--ink3); border-bottom:1px solid var(--rule);">CuTe Kernels</div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:11px;">
+          <thead style="background:var(--paper2);">
+            <tr><th style="padding:8px 10px; text-align:left; border-bottom:1px solid var(--rule); color:var(--ink3);">#</th><th style="padding:8px 10px; text-align:left; border-bottom:1px solid var(--rule); color:var(--ink3);">Technique</th><th style="padding:8px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink3);">TFLOPS</th><th style="padding:8px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink3);">% cuBLAS</th><th style="padding:8px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink3);">Δ</th></tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">v1</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">Baseline: sync gmem→smem</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">45.9</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">16.9%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink3);">—</td></tr>
+            <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">v2</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">+ UniversalCopy&lt;uint128_t&gt;</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">58.4</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">22.2%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green);">+26%</td></tr>
+            <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">v3</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">+ SMEM padding kPad=8</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">134.5</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">50.5%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green);">+131%</td></tr>
+            <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">v4</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">+ Swizzle&lt;3,3,3&gt;</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">115.3</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">42.9%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--orange);">−14%</td></tr>
+            <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">v5</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">+ cp.async CACHEALWAYS</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">170.8</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">64.1%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green);">+48%</td></tr>
+            <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">v6</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">swizzle + cp.async</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">180.2</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">68.0%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green);">+5%</td></tr>
+            <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">v7</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">+ 2-stage pipeline</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">172.9</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">65.0%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--orange);">−4%</td></tr>
+            <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">v8</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">+ 3-stage pipeline</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">200.4</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">75.8%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green);">+16%</td></tr>
+            <tr style="background:var(--green-light);"><td style="padding:7px 10px; border-bottom:none; color:var(--green); font-weight:500;">ptx</td><td style="padding:7px 10px; border-bottom:none; color:var(--green); font-weight:500;">Inline PTX (ldmatrix.x4, mma.sync)</td><td style="padding:7px 10px; text-align:right; border-bottom:none; color:var(--green); font-weight:500;">211.0</td><td style="padding:7px 10px; text-align:right; border-bottom:none; color:var(--green); font-weight:500;">80.1%</td><td style="padding:7px 10px; text-align:right; border-bottom:none; color:var(--green);">+7%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- PROJECTS -->
 <section class="section" id="projects">
   <div class="sec-head reveal">
-    <span class="sec-num">04</span>
+    <span class="sec-num">05</span>
     <h2 class="sec-title">Projects</h2>
     <div class="sec-rule"></div>
   </div>
   <div class="projects-list reveal">
+    <a href="https://github.com/bikrammajhi/fast-gpu-kernels" target="_blank" class="proj">
+      <div>
+        <div class="proj-name">fast-gpu-kernels</div>
+        <p class="proj-desc">11 CUDA + 8 CuTe BF16 GEMM kernels on A100. 259 TFLOPS (83% cuBLAS). cp.async, ldmatrix.x4, 3-stage pipeline, XOR swizzle, PTX.</p>
+        <div class="proj-tags">
+          <span class="tag lit">CUDA C++</span><span class="tag lit">CuTe</span><span class="tag lit">PTX</span><span class="tag">A100</span><span class="tag">sm_80</span>
+        </div>
+      </div>
+      <span class="proj-arrow">↗</span>
+    </a>
     <a href="https://github.com/bikrammajhi/100-days-of-GPU" target="_blank" class="proj">
       <div>
         <div class="proj-name">100-days-of-GPU</div>
@@ -1285,7 +1376,7 @@ footer {
 <!-- WRITING -->
 <section class="section" id="writing">
   <div class="sec-head reveal">
-    <span class="sec-num">05</span>
+    <span class="sec-num">06</span>
     <h2 class="sec-title">Writing</h2>
     <div class="sec-rule"></div>
   </div>
@@ -1380,7 +1471,7 @@ footer {
 <!-- DEBUG JOURNAL -->
 <section class="section" id="journal">
   <div class="sec-head reveal">
-    <span class="sec-num">06</span>
+    <span class="sec-num">07</span>
     <h2 class="sec-title">Debug Journal</h2>
     <div class="sec-rule"></div>
   </div>
@@ -1454,7 +1545,7 @@ footer {
 <!-- CONTACT -->
 <section class="section" id="contact">
   <div class="sec-head reveal">
-    <span class="sec-num">07</span>
+    <span class="sec-num">08</span>
     <h2 class="sec-title">Contact</h2>
     <div class="sec-rule"></div>
   </div>
