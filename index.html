@@ -612,11 +612,9 @@ footer {
   <div>
     <div class="hero-label">GPU Systems Engineer</div>
     <div class="hero-name">Bikram<br><em>Majhi</em></div>
-    <p class="hero-sub">
-      Hand-written BF16 GEMM kernels for <strong>A100</strong>, <strong>H100</strong> and <strong>B200</strong> (sm_100).
-      <strong>259 TFLOPS</strong> on A100 (86% cuBLAS), <strong>684 TFLOPS</strong> on H100 (88% cuBLAS),
-      <strong>1840 TFLOPS</strong> on B200 (125% cuBLAS peak with CuTe DSL v5).
-      cp.async · ldmatrix.x4 · TMA · WGMMA.
+     <p class="hero-sub">
+      Hand-written BF16 GEMM kernels for A100, H100 and B200 (sm_100). 259 TFLOPS on A100 (86% cuBLAS), 684 TFLOPS on H100 (88% cuBLAS), 1840 TFLOPS on B200 (125% cuBLAS peak)<br>
+      cp.async · ldmatrix.x4 · mma.sync · TMA · WGMMA · TMEM · tcgen05
     </p>
     <div class="hero-cta">
       <a href="#a100" class="btn btn-solid">A100 Lab</a>
@@ -782,7 +780,7 @@ footer {
             <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">v7s3</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">+ ldmatrix.x4 + 3-stage</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">219.5</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">70.3%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green);">+43%</td></tr>
             <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">v10</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">+ lambda-local registers</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">252.6</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">81.0%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green);">+15%</td></tr>
             <tr style="background:var(--green-light);"><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--green); font-weight:500;">v11a</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--green); font-weight:500;">+ 4×2 warps (256 threads)</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green); font-weight:500;">258.7</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green); font-weight:500;">86.1%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green); font-weight:500;">+2%</td></tr>
-            <tr><td style="padding:7px 10px; border-bottom:none; color:var(--ink3);">cuBLAS</td><td style="padding:7px 10px; border-bottom:none; color:var(--ink3);">Reference</td><td style="padding:7px 10px; text-align:right; border-bottom:none; color:var(--ink3);">300.4</td><td style="padding:7px 10px; text-align:right; border-bottom:none; color:var(--ink3);">96.3%</td><td style="padding:7px 10px; text-align:right; border-bottom:none; color:var(--ink3);">—</td></tr>
+            <tr><td style="padding:7px 10px; border-bottom:none; color:var(--ink3);">cuBLAS</td><td style="padding:7px 10px; border-bottom:none; color:var(--ink3);">Reference</td><td style="padding:7px 10px; text-align:right; border-bottom:none; color:var(--ink3);">300.4</td><td style="padding:7px 10px; text-align:right; border-bottom:none; color:var(--ink3);">100%</td><td style="padding:7px 10px; text-align:right; border-bottom:none; color:var(--ink3);">—</td></tr>
           </tbody>
         </table>
       </div>
