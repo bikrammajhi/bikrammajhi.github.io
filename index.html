@@ -361,70 +361,6 @@ nav {
   transition: background-color 0.2s ease;
 }
 
-/* ── GEMM LADDER ── */
-.ladder { position: relative; padding-left: 32px; }
-
-.ladder-rail {
-  position: absolute;
-  left: 6px; top: 8px; bottom: 8px;
-  width: 1px;
-  background: linear-gradient(to bottom, var(--green), var(--rule) 80%);
-  transition: background 0.2s ease;
-}
-
-.rung {
-  position: relative;
-  padding-bottom: 36px;
-  opacity: 0;
-  transform: translateY(12px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
-
-.rung.in { opacity: 1; transform: translateY(0); }
-
-.rung-dot {
-  position: absolute;
-  left: -28px;
-  top: 5px;
-  width: 13px; height: 13px;
-  border-radius: 50%;
-  background: var(--paper);
-  border: 1px solid var(--rule2);
-  transition: all 0.2s ease;
-}
-
-.rung.done .rung-dot { background: var(--green); border-color: var(--green); }
-.rung.current .rung-dot { background: var(--orange); border-color: var(--orange); box-shadow: 0 0 0 3px var(--orange-light); }
-
-.rung-meta {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin-bottom: 4px;
-  flex-wrap: wrap;
-}
-
-.rung-n { font-size: 10px; color: var(--ink3); transition: color 0.2s ease; }
-
-.rung-name {
-  font-family: var(--font-serif);
-  font-size: 17px;
-  color: var(--ink);
-  transition: color 0.2s ease;
-}
-
-.rung-gain {
-  font-size: 10px;
-  padding: 2px 8px;
-  border-radius: 2px;
-  letter-spacing: 0.04em;
-}
-
-.rung-gain.g { background: var(--green-light); color: var(--green); border: 1px solid color-mix(in srgb, var(--green) 30%, transparent); }
-.rung-gain.o { background: var(--orange-light); color: var(--orange); border: 1px solid color-mix(in srgb, var(--orange) 30%, transparent); }
-
-.rung-desc { font-size: 12px; color: var(--ink3); line-height: 1.7; max-width: 600px; transition: color 0.2s ease; }
-
 /* ── RESULTS ── */
 .results-grid {
   display: grid;
@@ -698,16 +634,8 @@ footer {
         <span class="stat-val" style="color:var(--orange)">684</span>
       </div>
       <div class="stat-row">
-        <span class="stat-key">B200 · CuTe DSL v5</span>
+        <span class="stat-key">B200 · CuTe DSL</span>
         <span class="stat-val" style="color:var(--blue)">1840</span>
-      </div>
-      <div class="stat-row">
-        <span class="stat-key">TFLOPS peak</span>
-        <span class="stat-val">1478</span>
-      </div>
-      <div class="stat-row">
-        <span class="stat-key">Arch</span>
-        <span class="stat-val" style="font-size:14px;">sm_80 + sm_90 + sm_100a</span>
       </div>
     </div>
     <div class="stack-row">
@@ -769,90 +697,6 @@ footer {
           <span style="font-size:11.5px; color:var(--ink2); line-height:1.6;">Dissecting Hopper: TMA, Tensor Core, Memory Subsystem</span>
         </div>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- GEMM LADDER -->
-<section class="section" id="ladder">
-  <div class="sec-head reveal">
-    <span class="sec-num">02</span>
-    <h2 class="sec-title">The GEMM Ladder</h2>
-    <div class="sec-rule"></div>
-  </div>
-  <div class="ladder" id="ladder-steps">
-    <div class="ladder-rail"></div>
-    <div class="rung done">
-      <div class="rung-dot"></div>
-      <div class="rung-meta">
-        <span class="rung-n">01</span>
-        <span class="rung-name">Naive kernel</span>
-        <span class="rung-gain g">0.075 TFLOPS</span>
-      </div>
-      <p class="rung-desc">1 thread → 1 output. Pure algorithm. Teaches make_layout, stride, and what a GPU actually does with your code.</p>
-    </div>
-    <div class="rung done">
-      <div class="rung-dot"></div>
-      <div class="rung-meta">
-        <span class="rung-n">02</span>
-        <span class="rung-name">Coalesced global memory</span>
-        <span class="rung-gain g">~3× gain</span>
-      </div>
-      <p class="rung-desc">Reorganize thread-data mapping so a warp reads a contiguous 128-byte cache line. local_tile + make_coord.</p>
-    </div>
-    <div class="rung done">
-      <div class="rung-dot"></div>
-      <div class="rung-meta">
-        <span class="rung-n">03</span>
-        <span class="rung-name">Shared memory tiling</span>
-        <span class="rung-gain g">~20× gain</span>
-      </div>
-      <p class="rung-desc">Load a tile once into SRAM cooperatively. Reuse it across BM threads. DRAM traffic cut by 128×. sync_threads is the contract.</p>
-    </div>
-    <div class="rung done">
-      <div class="rung-dot"></div>
-      <div class="rung-meta">
-        <span class="rung-n">04</span>
-        <span class="rung-name">Register file tiling</span>
-        <span class="rung-gain g">~80× gain</span>
-      </div>
-      <p class="rung-desc">local_partition assigns each thread its smem slice into registers. Inner loop runs zero memory stalls. Pure RF math.</p>
-    </div>
-    <div class="rung done">
-      <div class="rung-dot"></div>
-      <div class="rung-meta">
-        <span class="rung-n">05</span>
-        <span class="rung-name">Hierarchical warp tiling (CuTe)</span>
-        <span class="rung-gain g">~500× gain</span>
-      </div>
-      <p class="rung-desc">Three-level composition: threadblock → warp → 16×16 MMA. composition() chains layouts without pointer arithmetic.</p>
-    </div>
-    <div class="rung done">
-      <div class="rung-dot"></div>
-      <div class="rung-meta">
-        <span class="rung-n">06</span>
-        <span class="rung-name">A100 Tensor Core GEMM</span>
-        <span class="rung-gain g">259 TFLOPS</span>
-      </div>
-      <p class="rung-desc">11 CUDA + 8 CuTe optimization stages on A100. cp.async, ldmatrix.x4, 3-stage pipeline, XOR swizzle, lambda-local registers. 83% of cuBLAS at 16384×16384×16384 bf16.</p>
-    </div>
-    <div class="rung current">
-      <div class="rung-dot"></div>
-      <div class="rung-meta">
-        <span class="rung-n">07</span>
-        <span class="rung-name">H100 CuTe DSL · sm_90</span>
-        <span class="rung-gain o">88% cuBLAS · 684 TFLOPS</span>
-      </div>
-      <p class="rung-desc">CuTe DSL v2 on H100. WGMMA prefetch, cluster sync. 4096³ bf16, 200.91 µs latency. Pushing through matmul_v3/v4 cluster + TMA barrier stages.</p>
-    </div>
-    <div class="rung">
-      <div class="rung-dot"></div>
-      <div class="rung-meta">
-        <span class="rung-n">08</span>
-        <span class="rung-name">B200 CuTe DSL · sm_100a</span>
-        <span class="rung-gain o">125% cuBLAS · 597 µs (v5)</span>
-      </div>
-      <p class="rung-desc">6-stage Cubicle DSL on B200 Blackwell. v5: 597.49 µs at 8192³ FP16 — first public cuBLAS-exceeding kernel on sm_100a. All 6 versions numerically verified.</p>
     </div>
   </div>
 </section>
@@ -1162,21 +1006,7 @@ const obs = new IntersectionObserver(entries => {
 }, { threshold: 0.08 });
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
-// Ladder stagger
-const ladderObs = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      document.querySelectorAll('.rung').forEach((r, i) => {
-        setTimeout(() => r.classList.add('in'), i * 110);
-      });
-      ladderObs.disconnect();
-    }
-  });
-}, { threshold: 0.1 });
-const ladderEl = document.getElementById('ladder-steps');
-if (ladderEl) ladderObs.observe(ladderEl);
-
-</script>
+// ── SCROLL REVEAL ──
 
 </body>
 </html>
