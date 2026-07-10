@@ -678,8 +678,8 @@ footer {
     <div class="hero-name">Bikram<br><em>Majhi</em></div>
     <p class="hero-sub">
       Hand-written BF16 GEMM kernels for <strong>A100</strong>, <strong>H100</strong> and <strong>B200</strong> (sm_100).
-      <strong>259 TFLOPS</strong> on A100 (83% cuBLAS), <strong>684 TFLOPS</strong> on H100 (88% cuBLAS CuTe DSL),
-      <strong>1478 TFLOPS</strong> peak on B200 (reach 125% cuBLAS with CuTe DSL v5).
+      <strong>259 TFLOPS</strong> on A100 (86% cuBLAS), <strong>684 TFLOPS</strong> on H100 (88% cuBLAS),
+      <strong>1840 TFLOPS</strong> on B200 (125% cuBLAS peak with CuTe DSL v5).
       cp.async · ldmatrix.x4 · TMA · WGMMA.
     </p>
     <div class="hero-cta">
@@ -699,7 +699,7 @@ footer {
       </div>
       <div class="stat-row">
         <span class="stat-key">B200 · CuTe DSL v5</span>
-        <span class="stat-val" style="color:var(--blue)">1478</span>
+        <span class="stat-val" style="color:var(--blue)">1840</span>
       </div>
       <div class="stat-row">
         <span class="stat-key">TFLOPS peak</span>
@@ -857,7 +857,7 @@ footer {
   </div>
 </section>
 
-<!-- RESULTS -->
+<!-- PROJECTS -->
 <section class="section" id="projects">
   <div class="sec-head reveal">
     <span class="sec-num">03</span>
@@ -881,8 +881,8 @@ footer {
     </div>
     <div class="res-card">
       <div class="res-hw">A100 · CUDA GEMM</div>
-      <div class="res-num g">259</div>
-      <div class="res-label">TFLOPS · 82.9% of cuBLAS</div>
+      <div class="res-num g">258.7</div>
+      <div class="res-label">TFLOPS · 86.1% of cuBLAS</div>
       <p class="res-desc">11 CUDA optimization stages on A100-SXM4-40GB. cp.async, ldmatrix.x4, XOR swizzle, 3-stage pipeline, lambda-local regs. 16384×16384×16384 bf16.</p>
       <a href="https://github.com/bikrammajhi/fast-gpu-kernels/tree/main/kernels/cuda/A100" target="_blank" class="res-link">View kernels →</a>
     </div>
@@ -895,16 +895,16 @@ footer {
     </div>
     <div class="res-card">
       <div class="res-hw">H100 · CuTe DSL (WGMMA)</div>
-      <div class="res-num g">776</div>
-      <div class="res-label">TFLOPS · 88% of cuBLAS at 4K³</div>
+      <div class="res-num g">684</div>
+      <div class="res-label">TFLOPS · ~88% of cuBLAS at 4K³</div>
       <p class="res-desc">CuTe DSL v2 on H100 80GB. 4096×4096×4096 bf16, kernel latency 200.91 µs. WGMMA with prefetch on sm_90.</p>
       <a href="https://github.com/bikrammajhi/fast-gpu-kernels/tree/main/kernels/cute_dsl/H100" target="_blank" class="res-link">View kernels →</a>
     </div>
     <div class="res-card">
       <div class="res-hw">B200 · CuTe DSL (sm_100a)</div>
-      <div class="res-num b">~1478</div>
-      <div class="res-label">TFLOPS peak · 125% of cuBLAS</div>
-      <p class="res-desc">6 optimization stages (v1–v6) on B200 sm_100a, FP16. CuTe DSL v5 reaches 597 µs (125% cuBLAS peak). All versions verified against PyTorch einsum.</p>
+      <div class="res-num b">~1840</div>
+      <div class="res-label">TFLOPS · 125% of cuBLAS</div>
+      <p class="res-desc">6 optimization stages (v1–v6) on B200 sm_100a, FP16. CuTe DSL v5 reaches 597 µs (1840 TFLOPS · 125% cuBLAS peak). All versions verified against PyTorch einsum.</p>
       <a href="https://github.com/bikrammajhi/fast-gpu-kernels/tree/main/kernels/cute_dsl/B200" target="_blank" class="res-link">View kernels →</a>
     </div>
 
