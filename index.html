@@ -304,6 +304,15 @@ nav {
   transition: color 0.2s ease;
 }
 
+.unit {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink3);
+  margin-left: 5px;
+  font-family: var(--font-mono);
+}
+
 .stack-row {
   display: flex;
   flex-wrap: wrap;
@@ -626,15 +635,15 @@ footer {
     <div class="stat-block">
       <div class="stat-row">
         <span class="stat-key">A100 · CUDA GEMM</span>
-        <span class="stat-val" style="color:var(--green)">259</span>
+        <span class="stat-val" style="color:var(--green)">259 <span class="unit">TFLOPS</span></span>
       </div>
       <div class="stat-row">
         <span class="stat-key">H100 · CuTe DSL</span>
-        <span class="stat-val" style="color:var(--orange)">684</span>
+        <span class="stat-val" style="color:var(--orange)">684 <span class="unit">TFLOPS</span></span>
       </div>
       <div class="stat-row">
         <span class="stat-key">B200 · CuTe DSL</span>
-        <span class="stat-val" style="color:var(--blue)">1840</span>
+        <span class="stat-val" style="color:var(--blue)">1840 <span class="unit">TFLOPS</span></span>
       </div>
     </div>
     <div class="stack-row">
