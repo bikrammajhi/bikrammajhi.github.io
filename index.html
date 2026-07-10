@@ -1022,6 +1022,8 @@ footer {
     <li><a href="#ladder">GEMM</a></li>
     <li><a href="#results">Results</a></li>
     <li><a href="#a100">A100</a></li>
+    <li><a href="#h100">H100</a></li>
+    <li><a href="#b200">B200</a></li>
     <li><a href="#projects">Projects</a></li>
     <li><a href="#writing">Writing</a></li>
     <li><a href="#journal">Journal</a></li>
@@ -1047,10 +1049,10 @@ footer {
     <div class="hero-label">GPU Systems Engineer</div>
     <div class="hero-name">Bikram<br><em>Majhi</em></div>
     <p class="hero-sub">
-      I write CUDA kernels from scratch and benchmark them against cuBLAS.
-      <strong>259 TFLOPS</strong> on A100 (83% of cuBLAS) across 11 CUDA + 8 CuTe
-      optimization stages. Right now I'm deep in <strong>Blackwell B200</strong> —
-      sm_100 native kernels, FP4/FP8 data paths, CuTe DSL.
+      Hand-written BF16 GEMM kernels for <strong>A100</strong>, <strong>H100</strong> and <strong>B200</strong> (sm_100).
+      <strong>259 TFLOPS</strong> on A100 (83% cuBLAS), <strong>684 TFLOPS</strong> on H100 (88% cuBLAS CuTe DSL),
+      <strong>1478 TFLOPS</strong> peak on B200 (reach 125% cuBLAS with CuTe DSL v5).
+      cp.async · ldmatrix.x4 · TMA · WGMMA · Transformer Engine.
     </p>
     <div class="hero-cta">
       <a href="#a100" class="btn btn-solid">A100 Results</a>
@@ -1064,16 +1066,20 @@ footer {
         <span class="stat-val" style="color:var(--green)">259</span>
       </div>
       <div class="stat-row">
-        <span class="stat-key">A100 · CuTe GEMM</span>
-        <span class="stat-val" style="color:var(--orange)">211</span>
+        <span class="stat-key">H100 · CuTe DSL</span>
+        <span class="stat-val" style="color:var(--orange)">684</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-key">B200 · CuTe DSL v5</span>
+        <span class="stat-val" style="color:var(--blue)">1478</span>
       </div>
       <div class="stat-row">
         <span class="stat-key">TFLOPS peak</span>
-        <span class="stat-val">312</span>
+        <span class="stat-val">1478</span>
       </div>
       <div class="stat-row">
         <span class="stat-key">Arch</span>
-        <span class="stat-val" style="font-size:14px;">sm_80 + sm_100</span>
+        <span class="stat-val" style="font-size:14px;">sm_80 + sm_90 + sm_100a</span>
       </div>
     </div>
     <div class="stack-row">
@@ -1081,6 +1087,8 @@ footer {
       <span class="tag lit">CuTe DSL</span>
       <span class="tag lit">PTX</span>
       <span class="tag lit">CUTLASS</span>
+      <span class="tag lit">TMA / WGMMA</span>
+      <span class="tag lit">sm_100a</span>
       <span class="tag">Triton</span>
       <span class="tag">cuBLAS</span>
       <span class="tag">Nsight</span>
@@ -1103,12 +1111,14 @@ footer {
         My approach is always bottom-up — understand the hardware before trusting any abstraction above it.
       </p>
       <p style="font-size:13px; color:var(--ink2); line-height:1.85; margin-bottom:14px;">
-        My flagship project, <strong style="color:var(--ink)">100 Days of GPU</strong>, is a public daily log. 
-        It started from GPU vs CPU architecture, went through CUDA programming and OS internals, 
-        and is now at CuTe DSL and Tensor Core programming on Blackwell.
+        My flagship project, <strong style="color:var(--ink)">fast-gpu-kernels</strong>, is a public
+        benchmark of hand-written BF16 GEMM across three NVIDIA GPU generations — A100, H100 and B200.
+        It started on A100 (cuBLAS 83% CUDA, 80% CuTe) and is now on B200 reaching <strong style="color:var(--ink)">125% of cuBLAS peak</strong>
+        with CuTe DSL v5 (597 µs, 1478 TFLOPS peak). Uses Modal for remote GPU benchmarking.
       </p>
       <p style="font-size:13px; color:var(--ink2); line-height:1.85;">
-        Lately into : <strong style="color:var(--ink)">sm_100, FP4 data paths, and the Transformer Engine on B200</strong>.
+        Lately into : <strong style="color:var(--ink)">sm_100a (Blackwell), WGMMA, TMA barriers, Transformer Engine</strong>
+        and pushing through the CuTe DSL optimization ladder on B200.
       </p>
     </div>
     <div>
@@ -1202,10 +1212,19 @@ footer {
       <div class="rung-dot"></div>
       <div class="rung-meta">
         <span class="rung-n">07</span>
-        <span class="rung-name">Tensor Core MMA · sm_100</span>
-        <span class="rung-gain o">target: 75 TFLOPS</span>
+        <span class="rung-name">H100 CuTe DSL · sm_90</span>
+        <span class="rung-gain o">88% cuBLAS · 684 TFLOPS</span>
       </div>
-      <p class="rung-desc">Native Blackwell mma.sync. FP4/FP8 Tensor Core data paths. Transformer Engine. Approaching cuBLAS on 183 GB HBM3e.</p>
+      <p class="rung-desc">CuTe DSL v2 on H100. WGMMA prefetch, cluster sync. 4096³ bf16, 200.91 µs latency. Pushing through matmul_v3/v4 cluster + TMA barrier stages.</p>
+    </div>
+    <div class="rung">
+      <div class="rung-dot"></div>
+      <div class="rung-meta">
+        <span class="rung-n">08</span>
+        <span class="rung-name">B200 CuTe DSL · sm_100a</span>
+        <span class="rung-gain o">125% cuBLAS · 597 µs (v5)</span>
+      </div>
+      <p class="rung-desc">6-stage Cubicle DSL on B200 Blackwell. v5: 597.49 µs at 8192³ FP16 — first public cuBLAS-exceeding kernel on sm_100a. All 6 versions numerically verified.</p>
     </div>
   </div>
 </section>
@@ -1242,16 +1261,30 @@ footer {
     <div class="res-card">
       <div class="res-hw">A100 · CuTe GEMM</div>
       <div class="res-num o">211</div>
-      <div class="res-label">TFLOPS · 80.1% of cuBLAS</div>
-      <p class="res-desc">8 CuTe + inline PTX optimization stages. UniversalCopy, SMEM padding, Swizzle, cp.async CACHEALWAYS, multi-stage pipeline.</p>
+      <div class="res-label">TFLOPS · 79.4% of cuBLAS</div>
+      <p class="res-desc">9 CuTe + inline PTX optimization stages. UniversalCopy, SMEM padding, Swizzle, cp.async CACHEALWAYS, multi-stage pipeline.</p>
       <a href="https://github.com/bikrammajhi/fast-gpu-kernels/tree/main/kernels/cute/A100" target="_blank" class="res-link">View kernels →</a>
     </div>
     <div class="res-card">
-      <div class="res-hw">100 Days of GPU · GitHub</div>
-      <div class="res-num b">36★</div>
-      <div class="res-label">272 commits · 5 forks</div>
-      <p class="res-desc">Public daily log. 57+ days completed. CUDA, CUTLASS, Triton, PTX, Nsight. Actively maintained.</p>
-      <a href="https://github.com/bikrammajhi/100-days-of-GPU" target="_blank" class="res-link">View repo →</a>
+      <div class="res-hw">H100 · CuTe DSL (WGMMA)</div>
+      <div class="res-num g">776</div>
+      <div class="res-label">TFLOPS · 88% of cuBLAS at 4K³</div>
+      <p class="res-desc">CuTe DSL v2 on H100 80GB. 4096×4096×4096 bf16, kernel latency 200.91 µs. WGMMA with prefetch on sm_90.</p>
+      <a href="https://github.com/bikrammajhi/fast-gpu-kernels/tree/main/kernels/cute_dsl/H100" target="_blank" class="res-link">View kernels →</a>
+    </div>
+    <div class="res-card">
+      <div class="res-hw">B200 · CuTe DSL (sm_100a)</div>
+      <div class="res-num b">~1478</div>
+      <div class="res-label">TFLOPS peak · 125% of cuBLAS</div>
+      <p class="res-desc">6 optimization stages (v1–v6) on B200 sm_100a, FP16. CuTe DSL v5 reaches 597 µs (125% cuBLAS peak). All versions verified against PyTorch einsum.</p>
+      <a href="https://github.com/bikrammajhi/fast-gpu-kernels/tree/main/kernels/cute_dsl/B200" target="_blank" class="res-link">View kernels →</a>
+    </div>
+    <div class="res-card">
+      <div class="res-hw">fast-gpu-kernels · GitHub</div>
+      <div class="res-num b">3 GPUs</div>
+      <div class="res-label">A100 + H100 + B200 · Modal remote</div>
+      <p class="res-desc">Complete BF16 GEMM benchmark suite across 3 GPU generations. Hand-written CUDA, CuTe DSL, WGMMA/TMA. Python 3.12+, Modal, CUDA 13.1 sm_100.</p>
+      <a href="https://github.com/bikrammajhi/fast-gpu-kernels" target="_blank" class="res-link">View repo →</a>
     </div>
   </div>
 </section>
@@ -1264,8 +1297,9 @@ footer {
     <div class="sec-rule"></div>
   </div>
   <p style="font-size:12px; color:var(--ink3); line-height:1.8; margin-bottom:28px;" class="reveal">
-    Hand-optimized BF16 GEMM on NVIDIA A100-SXM4-40GB across two approaches: raw CUDA and CuTe DSL.
-    108 SMs · 312 TFLOPS BF16 peak · 1.5 TB/s HBM2e · Target: M=N=K=16384, bf16
+    Hand-optimized BF16 GEMM on NVIDIA A100-SXM4-40GB across two approaches: raw CUDA (v1–v11a) and CuTe DSL (v1–ptx_gemm).
+    108 SMs · 312 TFLOPS BF16 peak · 1.5 TB/s HBM2e · Target: M=N=K=16384, bf16.
+    Benchmarked on <a href="https://github.com/bikrammajhi/fast-gpu-kernels" target="_blank" style="color:var(--green);">fast-gpu-kernels</a>.
   </p>
   <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;" class="reveal">
     <div style="border:1px solid var(--rule); border-radius:3px; overflow:hidden;">
@@ -1312,6 +1346,93 @@ footer {
   </div>
 </section>
 
+<!-- H100 BF16 GEMM LAB -->
+<section class="section" id="h100">
+  <div class="sec-head reveal">
+    <span class="sec-num">04b</span>
+    <h2 class="sec-title">H100 BF16 GEMM Lab</h2>
+    <div class="sec-rule"></div>
+  </div>
+  <p style="font-size:12px; color:var(--ink3); line-height:1.8; margin-bottom:28px;" class="reveal">
+    CuTe DSL + WGMMA / TMA kernels on H100 SXM5 80GB (sm_90).
+    132 SMs · 989 TFLOPS BF16 peak · 3.35 TB/s HBM3 · Two work tracked: WGMMA baseline and CuTe DSL matmul.
+  </p>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;" class="reveal">
+    <div style="border:1px solid var(--rule); border-radius:3px; overflow:hidden;">
+      <div style="font-size:10px; letter-spacing:0.08em; text-transform:uppercase; padding:10px 14px; background:var(--paper2); color:var(--ink3); border-bottom:1px solid var(--rule);">WGMMA / TMA Kernels</div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:11px;">
+          <thead style="background:var(--paper2);">
+            <tr><th style="padding:8px 10px; text-align:left; border-bottom:1px solid var(--rule); color:var(--ink3);">Kernel</th><th style="padding:8px 10px; text-align:left; border-bottom:1px solid var(--rule); color:var(--ink3);">Description</th><th style="padding:8px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink3);">% cuBLAS</th><th style="padding:8px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink3);">Kernel time</th></tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink3);">cuBLAS</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink3);">Reference (16384³, bf16)</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink3);">~75% peak</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink3);">—</td></tr>
+            <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">matmul_v1</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">Baseline WGMMA</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">~49%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">24.0–24.7 ms</td></tr>
+            <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">matmul_v2</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">WGMMA with prefetch</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">~50%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">24.0–24.7 ms</td></tr>
+            <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">matmul_v3</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">WGMMA with cluster sync</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">~50%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">24.0–24.7 ms</td></tr>
+            <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">matmul_v4</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">WGMMA with TMA barriers</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">~50%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">24.0–24.7 ms</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div style="border:1px solid var(--rule); border-radius:3px; overflow:hidden;">
+      <div style="font-size:10px; letter-spacing:0.08em; text-transform:uppercase; padding:10px 14px; background:var(--paper2); color:var(--ink3); border-bottom:1px solid var(--rule);">CuTe DSL</div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:11px;">
+          <thead style="background:var(--paper2);">
+            <tr><th style="padding:8px 10px; text-align:left; border-bottom:1px solid var(--rule); color:var(--ink3);">Kernel</th><th style="padding:8px 10px; text-align:left; border-bottom:1px solid var(--rule); color:var(--ink3);">Shape</th><th style="padding:8px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink3);">TFLOPS</th><th style="padding:8px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink3);">% cuBLAS</th></tr>
+          </thead>
+          <tbody>
+            <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink3);">cuBLAS</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink3);">4096³, bf16</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink3);">776.0</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink3);">—</td></tr>
+            <tr style="background:var(--green-light);"><td style="padding:7px 10px; border-bottom:none; color:var(--green); font-weight:500;">DSL v2</td><td style="padding:7px 10px; border-bottom:none; color:var(--green); font-weight:500;">4096³, bf16</td><td style="padding:7px 10px; text-align:right; border-bottom:none; color:var(--green); font-weight:500;">684.07</td><td style="padding:7px 10px; text-align:right; border-bottom:none; color:var(--green); font-weight:500;">88%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:10px; color:var(--ink3); padding:10px 14px; line-height:1.6; border-top:1px solid var(--rule);">DSL v2 kernel latency: 200.91 µs. All verified against PyTorch <code style="font-size:10px;">einsum</code> reference.</p>
+    </div>
+  </div>
+</section>
+
+<!-- B200 BF16/FP16 GEMM LAB -->
+<section class="section" id="b200">
+  <div class="sec-head reveal">
+    <span class="sec-num">04c</span>
+    <h2 class="sec-title">B200 FP16 GEMM Lab</h2>
+    <div class="sec-rule"></div>
+  </div>
+  <p style="font-size:12px; color:var(--ink3); line-height:1.8; margin-bottom:28px;" class="reveal">
+    CuTe DSL on NVIDIA B200 (sm_100a, Blackwell). Target: M=N=K=8192, Float16.
+    Peak ~1478 TFLOPS FP16. All 6 versions verified numerically against PyTorch <code style="font-size:10px;">einsum</code>.
+  </p>
+  <div style="border:1px solid var(--rule); border-radius:3px; overflow:hidden;" class="reveal">
+    <div style="font-size:10px; letter-spacing:0.08em; text-transform:uppercase; padding:10px 14px; background:var(--paper2); color:var(--ink3); border-bottom:1px solid var(--rule);">CuTe DSL Optimization Ladder</div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse; font-size:11px;">
+        <thead style="background:var(--paper2);">
+          <tr>
+            <th style="padding:8px 10px; text-align:left; border-bottom:1px solid var(--rule); color:var(--ink3);">Ver.</th>
+            <th style="padding:8px 10px; text-align:left; border-bottom:1px solid var(--rule); color:var(--ink3);">Key optimisation</th>
+            <th style="padding:8px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink3);">Kernel (µs)</th>
+            <th style="padding:8px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink3);">% cuBLAS</th>
+            <th style="padding:8px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink3);">Speedup vs v1</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">v1</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">Baseline</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">2400.18</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">31%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink3);">1.00×</td></tr>
+          <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">v2</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">+ tiled load / pipeline</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">1229.82</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green);">60%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green);">+95%</td></tr>
+          <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">v3</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">+ warps / async stages</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">762.88</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green);">97%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green);">+215%</td></tr>
+          <tr><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">v4</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--ink2);">+ larger tiles / swizzle</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--ink2);">652.78</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green);">114%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green);">+268%</td></tr>
+          <tr style="background:var(--green-light);"><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--green); font-weight:500;">v5</td><td style="padding:7px 10px; border-bottom:1px solid var(--rule); color:var(--green); font-weight:500;">+ MMA scheduling / swizzle</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green); font-weight:500;">597.49</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green); font-weight:500;">125%</td><td style="padding:7px 10px; text-align:right; border-bottom:1px solid var(--rule); color:var(--green); font-weight:500;">+302%</td></tr>
+          <tr><td style="padding:7px 10px; border-bottom:none; color:var(--ink2);">v6</td><td style="padding:7px 10px; border-bottom:none; color:var(--ink2);">+ Tensor Memory + TMA</td><td style="padding:7px 10px; text-align:right; border-bottom:none; color:var(--ink2);">617.95</td><td style="padding:7px 10px; text-align:right; border-bottom:none; color:var(--ink2);">120%</td><td style="padding:7px 10px; text-align:right; border-bottom:none; color:var(--ink3);">+289%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <p style="font-size:10px; color:var(--ink3); margin-top:10px; line-height:1.6;" class="reveal">
+    Reference: cuBLAS (8192³, Float16) on B200. ~1478 TFLOPS FP16 peak. Requires CUDA 13.1, nvcc arch sm_100. Run via <code style="font-size:10px;">modal run scripts/cute_dsl/run.py::main --task B200/matmul_v5.py --gpu B200</code>
+  </p>
+</section>
+
 <!-- PROJECTS -->
 <section class="section" id="projects">
   <div class="sec-head reveal">
@@ -1323,9 +1444,9 @@ footer {
     <a href="https://github.com/bikrammajhi/fast-gpu-kernels" target="_blank" class="proj">
       <div>
         <div class="proj-name">fast-gpu-kernels</div>
-        <p class="proj-desc">11 CUDA + 8 CuTe BF16 GEMM kernels on A100. 259 TFLOPS (83% cuBLAS). cp.async, ldmatrix.x4, 3-stage pipeline, XOR swizzle, PTX.</p>
+        <p class="proj-desc">BF16 GEMM benchmark on A100 (CUDA 259 TFLOPS · 83% cuBLAS / CuTe 211 TFLOPS · 80% CuTe+PTX), H100 (CuTe DSL 684 TFLOPS · 88% cuBLAS), and B200 (CuTe DSL v5 597 µs · 125% cuBLAS peak). Hand-written kernels + Modal remote. Python 3.12+, cutlass.</p>
         <div class="proj-tags">
-          <span class="tag lit">CUDA C++</span><span class="tag lit">CuTe</span><span class="tag lit">PTX</span><span class="tag">A100</span><span class="tag">sm_80</span>
+          <span class="tag lit">CUDA C++</span><span class="tag lit">CuTe DSL</span><span class="tag lit">PTX</span><span class="tag lit">WGMMA / TMA</span><span class="tag">A100</span><span class="tag">H100</span><span class="tag">B200</span><span class="tag">sm_100a</span><span class="tag">Modal</span>
         </div>
       </div>
       <span class="proj-arrow">↗</span>
@@ -1333,29 +1454,39 @@ footer {
     <a href="https://github.com/bikrammajhi/100-days-of-GPU" target="_blank" class="proj">
       <div>
         <div class="proj-name">100-days-of-GPU</div>
-        <p class="proj-desc">Public daily log. 57+ days, 272 commits. GPU arch → CUDA → OS internals → CuTe DSL → Tensor Cores → Blackwell.</p>
+        <p class="proj-desc">Public daily log. 57+ days, 272 commits. GPU arch → CUDA → OS internals → CuTe DSL → Tensor Cores → Blackwell B200 sm_100a.</p>
         <div class="proj-tags">
           <span class="tag lit">CUDA C++</span><span class="tag lit">CuTe</span><span class="tag">Triton</span><span class="tag">PTX</span><span class="tag">Mojo</span>
         </div>
       </div>
       <span class="proj-arrow">↗</span>
     </a>
-    <a href="#" class="proj">
+    <a href="https://github.com/bikrammajhi/fast-gpu-kernels/tree/main/kernels/cute_dsl/H100" target="_blank" class="proj">
       <div>
-        <div class="proj-name">blackwell-gemm</div>
-        <p class="proj-desc">Handwritten GEMM kernels on B200. 6 optimization stages benchmarked against cuBLAS. Current: sm_100 native.</p>
+        <div class="proj-name">fast-gpu-kernels · H100 CuTe DSL</div>
+        <p class="proj-desc">CuTe DSL WGMMA + TMA kernels on H100 80GB. Baseline to v2: 776 TFLOPS cuBLAS ref (4K³ bf16), DSL v2 at 684 TFLOPS — 88% of cuBLAS.</p>
         <div class="proj-tags">
-          <span class="tag lit">CUDA C++</span><span class="tag lit">sm_100</span><span class="tag">cuBLAS</span><span class="tag">Modal</span>
+          <span class="tag lit">CuTe DSL</span><span class="tag lit">WGMMA</span><span class="tag">sm_90</span><span class="tag">H100</span>
         </div>
       </div>
       <span class="proj-arrow">↗</span>
     </a>
-    <a href="#" class="proj">
+    <a href="https://github.com/bikrammajhi/fast-gpu-kernels/tree/main/kernels/cute_dsl/B200" target="_blank" class="proj">
       <div>
-        <div class="proj-name">cute-modal-runner</div>
-        <p class="proj-desc">Modal runner for CuTe DSL Python kernels and raw .cu CUDA files. One command dispatches both. CUDA 13.1, nvcc sm_100, B200.</p>
+        <div class="proj-name">fast-gpu-kernels · B200 CuTe DSL</div>
+        <p class="proj-desc">CuTe DSL on B200 sm_100a (Blackwell). 6 optimization stages (v1–v6), FP16. v5: 597 µs, 125% of cuBLAS. All pass PyTorch einsum verification. CUDA 13.1, nvcc sm_100.</p>
         <div class="proj-tags">
-          <span class="tag">Python</span><span class="tag">Modal</span><span class="tag lit">CuTe DSL</span>
+          <span class="tag lit">CuTe DSL</span><span class="tag lit">sm_100a</span><span class="tag">B200</span><span class="tag">Modal</span>
+        </div>
+      </div>
+      <span class="proj-arrow">↗</span>
+    </a>
+    <a href="https://github.com/bikrammajhi/fast-gpu-kernels/tree/main/kernels/cute/A100" target="_blank" class="proj">
+      <div>
+        <div class="proj-name">fast-gpu-kernels · A100 CuTe</div>
+        <p class="proj-desc">9-stage CuTe DSL + inline PTX optimization ladder on A100. v8 (3-stage): 200.4 TFLOPS · 75.8%. ptx_gemm (ldmatrix.x4, mma.sync inline): 211 TFLOPS · 79.4%.</p>
+        <div class="proj-tags">
+          <span class="tag lit">CuTe</span><span class="tag lit">PTX</span><span class="tag">A100</span><span class="tag">sm_80</span>
         </div>
       </div>
       <span class="proj-arrow">↗</span>
@@ -1363,7 +1494,7 @@ footer {
     <a href="https://www.kaggle.com/code/bikrammajhi22/nvidia-cutlas" target="_blank" class="proj">
       <div>
         <div class="proj-name">CUTLASS deep dive</div>
-        <p class="proj-desc">Kaggle notebook on NVIDIA CUTLASS — template hierarchy, tile iterators, MMA operations.</p>
+        <p class="proj-desc">Kaggle notebook on NVIDIA CUTLASS — template hierarchy, tile iterators, MMA operations. Prerequisite reading for fast-gpu-kernels.</p>
         <div class="proj-tags">
           <span class="tag">CUTLASS</span><span class="tag">Python</span><span class="tag">Kaggle</span>
         </div>
