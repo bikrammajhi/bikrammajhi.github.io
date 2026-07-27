@@ -705,6 +705,12 @@ footer {
           <span style="font-size:11.5px; color:var(--ink2); line-height:1.6;">Dissecting Hopper: TMA, Tensor Core, Memory Subsystem</span>
         </div>
       </div>
+        <div class="res-card">
+      <div class="res-hw">nano-dynamo · Qwen2.5-3B</div>
+      <div class="res-num g">47%</div>
+      <div class="res-label">lower TTFT vs NVIDIA Dynamo</div>
+      <p class="res-desc">Minimal reimplementation of NVIDIA Dynamo in ~1.5k lines of Python. Disaggregated Prefill/Decode, KV-Aware Routing, GPU-GPU Accelerated KV-Transfer. Benchmarked with AIPerf on 4xA10G with realistic back-and-forth dialogue patterns to simulate real-world scenarios.</p>
+      <a href="https://github.com/bikrammajhi/nano-dynamo" target="_blank" class="res-link">View repo →</a>
     </div>
   </div>
 </section>
@@ -746,10 +752,10 @@ footer {
       <a href="https://github.com/bikrammajhi/fast-gpu-kernels/tree/main/kernels/cute/A100" target="_blank" class="res-link">View kernels →</a>
     </div>
     <div class="res-card">
-      <div class="res-hw">H100 · CuTe DSL (WGMMA)</div>
-      <div class="res-num g">684</div>
-      <div class="res-label">TFLOPS · ~88% of cuBLAS at 4K³</div>
-      <p class="res-desc">CuTe DSL v2 on H100 80GB. 4096×4096×4096 bf16, kernel latency 200.91 µs. WGMMA with prefetch on sm_90.</p>
+      <div class="res-hw">H100 · CuTe DSL (K1–K6)</div>
+      <div class="res-num g">728.8</div>
+      <div class="res-label">TFLOPS · 97.8% of cuBLAS at 8K³</div>
+      <p class="res-desc">6 kernel variants on H100 80GB HBM3. TMA+WGMMA, multi-stage pipeline (1–4 stages), warp specialization, TMA multicast. 128×256×64 tile, sm_90.</p>
       <a href="https://github.com/bikrammajhi/fast-gpu-kernels/tree/main/kernels/cute_dsl/H100" target="_blank" class="res-link">View kernels →</a>
     </div>
     <div class="res-card">
