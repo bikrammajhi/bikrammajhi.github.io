@@ -686,32 +686,13 @@ footer {
       </p>
     </div>
     <div>
-      <div style="font-size:10px; text-transform:uppercase; letter-spacing:0.09em; color:var(--ink3); margin-bottom:12px;">// reading</div>
-      <div style="border:1px solid var(--rule); border-radius:3px; overflow:hidden;">
-        <div style="display:flex; gap:10px; align-items:flex-start; padding:12px 16px; border-bottom:1px solid var(--rule);">
-          <span style="color:var(--green); flex-shrink:0;">▸</span>
-          <span style="font-size:11.5px; color:var(--ink2); line-height:1.6;">Dissecting the NVIDIA Blackwell Architecture with Microbenchmarks</span>
-        </div>
-        <div style="display:flex; gap:10px; align-items:flex-start; padding:12px 16px; border-bottom:1px solid var(--rule);">
-          <span style="color:var(--green); flex-shrink:0;">▸</span>
-          <span style="font-size:11.5px; color:var(--ink2); line-height:1.6;">The Ultra-Scale Playbook: Training LLMs on GPU Clusters</span>
-        </div>
-        <div style="display:flex; gap:10px; align-items:flex-start; padding:12px 16px; border-bottom:1px solid var(--rule);">
-          <span style="color:var(--green); flex-shrink:0;">▸</span>
-          <span style="font-size:11.5px; color:var(--ink2); line-height:1.6;">NVIDIA Tensor Core Evolution: Volta to Blackwell (SemiAnalysis)</span>
-        </div>
-        <div style="display:flex; gap:10px; align-items:flex-start; padding:12px 16px;">
-          <span style="color:var(--green); flex-shrink:0;">▸</span>
-          <span style="font-size:11.5px; color:var(--ink2); line-height:1.6;">Dissecting Hopper: TMA, Tensor Core, Memory Subsystem</span>
-        </div>
+      <div class="res-card">
+        <div class="res-hw">nano-dynamo · Qwen2.5-3B</div>
+        <div class="res-num g">47%</div>
+        <div class="res-label">lower TTFT vs NVIDIA Dynamo</div>
+        <p class="res-desc">Minimal reimplementation of NVIDIA Dynamo in ~1.5k lines of Python. Disaggregated Prefill/Decode, KV-Aware Routing, GPU-GPU Accelerated KV-Transfer. Benchmarked with AIPerf on 4xA10G with realistic back-and-forth dialogue patterns to simulate real-world scenarios.</p>
+        <a href="https://github.com/bikrammajhi/nano-dynamo" target="_blank" class="res-link">View repo →</a>
       </div>
-        <div class="res-card">
-      <div class="res-hw">nano-dynamo · Qwen2.5-3B</div>
-      <div class="res-num g">47%</div>
-      <div class="res-label">lower TTFT vs NVIDIA Dynamo</div>
-      <p class="res-desc">Minimal reimplementation of NVIDIA Dynamo in ~1.5k lines of Python. Disaggregated Prefill/Decode, KV-Aware Routing, GPU-GPU Accelerated KV-Transfer. Benchmarked with AIPerf on 4xA10G with realistic back-and-forth dialogue patterns to simulate real-world scenarios.</p>
-      <a href="https://github.com/bikrammajhi/nano-dynamo" target="_blank" class="res-link">View repo →</a>
-    </div>
   </div>
 </section>
 
