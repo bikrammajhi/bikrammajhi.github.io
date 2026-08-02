@@ -53,6 +53,7 @@
   --orange: #b85c2a;
   --orange-light: #f5ece6;
   --blue: #2a4a6b;
+  --purple: #6c4fa0;
 }
 
 [data-theme="dark"] {
@@ -69,6 +70,7 @@
   --orange: #e69a6e;
   --orange-light: #261c14;
   --blue: #6a94b8;
+  --purple: #c4b5fd;
 }
 
 html { scroll-behavior: smooth; }
@@ -430,6 +432,14 @@ nav {
 
 .res-link:hover { opacity: 0.7; }
 
+/* ── BENCH TABLE ── */
+.bench { width: 100%; border-collapse: collapse; font-size: 10px; margin: 12px 0 2px; color: var(--ink2); transition: color 0.2s ease; }
+.bench thead th { font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink3); font-weight: 400; text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--rule2); white-space: nowrap; transition: color 0.2s ease, border-color 0.2s ease; }
+.bench tbody th { font-weight: 400; font-size: 10px; color: var(--ink); text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--rule); white-space: nowrap; transition: color 0.2s ease, border-color 0.2s ease; }
+.bench tbody td { padding: 4px 6px; border-bottom: 1px solid var(--rule); color: var(--ink2); white-space: nowrap; transition: color 0.2s ease, border-color 0.2s ease; }
+.bench tbody tr:last-child td, .bench tbody tr:last-child th { border-bottom: none; }
+.bench td.r, .bench th.r { text-align: right; }
+
 /* ── PROJECTS ── */
 .projects-list { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; transition: border-color 0.2s ease; }
 
@@ -619,7 +629,7 @@ footer {
     <div class="hero-label">GPU Systems Engineer</div>
     <div class="hero-name">Bikram<br><em>Majhi</em></div>
       <p class="hero-sub">
-       Learned CUDA through 100 Days of GPU. Now optimizing BF16 GEMM across NVIDIA's latest silicon — from A100 to B200. Most recently, an LLM serving system hitting 47% lower TTFT than Dynamo.<br>
+       Learned CUDA through 100 Days of GPU. Now optimizing BF16 GEMM across NVIDIA's latest silicon — from A100 to B200. Most recently, a disaggregated LLM serving system hitting ~1.3× NVIDIA Dynamo's TTFT — throughput and latency within 3–9% — on a full 4-GPU stack.<br>
        cp.async · ldmatrix.x4 · mma.sync · TMA · WGMMA · TMEM · tcgen05 · Disaggregated Serving · KV-Aware Routing
       </p>
       <div class="hero-cta">
@@ -643,8 +653,8 @@ footer {
         <span class="stat-val" style="color:var(--blue)">1840 <span class="unit">TFLOPS</span></span>
       </div>
       <div class="stat-row">
-        <span class="stat-key">4×A10G · nano-Dynamo</span>
-        <span class="stat-val" style="color:var(--purple)">47% <span class="unit">↓ TTFT</span></span>
+        <span class="stat-key">4×A100 · nano-Dynamo</span>
+        <span class="stat-val" style="color:var(--purple)">1,121 <span class="unit">tok/s</span></span>
       </div>
     </div>
     <div class="stack-row">
@@ -676,15 +686,38 @@ footer {
         It started with <a href="https://github.com/bikrammajhi/100-days-of-GPU" target="_blank" style="color:var(--ink); text-decoration:underline;">100 Days of GPU</a> — a personal experiment to see if I could actually learn CUDA properly. Turns out, with daily practice and a lot of late nights, you can. That experiment became <a href="https://github.com/bikrammajhi/fast-gpu-kernels" target="_blank" style="color:var(--ink); text-decoration:underline;">fast-gpu-kernels</a>, where I benchmarked hand-written BF16 GEMM across A100, H100 and B200 — ending at 258.7 TFLOPS on A100, <strong style="color:var(--ink)">728.8 TFLOPS on H100</strong>, and <strong style="color:var(--ink)">1840 TFLOPS on B200</strong> (125% of cuBLAS peak). I was running these on Modal from my laptop, watching the numbers tick up one optimization at a time.
       </p>
       <p style="font-size:13px; color:var(--ink2); line-height:1.85;">
-        Then I got curious about LLM serving and built <a href="https://github.com/bikrammajhi/nano-dynamo" target="_blank" style="color:var(--ink); text-decoration:underline;">nano-dynamo</a> — a minimal system that achieves <strong style="color:var(--ink)">47% lower TTFT</strong> than NVIDIA Dynamo. Same obsession with understanding what's actually happening under the hood, just applied to a different layer of the stack. I'm drawn to problems where you can trace every microsecond to a specific hardware decision.
+        Then I got curious about LLM serving and built <a href="https://github.com/bikrammajhi/nano-dynamo" target="_blank" style="color:var(--ink); text-decoration:underline;">nano-dynamo</a> — a minimal reimplementation of NVIDIA Dynamo in ~1.5k lines of Python. Benchmarked head-to-head on a full disaggregated stack (4× A100 · 2 prefill + 2 decode · Qwen3-14B-FP8), TTFT lands within <strong style="color:var(--ink)">~1.3× of NVIDIA Dynamo</strong> — throughput and end-to-end latency within <strong style="color:var(--ink)">3–9%</strong>. Same obsession with understanding what's actually happening under the hood, just applied to a different layer of the stack. I'm drawn to problems where you can trace every microsecond to a specific hardware decision.
       </p>
     </div>
     <div>
-      <div class="res-card">
-        <div class="res-hw">nano-dynamo · Qwen2.5-3B</div>
-        <div class="res-num g">47%</div>
-        <div class="res-label">lower TTFT vs NVIDIA Dynamo</div>
-        <p class="res-desc">Minimal reimplementation of NVIDIA Dynamo in ~1.5k lines of Python. Disaggregated Prefill/Decode, KV-Aware Routing, GPU-GPU Accelerated KV-Transfer. Benchmarked with AIPerf on 4xA10G with realistic back-and-forth dialogue patterns.</p>
+      <div class="res-card" style="padding-top:0;">
+        <div class="res-hw">nano-dynamo · 2P+2D · Qwen3-14B-FP8 · 4×A100</div>
+        <div class="res-num b">1.3×</div>
+        <div class="res-label">TTFT gap vs NVIDIA Dynamo · AIPerf · 2026-08-01</div>
+        <p class="res-desc">Minimal NVIDIA Dynamo reimplementation in ~1.5k lines of Python. vLLM 0.26 + NixlPushConnector (KV push, block_size=64, max_model_len=32768), disaggregated Prefill/Decode, KV-aware routing. Head-to-head vs NVIDIA Dynamo, identical AIPerf scenarios — only the routing/frontend differs:</p>
+        <table class="bench">
+          <thead>
+            <tr>
+              <th>scenario</th>
+              <th class="r">TTFT·ms</th>
+              <th class="r">p50·ms</th>
+              <th class="r">p99·ms</th>
+              <th class="r">tok/s</th>
+              <th class="r">lat·ms</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">multi_turn</th>
+              <td class="r">264</td><td class="r">218</td><td class="r">638</td><td class="r">371</td><td class="r">2,083</td>
+            </tr>
+            <tr>
+              <th scope="row">mixed_workload</th>
+              <td class="r">326</td><td class="r">224</td><td class="r">1,506</td><td class="r">1,121</td><td class="r">3,085</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="res-desc" style="margin-top:8px">multi_turn · 30 convs×5 turns, ISL=271/OSL=128, concurrency 10 · mixed_workload · 204 reqs, mixed ISL/OSL, concurrency 20. vs NVIDIA Dynamo: TTFT 1.32–1.35×, throughput 1.03–1.09×, E2E latency 1.03–1.05× — within 3–9%, the residual being the Python gateway's ~70–80 ms/req vs Dynamo's Rust frontend. Prefill runs in one step (196 ms); decode 2,580 ms E2E once KV lands at ~200 ms (KV xfer 5–31 ms, ~1.6–1.9 transfers/s/worker).</p>
         <a href="https://github.com/bikrammajhi/nano-dynamo" target="_blank" class="res-link">View repo →</a>
       </div>
   </div>
