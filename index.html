@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bikram Majhi</title>
+<meta name="description" content="GPU systems engineer. Kernels (258-1840 TFLOPS on A100→B200), disaggregated serving within a few percent of NVIDIA Dynamo, and GradSync: distributed training with hand-written primitives.">
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
 
 <!-- ── FONT OPTIONS: Uncomment ONE set below ── -->
 
@@ -176,7 +178,7 @@ nav {
 
 /* ── HERO ── */
 .hero {
-  padding: 24px 40px 56px;
+  padding: 24px 40px 48px;
   max-width: 1080px;
   margin: 0 auto;
   display: grid;
@@ -229,7 +231,7 @@ nav {
   color: var(--ink2);
   line-height: 1.8;
   max-width: 520px;
-  margin-bottom: 40px;
+  margin-bottom: 26px;
   transition: color 0.2s ease;
 }
 
@@ -269,7 +271,7 @@ nav {
 
 .btn-outline:hover { border-color: var(--ink3); color: var(--ink); }
 
-.hero-aside { padding-bottom: 4px; margin-top: 42px; }
+.hero-aside { padding-bottom: 4px; margin-top: 12px; }
 
 .stat-block {
   border: 1px solid var(--rule);
@@ -283,7 +285,7 @@ nav {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: 10px 16px;
   border-bottom: 1px solid var(--rule);
   transition: border-color 0.2s ease;
 }
@@ -338,16 +340,17 @@ nav {
 .section {
   max-width: 1080px;
   margin: 0 auto;
-  padding: 72px 40px;
+  padding: 56px 40px;
   border-bottom: 1px solid var(--rule);
   transition: border-color 0.2s ease;
+  scroll-margin-top: 60px;
 }
 
 .sec-head {
   display: flex;
   align-items: baseline;
   gap: 14px;
-  margin-bottom: 48px;
+  margin-bottom: 32px;
 }
 
 .sec-num {
@@ -386,7 +389,7 @@ nav {
 
 .res-card {
   background: var(--paper);
-  padding: 28px 24px;
+  padding: 24px;
   transition: background 0.15s ease;
 }
 
@@ -403,7 +406,7 @@ nav {
 
 .res-num {
   font-family: var(--font-serif);
-  font-size: 44px;
+  font-size: 38px;
   letter-spacing: -0.03em;
   line-height: 1;
   margin-bottom: 4px;
@@ -431,6 +434,21 @@ nav {
 }
 
 .res-link:hover { opacity: 0.7; }
+
+.code-mini {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.8;
+  color: var(--ink2);
+  background: var(--paper2);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 10px 12px;
+  margin: 10px 0 12px;
+  overflow-x: auto;
+  white-space: pre;
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
 
 /* ── BENCH TABLE ── */
 .bench { width: 100%; border-collapse: collapse; font-size: 10px; margin: 12px 0 2px; color: var(--ink2); transition: color 0.2s ease; }
@@ -584,6 +602,172 @@ footer {
   footer { padding: 16px 20px; flex-direction: column; gap: 6px; text-align: center; }
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   v3 · GPU WORKSTATION — design system
+   paper/ink palette + Playfair serif + Azeret Mono, with
+   terminal chrome: $ prompts · nvidia-smi monitor · kernel-log cards
+   ═══════════════════════════════════════════════════════════════ */
+
+::selection { background: var(--green-light); color: var(--green); }
+
+body {
+  background-image: radial-gradient(1100px 480px at 15% -12%, var(--green-light), transparent 72%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+nav, footer, .section, .res-card, .smi, .socials, .writing-list, .projects-list { background: var(--paper); }
+
+/* ── NAV · shell prompt ── */
+nav { height: 60px; padding: 0 40px 0 32px; }
+.logo { font-size: 19px; display: inline-flex; align-items: baseline; gap: 12px; }
+.logo .cwd { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; color: var(--ink3); text-transform: none; }
+.logo .cwd::before { content: "~"; color: var(--green); margin-right: 1px; }
+.cursor { display: inline-block; width: 7px; height: 13px; background: var(--green); font-style: normal; vertical-align: -2px; animation: blink 1.1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.nav-links { gap: 26px; }
+.nav-links a { display: inline-flex; align-items: baseline; gap: 5px; font-size: 9.5px; }
+.nav-links .n { font-size: 8px; color: var(--green); }
+
+/* ── HERO ── */
+.hero-name { font-size: clamp(52px, 6.4vw, 92px); margin-bottom: 22px; }
+.hero-label { font-size: 9.5px; letter-spacing: 0.24em; color: var(--ink3); }
+.hero-label::before { content: "$ "; color: var(--green); }
+.hero-sub { font-size: 12.5px; max-width: 500px; line-height: 1.75; margin-bottom: 22px; }
+.hero { padding: 34px 40px 56px; grid-template-columns: minmax(0,1fr) 336px; gap: 64px; align-items: start; }
+.hero-aside { padding-bottom: 4px; margin-top: 12px; }
+.hero-cta { gap: 8px; }
+.btn { border-radius: 3px; padding: 7px 14px; font-size: 10px; }
+.btn-solid { background: var(--ink); color: var(--paper); }
+.btn-solid:hover { background: var(--ink2); }
+.btn-outline { background: transparent; color: var(--ink2); border: 1px solid var(--rule2); }
+.btn-outline:hover { border-color: var(--ink3); color: var(--ink); }
+.hero-cta .btn:nth-child(2) { color: var(--green); border-color: var(--green); background: var(--green-light); }
+.hero-cta .btn:nth-child(3) { color: var(--blue); border-color: rgba(42,74,107,0.55); background: var(--paper2); }
+.hero-cta .btn:nth-child(4) { color: var(--orange); border-color: rgba(184,92,42,0.55); background: transparent; }
+.btn:hover, .btn-outline:hover { transform: translateY(-1px); }
+
+/* ── GPU MONITOR · nvidia-smi style panel ── */
+.hero-aside { padding-bottom: 4px; margin-top: 40px; }
+.smi { border: 1px solid var(--rule2); border-radius: 6px; overflow: hidden; box-shadow: 0 1px 0 var(--rule) inset; }
+.smi-hd {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper2);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  white-space: nowrap;
+}
+.dots { display: inline-flex; gap: 5px; flex-shrink: 0; }
+.dot { display: block; width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--rule2); }
+.dot.g { background: var(--green); border-color: var(--green); }
+.dot.o { background: var(--orange); border-color: var(--orange); }
+.dot.b { background: var(--blue); border-color: var(--blue); }
+.smi-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 12px;
+  border-top: 1px dashed var(--rule);
+  transition: background 0.15s;
+}
+.smi-row:first-child { border-top: none; }
+.smi-row:hover { background: var(--paper2); }
+.smi-name { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.smi-util { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.04em; white-space: nowrap; }
+.smi-val { font-family: var(--font-serif); font-size: 17px; letter-spacing: -0.02em; color: var(--ink); white-space: nowrap; }
+.smi-unit { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; color: var(--ink3); text-transform: uppercase; margin-left: 4px; }
+.smi-ft {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 12px;
+  border-top: 1px solid var(--rule);
+  background: var(--paper2);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.08em;
+  color: var(--ink3);
+  text-transform: uppercase;
+}
+
+/* ── TOOLKIT strip ── */
+.kit { margin-top: 16px; padding-top: 12px; border-top: 1px dashed var(--rule2); }
+.kit-cap { font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink3); margin-bottom: 9px; }
+.stack-row { gap: 5px; }
+.tag { border-radius: 2px; font-size: 9.5px; padding: 4px 10px; }
+
+/* ── SECTION HEAD · prompt style ── */
+.section { padding: 78px 40px; }
+.sec-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 36px; }
+.sec-num {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  color: var(--green);
+  white-space: nowrap;
+}
+.sec-num::before { content: "["; }
+.sec-num::after { content: "]"; }
+.sec-title { font-size: 26px; margin-right: auto; }
+.sec-meta { font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink3); white-space: nowrap; }
+.sec-rule { flex: 1; height: 0; border-top: 1px dashed var(--rule2); }
+
+/* ── CARDS · kernel log entries ── */
+.results-grid { border: none; background: transparent; gap: 14px; }
+.res-card {
+  position: relative;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.res-card::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: 18px;
+  bottom: 18px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--rule2);
+  transition: background 0.18s;
+}
+.res-card:hover { transform: translateY(-3px); border-color: var(--rule2); box-shadow: 0 14px 28px -20px var(--ink3); }
+.res-card:hover::before { background: var(--green); }
+.res-hw { font-size: 9px; letter-spacing: 0.1em; }
+.res-num { font-size: 40px; }
+.res-link { border-bottom: none; background: none; padding: 3px 0; }
+
+/* ── CODE MINI ── */
+.code-mini { border-radius: 6px; }
+
+/* ── CONTACT ── */
+.socials { overflow: hidden; border-radius: 8px; }
+.soc { transition: background 0.15s, padding-left 0.15s; }
+.soc:hover { padding-left: 22px; }
+.ok { color: var(--green); }
+
+/* ── ACCESSIBILITY & POLISH ── */
+:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; animation: none !important; }
+  .reveal { opacity: 1; transform: none; }
+}
+
 /* Print styles - always use light theme for printing */
 @media print {
   [data-theme="dark"] {
@@ -603,11 +787,11 @@ footer {
 
 <!-- NAV -->
 <nav>
-  <a href="#" class="logo">Bikram Majhi</a>
+  <a href="#" class="logo">Bikram Majhi<span class="cwd">/gpu-sys</span><em class="cursor"></em></a>
   <ul class="nav-links">
-    <li><a href="#about">About</a></li>
-    <li><a href="#projects">Projects</a></li>
-    <li><a href="#contact">Contact</a></li>
+    <li><a href="#about"><span class="n">01</span>About</a></li>
+    <li><a href="#projects"><span class="n">02</span>Projects</a></li>
+    <li><a href="#contact"><span class="n">03</span>Contact</a></li>
   </ul>
   <div style="display:flex;align-items:center;">
      <span class="affiliation">IISER-K × IIT-J</span>
@@ -629,35 +813,43 @@ footer {
     <div class="hero-label">GPU Systems Engineer</div>
     <div class="hero-name">Bikram<br><em>Majhi</em></div>
       <p class="hero-sub">
-       Learned CUDA through 100 Days of GPU. Now optimizing BF16 GEMM across NVIDIA's latest silicon — from A100 to B200. Most recently, a disaggregated LLM serving system hitting ~1.3× NVIDIA Dynamo's TTFT — throughput and latency within 3–9% — on a full 4-GPU stack.<br>
-       cp.async · ldmatrix.x4 · mma.sync · TMA · WGMMA · TMEM · tcgen05 · Disaggregated Serving · KV-Aware Routing
+       I work the whole GPU stack — kernels, training, serving — and write every layer myself, from the PTX instruction to the optimizer step. BF16 GEMM kernels reaching 258–1840 TFLOPS (A100 → B200), a disaggregated serving stack within a few percent of NVIDIA Dynamo on 4×A100, and GradSync: a compact distributed-training framework for LLMs where every parallel primitive is written by hand on torch.distributed. Nothing I ship is a black box.
       </p>
       <div class="hero-cta">
         <a href="https://github.com/bikrammajhi/fast-gpu-kernels" target="_blank" class="btn btn-solid">fast-gpu-kernels →</a>
-        <a href="https://github.com/bikrammajhi/nano-dynamo" target="_blank" class="btn btn-solid">nano-dynamo →</a>
+        <a href="https://github.com/bikrammajhi/nano-dynamo" target="_blank" class="btn btn-outline">nano-dynamo →</a>
+        <a href="https://github.com/bikrammajhi/GradSync" target="_blank" class="btn btn-outline">GradSync →</a>
         <a href="https://github.com/bikrammajhi/100-days-of-GPU" target="_blank" class="btn btn-outline">100 Days of GPU</a>
       </div>
   </div>
   <div class="hero-aside">
-    <div class="stat-block">
-      <div class="stat-row">
-        <span class="stat-key">A100 · CUDA GEMM</span>
-        <span class="stat-val" style="color:var(--green)">258.7 <span class="unit">TFLOPS</span></span>
+    <div class="smi">
+      <div class="smi-hd"><span>bikram@b200:~$ nvidia-smi</span><span class="dots"><i class="dot g"></i><i class="dot o"></i><i class="dot b"></i></span></div>
+      <div class="smi-row">
+        <span class="smi-name">a100 · cuda gemm</span>
+        <span class="smi-util" style="color:var(--green)">▲ 86.1%</span>
+        <span class="smi-val" style="color:var(--green)">258.7 <span class="smi-unit">tflops</span></span>
       </div>
-      <div class="stat-row">
-        <span class="stat-key">H100 · CuTe DSL</span>
-        <span class="stat-val" style="color:var(--orange)">728.8 <span class="unit">TFLOPS</span></span>
+      <div class="smi-row">
+        <span class="smi-name">h100 · cute dsl</span>
+        <span class="smi-util" style="color:var(--orange)">▲ 97.8%</span>
+        <span class="smi-val" style="color:var(--orange)">728.8 <span class="smi-unit">tflops</span></span>
       </div>
-      <div class="stat-row">
-        <span class="stat-key">B200 · CuTe DSL</span>
-        <span class="stat-val" style="color:var(--blue)">1840 <span class="unit">TFLOPS</span></span>
+      <div class="smi-row">
+        <span class="smi-name">b200 · cute dsl</span>
+        <span class="smi-util" style="color:var(--blue)">▲ 125%</span>
+        <span class="smi-val" style="color:var(--blue)">1840 <span class="smi-unit">tflops</span></span>
       </div>
-      <div class="stat-row">
-        <span class="stat-key">4×A100 · nano-Dynamo</span>
-        <span class="stat-val" style="color:var(--purple)">1,121 <span class="unit">tok/s</span></span>
+      <div class="smi-row">
+        <span class="smi-name">4×a100 · nano-dynamo</span>
+        <span class="smi-util" style="color:var(--purple)">▲ 1.3×</span>
+        <span class="smi-val" style="color:var(--purple)">1,121 <span class="smi-unit">tok/s</span></span>
       </div>
+      <div class="smi-ft"><span>cuda 12.4</span><span>pwr: max</span><span>gp100-days</span></div>
     </div>
-    <div class="stack-row">
+    <div class="kit">
+      <div class="kit-cap">toolkit</div>
+      <div class="stack-row">
       <span class="tag lit">CUDA C++</span>
       <span class="tag lit">CuTe DSL</span>
       <span class="tag lit">CuTe</span>
@@ -669,6 +861,11 @@ footer {
       <span class="tag">ThunderKittens</span>
       <span class="tag">TileLang</span>
       <span class="tag">TIRx</span>
+      <span class="tag lit">vLLM</span>
+      <span class="tag lit">Dynamo</span>
+      <span class="tag lit">AIPerf</span>
+      <span class="tag lit">Megatron-Core</span>
+      </div>
     </div>
   </div>
 </div>
@@ -679,14 +876,18 @@ footer {
     <span class="sec-num">01</span>
     <h2 class="sec-title">About</h2>
     <div class="sec-rule"></div>
+    <span class="sec-meta">whoami</span>
   </div>
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:start;" class="reveal">
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:start;" class="reveal">
     <div>
       <p style="font-size:13px; color:var(--ink2); line-height:1.85; margin-bottom:14px;">
         It started with <a href="https://github.com/bikrammajhi/100-days-of-GPU" target="_blank" style="color:var(--ink); text-decoration:underline;">100 Days of GPU</a> — a personal experiment to see if I could actually learn CUDA properly. Turns out, with daily practice and a lot of late nights, you can. That experiment became <a href="https://github.com/bikrammajhi/fast-gpu-kernels" target="_blank" style="color:var(--ink); text-decoration:underline;">fast-gpu-kernels</a>, where I benchmarked hand-written BF16 GEMM across A100, H100 and B200 — ending at 258.7 TFLOPS on A100, <strong style="color:var(--ink)">728.8 TFLOPS on H100</strong>, and <strong style="color:var(--ink)">1840 TFLOPS on B200</strong> (125% of cuBLAS peak). I was running these on Modal from my laptop, watching the numbers tick up one optimization at a time.
       </p>
       <p style="font-size:13px; color:var(--ink2); line-height:1.85;">
-        Then I got curious about LLM serving and built <a href="https://github.com/bikrammajhi/nano-dynamo" target="_blank" style="color:var(--ink); text-decoration:underline;">nano-dynamo</a> — a minimal reimplementation of NVIDIA Dynamo in ~1.5k lines of Python. Benchmarked head-to-head on a full disaggregated stack (4× A100 · 2 prefill + 2 decode · Qwen3-14B-FP8), TTFT lands within <strong style="color:var(--ink)">~1.3× of NVIDIA Dynamo</strong> — throughput and end-to-end latency within <strong style="color:var(--ink)">3–9%</strong>. Same obsession with understanding what's actually happening under the hood, just applied to a different layer of the stack. I'm drawn to problems where you can trace every microsecond to a specific hardware decision.
+        Then I got curious about LLM serving and built <a href="https://github.com/bikrammajhi/nano-dynamo" target="_blank" style="color:var(--ink); text-decoration:underline;">nano-dynamo</a> — a minimal reimplementation of NVIDIA Dynamo in ~1.5k lines of Python. Benchmarked head-to-head on a full disaggregated stack (4× A100 · 2 prefill + 2 decode · Qwen3-14B-FP8), TTFT lands within <strong style="color:var(--ink)">~1.3× of NVIDIA Dynamo</strong> — throughput and end-to-end latency within <strong style="color:var(--ink)">3–9%</strong>. Same obsession with understanding what's actually happening under the hood. I'm drawn to problems where you can trace every microsecond to a specific hardware decision.
+      </p>
+      <p style="font-size:13px; color:var(--ink2); line-height:1.85;">
+        To actually learn distributed training, I wrote it instead of reading about it — a full training loop in plain torch.distributed, with a Llama-1B on 2×A100 as the test. <a href="https://github.com/bikrammajhi/GradSync" target="_blank" style="color:var(--ink); text-decoration:underline;">GradSync</a> is the result: hand-written tensor parallelism, from how the weights are sharded to how the gradients come back together, every collective visible. Everyone should do this once — you learn more in a week of writing than a year of tutorials.
       </p>
     </div>
     <div>
@@ -694,42 +895,52 @@ footer {
         <div class="res-hw">nano-dynamo · 2P+2D · Qwen3-14B-FP8 · 4×A100</div>
         <div class="res-num b">1.3×</div>
         <div class="res-label">TTFT gap vs NVIDIA Dynamo · AIPerf · 2026-08-01</div>
-        <p class="res-desc">Minimal NVIDIA Dynamo reimplementation in ~1.5k lines of Python. vLLM 0.26 + NixlPushConnector (KV push, block_size=64, max_model_len=32768), disaggregated Prefill/Decode, KV-aware routing. Head-to-head vs NVIDIA Dynamo, identical AIPerf scenarios — only the routing/frontend differs:</p>
+        <p class="res-desc">nano-dynamo in ~1.5k lines of Python — disaggregated Prefill/Decode, KV-aware routing, NixlPushConnector. Head-to-head vs NVIDIA Dynamo, identical AIPerf scenarios:</p>
         <table class="bench">
           <thead>
             <tr>
               <th>scenario</th>
               <th class="r">TTFT·ms</th>
               <th class="r">p50·ms</th>
-              <th class="r">p99·ms</th>
               <th class="r">tok/s</th>
-              <th class="r">lat·ms</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <th scope="row">multi_turn</th>
-              <td class="r">264</td><td class="r">218</td><td class="r">638</td><td class="r">371</td><td class="r">2,083</td>
+              <td class="r">264</td><td class="r">218</td><td class="r">371</td>
             </tr>
             <tr>
               <th scope="row">mixed_workload</th>
-              <td class="r">326</td><td class="r">224</td><td class="r">1,506</td><td class="r">1,121</td><td class="r">3,085</td>
+              <td class="r">326</td><td class="r">224</td><td class="r">1,121</td>
             </tr>
           </tbody>
         </table>
-        <p class="res-desc" style="margin-top:8px">multi_turn · 30 convs×5 turns, ISL=271/OSL=128, concurrency 10 · mixed_workload · 204 reqs, mixed ISL/OSL, concurrency 20. vs NVIDIA Dynamo: TTFT 1.32–1.35×, throughput 1.03–1.09×, E2E latency 1.03–1.05× — within 3–9%, the residual being the Python gateway's ~70–80 ms/req vs Dynamo's Rust frontend. Prefill runs in one step (196 ms); decode 2,580 ms E2E once KV lands at ~200 ms (KV xfer 5–31 ms, ~1.6–1.9 transfers/s/worker).</p>
+        <p class="res-desc" style="margin-top:8px">vs NVIDIA Dynamo: TTFT 1.32–1.35×, throughput 1.03–1.09×, E2E latency 1.03–1.05× — the residual is the Python gateway's ~70–80 ms/req vs Dynamo's Rust frontend.</p>
         <a href="https://github.com/bikrammajhi/nano-dynamo" target="_blank" class="res-link">View repo →</a>
       </div>
+      <div class="res-card" style="margin-top:16px;">
+        <div class="res-hw">GradSync · TP from scratch · 2×A100</div>
+        <div class="res-num b">TP=2</div>
+        <div class="res-label">Llama · torch.distributed · 2026-08-08</div>
+        <p class="res-desc">Llama-1B — RoPE, GQA, RMSNorm — trained with hand-written tensor parallelism, no Megatron, no DeepSpeed.</p>
+        <pre class="code-mini">Q/K/V·up/gate → Column · out/down → Row (zero-copy)
+embedding → vocab-range mask · logits → Gather</pre>
+        <a href="https://github.com/bikrammajhi/GradSync" target="_blank" class="res-link">View repo →</a>
+      </div>
+  </div>
   </div>
 </section>
 
 <!-- PROJECTS -->
 <section class="section" id="projects">
   <div class="sec-head reveal">
-    <span class="sec-num">03</span>
+    <span class="sec-num">02</span>
     <h2 class="sec-title">Projects</h2>
     <div class="sec-rule"></div>
+    <span class="sec-meta">ls ~/bench</span>
   </div>
+  <p class="res-desc" style="margin:-14px 0 18px; max-width:560px;">The benchmark trail — every number reproducible from <a href="https://github.com/bikrammajhi/fast-gpu-kernels" target="_blank" style="color:var(--green); text-decoration:none; border-bottom:1px solid currentColor;">fast-gpu-kernels</a>, one hand-written kernel at a time:</p>
   <div class="results-grid reveal">
     <div class="res-card">
       <div class="res-hw">Tesla T4 · Custom GEMM</div>
@@ -770,7 +981,7 @@ footer {
       <div class="res-hw">B200 · CuTe DSL (sm_100a)</div>
       <div class="res-num b">~1840</div>
       <div class="res-label">TFLOPS · 125% of cuBLAS</div>
-      <p class="res-desc">6 optimization stages (v1–v6) on B200 sm_100a, FP16. CuTe DSL v5 reaches 597 µs (1840 TFLOPS · 125% cuBLAS peak). All versions verified against PyTorch einsum.</p>
+<p class="res-desc">6 optimization stages (v1–v6) on B200 sm_100a, FP16. CuTe DSL v5 reaches 597 µs (1840 TFLOPS · 125% cuBLAS peak). All versions verified against PyTorch einsum.</p>
       <a href="https://github.com/bikrammajhi/fast-gpu-kernels/tree/main/kernels/cute_dsl/B200" target="_blank" class="res-link">View kernels →</a>
     </div>
   </div>
@@ -785,9 +996,10 @@ footer {
 <!-- CONTACT -->
 <section class="section" id="contact">
   <div class="sec-head reveal">
-    <span class="sec-num">08</span>
+    <span class="sec-num">03</span>
     <h2 class="sec-title">Contact</h2>
     <div class="sec-rule"></div>
+    <span class="sec-meta">ssh bikram</span>
   </div>
   <div class="contact-grid">
     <div class="reveal">
@@ -835,7 +1047,10 @@ footer {
 
 <footer>
   <span>© 2026 Bikram Majhi · IISER-K × IIT-J, India</span>
-  <span class="text-subtle">nvcc -O3 -arch=sm_100</span>
+  <span style="display:flex; align-items:center; gap:16px;">
+    <a href="#" class="text-subtle" style="text-decoration:none;">↑ top</a>
+    <span class="text-subtle">nvcc -O3 -arch=sm_100 · <span class="ok">exit 0</span></span>
+  </span>
 </footer>
 
 <script>
