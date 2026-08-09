@@ -1063,9 +1063,7 @@ embedding → vocab-range mask · logits → Gather</pre>
 </section>
 
 <footer>
-  <span>
-    © 2026 Bikram Majhi · IISER-K × IIT-J, India · <span id="visitorLoc" style="display:inline-block; color:var(--ink3);"><span class="ok">visitor:</span> locating…</span>
-  </span>
+  <span>© 2026 Bikram Majhi · IISER-K × IIT-J, India</span>
   <span style="display:flex; align-items:center; gap:16px;">
     <a href="#" class="text-subtle" style="text-decoration:none;">↑ top</a>
     <span class="text-subtle">nvcc -O3 -arch=sm_100 · <span class="ok">exit 0</span></span>
@@ -1111,17 +1109,6 @@ const obs = new IntersectionObserver(entries => {
   });
 }, { threshold: 0.08 });
 document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
-
-// ── VISITOR LOCATION ──
-fetch('https://ipwho.is/')
-  .then(r => r.json())
-  .then(d => {
-    const el = document.getElementById('visitorLoc');
-    if (!el || !d.success) return;
-    const place = [d.city, d.region, d.country].filter(Boolean).join(', ');
-    el.innerHTML = `<span class="ok">visitor:</span> ${place || d.ip}`;
-  })
-  .catch(() => {});
 
 </script>
 
