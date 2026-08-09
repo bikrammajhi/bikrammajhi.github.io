@@ -672,9 +672,9 @@ nav { height: 60px; padding: 0 40px 0 32px; }
 .dot.b { background: var(--blue); border-color: var(--blue); }
 .smi-row {
   display: grid;
-  grid-template-columns: 1fr auto auto;
-  align-items: baseline;
-  gap: 12px;
+  grid-template-columns: 42px 110px auto auto;
+  align-items: center;
+  gap: 10px;
   padding: 8px 12px;
   border-top: 1px dashed var(--rule);
   transition: background 0.15s;
@@ -682,6 +682,8 @@ nav { height: 60px; padding: 0 40px 0 32px; }
 .smi-row:first-child { border-top: none; }
 .smi-row:hover { background: var(--paper2); }
 .smi-name { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.smi-track { display: inline-block; width: 100%; height: 5px; border-radius: 3px; background: var(--rule2); overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.18); }
+.smi-track i { display: block; height: 100%; width: var(--w); border-radius: inherit; background: var(--c); box-shadow: 0 0 6px var(--c); }
 .smi-util { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.04em; white-space: nowrap; }
 .smi-val { font-family: var(--font-serif); font-size: 17px; letter-spacing: -0.02em; color: var(--ink); white-space: nowrap; }
 .smi-unit { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; color: var(--ink3); text-transform: uppercase; margin-left: 4px; }
@@ -826,23 +828,27 @@ nav { height: 60px; padding: 0 40px 0 32px; }
     <div class="smi">
       <div class="smi-hd"><span>bikram@b200:~$ nvidia-smi</span><span class="dots"><i class="dot g"></i><i class="dot o"></i><i class="dot b"></i></span></div>
       <div class="smi-row">
-        <span class="smi-name">a100 · cuda gemm</span>
-        <span class="smi-util" style="color:var(--green)">▲ 86.1%</span>
+        <span class="smi-name">a100</span>
+        <span class="smi-track" style="--w:66.2%;--c:var(--green)"><i></i></span>
+        <span class="smi-util" style="color:var(--green)">86.1%</span>
         <span class="smi-val" style="color:var(--green)">258.7 <span class="smi-unit">tflops</span></span>
       </div>
       <div class="smi-row">
-        <span class="smi-name">h100 · cute dsl</span>
-        <span class="smi-util" style="color:var(--orange)">▲ 97.8%</span>
+        <span class="smi-name">h100</span>
+        <span class="smi-track" style="--w:75.2%;--c:var(--orange)"><i></i></span>
+        <span class="smi-util" style="color:var(--orange)">97.8%</span>
         <span class="smi-val" style="color:var(--orange)">728.8 <span class="smi-unit">tflops</span></span>
       </div>
       <div class="smi-row">
-        <span class="smi-name">b200 · cute dsl</span>
-        <span class="smi-util" style="color:var(--blue)">▲ 125%</span>
+        <span class="smi-name">b200</span>
+        <span class="smi-track" style="--w:96.2%;--c:var(--blue)"><i></i></span>
+        <span class="smi-util" style="color:var(--blue)">125%</span>
         <span class="smi-val" style="color:var(--blue)">1840 <span class="smi-unit">tflops</span></span>
       </div>
       <div class="smi-row">
-        <span class="smi-name">4×a100 · nano-dynamo</span>
-        <span class="smi-util" style="color:var(--purple)">▲ 1.3×</span>
+        <span class="smi-name">4×a100</span>
+        <span class="smi-track" style="--w:100%;--c:var(--purple)"><i></i></span>
+        <span class="smi-util" style="color:var(--purple)">1.3×</span>
         <span class="smi-val" style="color:var(--purple)">1,121 <span class="smi-unit">tok/s</span></span>
       </div>
       <div class="smi-ft"><span>cuda 12.4</span><span>pwr: max</span><span>gp100-days</span></div>
