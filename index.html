@@ -634,7 +634,7 @@ nav { height: 60px; padding: 0 40px 0 32px; }
 .hero-label { font-size: 9.5px; letter-spacing: 0.24em; color: var(--ink3); }
 .hero-label::before { content: "$ "; color: var(--green); }
 .hero-sub { font-size: 12.5px; max-width: 500px; line-height: 1.75; margin-bottom: 22px; }
-.hero { padding: 34px 40px 56px; grid-template-columns: minmax(0,1fr) 336px; gap: 64px; align-items: start; }
+.hero { padding: 34px 40px 56px; grid-template-columns: minmax(0,1fr) 440px; gap: 64px; align-items: start; }
 .hero-aside { padding-bottom: 4px; margin-top: 12px; }
 .hero-cta { gap: 8px; }
 .btn { border-radius: 3px; padding: 7px 14px; font-size: 10px; }
@@ -685,6 +685,7 @@ nav { height: 60px; padding: 0 40px 0 32px; }
 .smi-track { display: inline-block; width: 100%; height: 5px; border-radius: 3px; background: var(--rule2); overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.18); }
 .smi-track i { display: block; height: 100%; width: var(--w); border-radius: inherit; background: var(--c); box-shadow: 0 0 6px var(--c); }
 .smi-util { font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.04em; white-space: nowrap; }
+.smi-of { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; color: var(--ink3); text-transform: uppercase; }
 .smi-val { font-family: var(--font-serif); font-size: 17px; letter-spacing: -0.02em; color: var(--ink); white-space: nowrap; }
 .smi-unit { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; color: var(--ink3); text-transform: uppercase; margin-left: 4px; }
 .smi-ft {
@@ -830,25 +831,25 @@ nav { height: 60px; padding: 0 40px 0 32px; }
       <div class="smi-row">
         <span class="smi-name">a100</span>
         <span class="smi-track" style="--w:86.1%;--c:var(--green)"><i></i></span>
-        <span class="smi-util" style="color:var(--green)">86.1%</span>
+        <span class="smi-util" style="color:var(--green)">86.1% <span class="smi-of">cuBLAS</span></span>
         <span class="smi-val" style="color:var(--green)">258.7 <span class="smi-unit">tflops</span></span>
       </div>
       <div class="smi-row">
         <span class="smi-name">h100</span>
         <span class="smi-track" style="--w:97.8%;--c:var(--orange)"><i></i></span>
-        <span class="smi-util" style="color:var(--orange)">97.8%</span>
+        <span class="smi-util" style="color:var(--orange)">97.8% <span class="smi-of">cuBLAS</span></span>
         <span class="smi-val" style="color:var(--orange)">728.8 <span class="smi-unit">tflops</span></span>
       </div>
       <div class="smi-row">
         <span class="smi-name">b200</span>
         <span class="smi-track" style="--w:100%;--c:var(--blue)"><i></i></span>
-        <span class="smi-util" style="color:var(--blue)">125%</span>
+        <span class="smi-util" style="color:var(--blue)">125% <span class="smi-of">cuBLAS</span></span>
         <span class="smi-val" style="color:var(--blue)">1840 <span class="smi-unit">tflops</span></span>
       </div>
       <div class="smi-row">
         <span class="smi-name">4×a100</span>
         <span class="smi-track" style="--w:100%;--c:var(--purple)"><i></i></span>
-        <span class="smi-util" style="color:var(--purple)">1.3×</span>
+        <span class="smi-util" style="color:var(--purple)">1.3× <span class="smi-of">Dynamo</span></span>
         <span class="smi-val" style="color:var(--purple)">1,121 <span class="smi-unit">tok/s</span></span>
       </div>
       <div class="smi-ft"><span>cuda 12.4</span><span>pwr: max</span><span>gp100-days</span></div>
